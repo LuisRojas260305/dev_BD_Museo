@@ -64,6 +64,17 @@ app.use(express.json());
 // Genero
 app.use('/api/genero', require('./routes/Obra/genero'));
 
+// Usuarios
+app.use('/api/usuarios', require('./routes/Usuario/usuarios'));
+
+// Obras
+app.use('/api/obras', require('./routes/Obra/obras'));
+
+// Ventas
+app.use('/api/ventas', require('./routes/Compra/ventas'));
+
+// Reportes (protegidas para admin)
+app.use('/api/reportes', require('./routes/Compra/reportes'));
 
 // Ruta de prueba
 app.get('/', (req, res) => {

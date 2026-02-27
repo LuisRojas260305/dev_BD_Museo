@@ -1,102 +1,182 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:3000';
+const API = 'http://localhost:3000/api';
+let tokenUsuario = null;
+let tokenAdmin = null;
+let idArtista = null;
+let idObra = null;
+let idVenta = null;
 
-// Lista de tablas catálogo con su campo ID y campos a enviar
-const tables = [
-  { name: 'nacionalidad', idField: 'nacionalidad_id', fields: ['nombre', 'comentario'] },
-  { name: 'arcilla', idField: 'arcilla_id', fields: ['nombre', 'comentario'] },
-  { name: 'coccion', idField: 'coccion_id', fields: ['nombre', 'comentario'] },
-  { name: 'esmaltado', idField: 'esmaltado_id', fields: ['nombre', 'comentario'] },
-  { name: 'modelado', idField: 'modelado_id', fields: ['nombre', 'comentario'] },
-  { name: 'tipo_escultura', idField: 'tipo_id', fields: ['nombre', 'comentario'] },
-  { name: 'material', idField: 'material_id', fields: ['nombre', 'comentario'] },
-  { name: 'tecnica_escultura', idField: 'tecnica_id', fields: ['nombre', 'comentario'] },
-  { name: 'impresion', idField: 'impresion_id', fields: ['nombre', 'comentario'] },
-  { name: 'tecnica_fotografica', idField: 'tecnica_id', fields: ['nombre', 'comentario'] },
-  { name: 'camara', idField: 'camara_id', fields: ['nombre', 'comentario'] },
-  { name: 'soporte', idField: 'soporte_id', fields: ['nombre', 'comentario'] },
-  { name: 'estilo', idField: 'estilo_id', fields: ['nombre', 'comentario'] },
-  { name: 'tematica', idField: 'tematica_id', fields: ['nombre', 'comentario'] },
-  { name: 'pieza_orfebreria', idField: 'pieza_id', fields: ['nombre', 'comentario'] },
-  { name: 'metales', idField: 'metal_id', fields: ['nombre', 'comentario'] }
-];
+// Helper para peticiones autenticadas
+const authRequest = (token) => ({
+  headers: { Authorization: `Bearer ${token}` }
+});
 
-async function testTable(table) {
-  console.log(`\n🧪 Probando ${table.name}...`);
-  const url = `${BASE_URL}/api/${table.name}`;
-  let id = null;
-  const timestamp = Date.now();
+// Colores para consola
+const colors = {
+  reset: '\x1b[0m',
+  green: '\x1b[32m',
+  red: '\x1b[31m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m'
+};
 
-  try {
-    // 1. Crear
-    const createData = {
-      nombre: `Test ${table.name} ${timestamp}`,
-      comentario: 'Creado por test automático'
-    };
-    const createRes = await axios.post(url, createData);
-    if (createRes.status !== 201) throw new Error(`POST falló: ${createRes.status}`);
-    id = createRes.data.id;
-    console.log(`   ✅ Creado con id ${id}`);
-
-    // 2. Listar y verificar que existe
-    const listRes = await axios.get(url);
-    const found = listRes.data.find(item => item[table.idField] === id);
-    if (!found) throw new Error('No se encontró el registro creado');
-    console.log(`   ✅ Encontrado en GET`);
-
-    // 3. Modificar
-    const updateData = {
-      nombre: `Test ${table.name} modificado ${timestamp}`,
-      comentario: 'Modificado por test'
-    };
-    const updateRes = await axios.put(`${url}/${id}`, updateData);
-    if (updateRes.status !== 200) throw new Error(`PUT falló: ${updateRes.status}`);
-    console.log(`   ✅ Modificado`);
-
-    // 4. Verificar modificación
-    const listRes2 = await axios.get(url);
-    const found2 = listRes2.data.find(item => item[table.idField] === id);
-    if (!found2 || !found2.nombre.includes('modificado')) {
-      throw new Error('La modificación no se reflejó');
-    }
-    console.log(`   ✅ Verificado cambio`);
-
-    // 5. Eliminar
-    const deleteRes = await axios.delete(`${url}/${id}`);
-    if (deleteRes.status !== 200) throw new Error(`DELETE falló: ${deleteRes.status}`);
-    console.log(`   ✅ Eliminado`);
-
-    return { table: table.name, success: true };
-  } catch (error) {
-    console.error(`   ❌ Error en ${table.name}:`, error.response?.data || error.message);
-    // Si hubo error y se creó un id, intentamos limpiar
-    if (id) {
-      try {
-        await axios.delete(`${url}/${id}`);
-        console.log(`   🧹 Limpieza: eliminado registro ${id}`);
-      } catch (e) {}
-    }
-    return { table: table.name, success: false, error: error.message };
-  }
-}
+const logSuccess = (msg) => console.log(`${colors.green}✅ ${msg}${colors.reset}`);
+const logError = (msg, err) => console.log(`${colors.red}❌ ${msg}: ${err.message}${colors.reset}`);
+const logInfo = (msg) => console.log(`${colors.blue}ℹ️ ${msg}${colors.reset}`);
 
 async function runTests() {
-  console.log('🚀 Iniciando pruebas automáticas de API');
-  let results = [];
-  for (const table of tables) {
-    const result = await testTable(table);
-    results.push(result);
-  }
-  console.log('\n📊 Resumen:');
-  results.forEach(r => {
-    console.log(`   ${r.success ? '✅' : '❌'} ${r.table}`);
-  });
-  const failed = results.filter(r => !r.success);
-  if (failed.length === 0) {
-    console.log('\n🎉 Todas las pruebas pasaron exitosamente!');
-  } else {
-    console.log(`\n⚠️  ${failed.length} pruebas fallaron.`);
+  logInfo('Iniciando pruebas integrales del backend...\n');
+
+  // 1. Crear usuario registrado
+  try {
+    const email = `test${Date.now()}@example.com`;
+    const password = '123456';
+    const nombre = 'Test User';
+
+    logInfo('Registrando usuario...');
+    const reg = await axios.post(`${API}/usuarios/registro`, {
+      email, password, nombre, apellido: 'Apellido'
+    });
+    if (reg.status !== 201) throw new Error('Registro falló');
+    logSuccess('Usuario registrado');
+
+    // 2. Login como usuario registrado
+    logInfo('Login como usuario registrado...');
+    const login = await axios.post(`${API}/usuarios/login`, { email, password });
+    if (login.status !== 200 || !login.data.token) throw new Error('Login falló');
+    tokenUsuario = login.data.token;
+    logSuccess('Login exitoso, token obtenido');
+
+    // 3. Obtener perfil
+    logInfo('Obteniendo perfil...');
+    const perfil = await axios.get(`${API}/usuarios/perfil`, authRequest(tokenUsuario));
+    if (perfil.status !== 200) throw new Error('Perfil no obtenido');
+    logSuccess('Perfil obtenido');
+
+    // 4. Pagar membresía (convertirse en miembro)
+    // 4. Pagar membresía (convertirse en miembro)
+    logInfo('Pagando membresía...');
+    const membresia = await axios.post(`${API}/usuarios/membresia`, {
+      tarjeta_numero: '4111111111111111',
+      tarjeta_nombre: 'Test User',
+      tarjeta_expiracion: '2028-12-31'
+    }, authRequest(tokenUsuario));
+    if (membresia.status !== 200) throw new Error('Pago de membresía falló');
+    logSuccess('Membresía activada, código: ' + membresia.data.codigo_seguridad);
+
+    // --- NUEVO: Re-login para obtener token con tipo 'miembro' ---
+    logInfo('Re-logueando como miembro para actualizar token...');
+    const loginMiembro = await axios.post(`${API}/usuarios/login`, {
+      email: email,   // el mismo email usado al registrar
+      password: password
+    });
+    tokenUsuario = loginMiembro.data.token;
+    logSuccess('Token de miembro actualizado');
+
+    // 5. Crear un administrador (necesitamos uno para las operaciones admin)
+    // Nota: No hay endpoint público para crear admin, así que lo insertamos directamente en BD o usamos un admin preexistente.
+    // Para pruebas, podemos usar un admin fijo (ej. email: admin@test.com, password: admin123) que insertamos manualmente.
+    // Aquí asumimos que existe un admin con email 'admin@test.com' y password 'admin123'.
+    logInfo('Login como administrador (debe existir previamente)...');
+    try {
+      const loginAdmin = await axios.post(`${API}/usuarios/login`, {
+        email: 'admin@museo.com',
+        password: 'admin123'
+      });
+      if (loginAdmin.status !== 200) throw new Error('Admin no configurado');
+      tokenAdmin = loginAdmin.data.token;
+      logSuccess('Login admin exitoso');
+    } catch (e) {
+      logError('No se pudo loguear admin. Debes crear un usuario administrador manualmente con email admin@test.com y password admin123', e);
+      return;
+    }
+
+    // 6. Crear un artista (admin)
+    logInfo('Creando artista (admin)...');
+    const artistaData = {
+      nombre: 'Artista Test',
+      apellido: 'Apellido Test',
+      biografia: 'Biografía de prueba',
+      fecha_nacimiento: '1980-01-01',
+      nacionalidad_id: 1, // Asume que existe nacionalidad con ID 1
+      foto_url: 'test.jpg',
+      porcentaje_ganancia: 7.5,
+      comentario: 'Comentario',
+      generos: [1, 2] // Asume géneros con IDs 1 y 2
+    };
+    const artista = await axios.post(`${API}/artistas`, artistaData, authRequest(tokenAdmin));
+    if (artista.status !== 201) throw new Error('Creación de artista falló');
+    idArtista = artista.data.id;
+    logSuccess(`Artista creado con ID ${idArtista}`);
+
+    // 7. Crear una obra (pintura) (admin)
+    logInfo('Creando obra de pintura (admin)...');
+    const obraData = {
+      nombre: 'Obra Test',
+      codigo_inventario: `PIN-${String(Date.now()).slice(-5)}`,
+      artista_id: idArtista,
+      genero_id: 1, // Pintura
+      epoca_id: 1, // Asume época con ID 1
+      precio_venta: 1000,
+      alto: 100,
+      ancho: 80,
+      fecha_creacion: '2023-01-01',
+      estado: 'Disponible',
+      foto_url: 'obra.jpg',
+      descripcion: 'Descripción',
+      comentario: '',
+      // Datos específicos de pintura
+      soporte_id: 1,
+      estilos: [1, 2],
+      tematicas: [1]
+    };
+    const obra = await axios.post(`${API}/obras`, obraData, authRequest(tokenAdmin));
+    if (obra.status !== 201) throw new Error('Creación de obra falló');
+    idObra = obra.data.id;
+    logSuccess(`Obra creada con ID ${idObra}`);
+
+    // 8. Reservar obra (como miembro)
+    logInfo('Reservando obra...');
+    const reserva = await axios.post(`${API}/ventas/reservar`, {
+      obra_id: idObra,
+      codigo_seguridad: membresia.data.codigo_seguridad
+    }, authRequest(tokenUsuario));
+    if (reserva.status !== 200) throw new Error('Reserva falló');
+    idVenta = reserva.data.venta_id;
+    logSuccess(`Reserva creada, ID venta ${idVenta}`);
+
+    // 9. Concretar venta (admin)
+    logInfo('Concretando venta (admin)...');
+    const concretar = await axios.put(`${API}/ventas/${idVenta}/concretar`, {
+      direccion_envio: 'Calle Falsa 123'
+    }, authRequest(tokenAdmin));
+    if (concretar.status !== 200) throw new Error('Concretar venta falló');
+    logSuccess('Venta concretada y factura generada');
+
+    // 10. Consultar reportes (admin)
+    logInfo('Consultando obras vendidas por período...');
+    const hoy = new Date().toISOString().split('T')[0];
+    const reporteVentas = await axios.get(`${API}/reportes/ventas?desde=2020-01-01&hasta=${hoy}`, authRequest(tokenAdmin));
+    if (reporteVentas.status !== 200) throw new Error('Reporte de ventas falló');
+    logSuccess(`Ventas encontradas: ${reporteVentas.data.length}`);
+
+    logInfo('Consultando resumen de facturación...');
+    const reporteFact = await axios.get(`${API}/reportes/facturacion?desde=2020-01-01&hasta=${hoy}`, authRequest(tokenAdmin));
+    if (reporteFact.status !== 200) throw new Error('Reporte de facturación falló');
+    logSuccess(`Facturas encontradas: ${reporteFact.data.length}`);
+
+    logInfo('Consultando resumen de membresías...');
+    const reporteMem = await axios.get(`${API}/reportes/membresias?desde=2020-01-01&hasta=${hoy}`, authRequest(tokenAdmin));
+    if (reporteMem.status !== 200) throw new Error('Reporte de membresías falló');
+    logSuccess(`Membresías encontradas: ${reporteMem.data.length}`);
+
+    logSuccess('\n🎉 Todas las pruebas pasaron correctamente!');
+  } catch (error) {
+    logError('Error en prueba', error.response?.data || error);
+    if (error.response) {
+      console.log('Detalles:', error.response.data);
+    }
   }
 }
 

@@ -11,7 +11,7 @@ CREATE TABLE Usuario (
     password VARCHAR(255) NOT NULL,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100),
-    tipo ENUM('miembro', 'administrador') NOT NULL,
+    tipo ENUM('miembro', 'administrador', 'usuario') NOT NULL,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     comentario VARCHAR(1000)
 );
@@ -87,8 +87,8 @@ CREATE TABLE Artista_Genero (
 CREATE TABLE Epoca(
     epoca_id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100) NOT NULL,
-    ano_inicio YEAR NOT NULL,
-    ano_final YEAR,
+    ano_inicio INT NOT NULL,
+    ano_final INT,
     descripcion TEXT NOT NULL,
     comentario VARCHAR(1000)
 );

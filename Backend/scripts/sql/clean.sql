@@ -1,0 +1,73 @@
+-- Desactivar restricciones de claves foráneas
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Eliminar datos de todas las tablas en orden inverso (de hijas a padres)
+TRUNCATE TABLE RespuestaSeguridad;
+TRUNCATE TABLE Membresia;
+TRUNCATE TABLE Factura;
+TRUNCATE TABLE Venta;
+TRUNCATE TABLE Pintura_Tematica;
+TRUNCATE TABLE Pintura_Estilo;
+TRUNCATE TABLE Pintura;
+TRUNCATE TABLE Escultura_Tecnica;
+TRUNCATE TABLE Escultura_Material;
+TRUNCATE TABLE Escultura;
+TRUNCATE TABLE Fotografia;
+TRUNCATE TABLE Ceramica;
+TRUNCATE TABLE Orfebreria_Metales;
+TRUNCATE TABLE Orfebreria;
+TRUNCATE TABLE Artista_Genero;
+TRUNCATE TABLE Obra;
+TRUNCATE TABLE Artista;
+TRUNCATE TABLE Miembro;
+TRUNCATE TABLE Administrador;
+TRUNCATE TABLE Usuario;
+TRUNCATE TABLE PreguntaSeguridad;
+TRUNCATE TABLE Epoca;
+TRUNCATE TABLE Genero;
+TRUNCATE TABLE Nacionalidad;
+TRUNCATE TABLE Soporte;
+TRUNCATE TABLE Estilo;
+TRUNCATE TABLE Tematica;
+TRUNCATE TABLE Tipo_Escultura;
+TRUNCATE TABLE Material;
+TRUNCATE TABLE Tecnica_Escultura;
+TRUNCATE TABLE Impresion;
+TRUNCATE TABLE Tecnica_Fotografica;
+TRUNCATE TABLE Camara;
+TRUNCATE TABLE Arcilla;
+TRUNCATE TABLE Coccion;
+TRUNCATE TABLE Modelado;
+TRUNCATE TABLE Esmaltado;
+TRUNCATE TABLE Pieza_Orfebreria;
+TRUNCATE TABLE Metales;
+
+-- Reiniciar auto_increment (opcional, pero recomendado)
+ALTER TABLE Nacionalidad AUTO_INCREMENT = 1;
+ALTER TABLE Genero AUTO_INCREMENT = 1;
+ALTER TABLE Epoca AUTO_INCREMENT = 1;
+ALTER TABLE Soporte AUTO_INCREMENT = 1;
+ALTER TABLE Estilo AUTO_INCREMENT = 1;
+ALTER TABLE Tematica AUTO_INCREMENT = 1;
+ALTER TABLE Tipo_Escultura AUTO_INCREMENT = 1;
+ALTER TABLE Material AUTO_INCREMENT = 1;
+ALTER TABLE Tecnica_Escultura AUTO_INCREMENT = 1;
+ALTER TABLE Impresion AUTO_INCREMENT = 1;
+ALTER TABLE Tecnica_Fotografica AUTO_INCREMENT = 1;
+ALTER TABLE Camara AUTO_INCREMENT = 1;
+ALTER TABLE Arcilla AUTO_INCREMENT = 1;
+ALTER TABLE Coccion AUTO_INCREMENT = 1;
+ALTER TABLE Modelado AUTO_INCREMENT = 1;
+ALTER TABLE Esmaltado AUTO_INCREMENT = 1;
+ALTER TABLE Pieza_Orfebreria AUTO_INCREMENT = 1;
+ALTER TABLE Metales AUTO_INCREMENT = 1;
+ALTER TABLE PreguntaSeguridad AUTO_INCREMENT = 1;
+ALTER TABLE Usuario AUTO_INCREMENT = 1;
+ALTER TABLE Artista AUTO_INCREMENT = 1;
+ALTER TABLE Obra AUTO_INCREMENT = 1;
+ALTER TABLE Venta AUTO_INCREMENT = 1;
+ALTER TABLE Factura AUTO_INCREMENT = 1;
+ALTER TABLE Membresia AUTO_INCREMENT = 1;
+
+-- Reactivar restricciones
+SET FOREIGN_KEY_CHECKS = 1;
