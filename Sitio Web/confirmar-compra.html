@@ -23,6 +23,12 @@
             justify-content: space-between;
             align-items: center;
         }
+
+        .Titulo {
+            text-decoration: none;
+            color: white;
+        }
+
         .logo h1 {
             font-size: 1.5rem;
             font-weight: 400;
@@ -100,7 +106,7 @@
 <body>
     <header>
         <div class="logo">
-            <h1>🎨 Museo de Arte Contemporáneo</h1>
+           <h1><a class="Titulo" href="index.html">🎨 Museo de Arte Contemporáneo</a></h1>
         </div>
         <div class="auth-links">
             <a href="#" onclick="logout()">Cerrar sesión</a>
@@ -179,11 +185,13 @@
 
                 if (codigoIngresado === comprador.codigoSeguridad) {
                     // Cambiar estado de la obra a "Reservada"
-                    // En un sistema real, se actualizaría en el servidor. Aquí simulamos cambiando el array obras y guardando en localStorage.
+                    // Obtener obras desde localStorage
+                    let obras = JSON.parse(localStorage.getItem('obras') || '[]');
+                    // Luego buscar la obra con el ID
+                    const obra = obras.find(o => o.id === obraId);
+
                     obra.status = "Reservada";
-                    // También podríamos guardar la reserva en otra estructura
-                    alert(`Compra confirmada. La obra "${obra.nombre}" ha pasado a estado RESERVADA. Un trabajador del museo se comunicará con usted en 24 horas.`);
-                    window.location.href = 'index.html';
+                    localStorage.setItem('obras', JSON.stringify(obras));
                 } else {
                     document.getElementById('errorMsg').innerText = 'Código incorrecto. Intente nuevamente.';
                 }

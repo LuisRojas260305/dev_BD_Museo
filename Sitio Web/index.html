@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Museo de Arte Contemporáneo - Inicio</title>
     <style>
-        /* (los mismos estilos que antes, se mantienen) */
+        /* mismos estilos que antes */
         * {
             margin: 0;
             padding: 0;
@@ -26,6 +26,11 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .Titulo {
+            text-decoration: none;
+            color: white;
         }
 
         .logo h1 {
@@ -200,6 +205,12 @@
             color: #27ae60;
         }
 
+        .card-status {
+            font-size: 0.9rem;
+            color: #e67e22;
+            margin-top: 0.5rem;
+        }
+
         .no-results {
             text-align: center;
             padding: 3rem;
@@ -231,7 +242,7 @@
 <body>
     <header>
         <div class="logo">
-            <h1>🎨 Museo de Arte Contemporáneo</h1>
+            <h1><a class="Titulo" href="index.html">🎨 Museo de Arte Contemporáneo</a></h1>
         </div>
         <div class="auth-links" id="authLinks">
             <!-- Se llenará dinámicamente con JS -->
@@ -243,11 +254,7 @@
             <label for="genre">Género</label>
             <select id="genre">
                 <option value="todos">Todos</option>
-                <option value="pintura">Pintura</option>
-                <option value="escultura">Escultura</option>
-                <option value="fotografia">Fotografía</option>
-                <option value="ceramica">Cerámica</option>
-                <option value="orfebreria">Orfebrería</option>
+                <!-- Se llenará dinámicamente con JS -->
             </select>
         </div>
         <div class="filter-group">
@@ -273,132 +280,42 @@
     </footer>
 
     <script>
-        // Datos de ejemplo (obras)
-        const obras = [
-            {
-                id: 1,
-                nombre: "El Grito",
-                artista: "Edvard Munch",
-                artistaId: "munch",
-                genero: "pintura",
-                precio: 12000,
-                imagen: "https://picsum.photos/id/1015/300/200", // Paisaje
-                descripcion: "Obra expresionista",
-                fechaCreacion: "1893",
-                caracteristicas: {
-                    tecnica: "Óleo sobre cartón"
-                }
-            },
-            {
-                id: 2,
-                nombre: "David",
-                artista: "Miguel Ángel",
-                artistaId: "miguelangel",
-                genero: "escultura",
-                precio: 25000,
-                imagen: "https://picsum.photos/id/1043/300/200", // Escultura
-                descripcion: "Escultura renacentista",
-                fechaCreacion: "1504",
-                caracteristicas: {
-                    material: "Mármol",
-                    peso: "5,500 kg",
-                    dimensiones: "517 cm de altura"
-                }
-            },
-            {
-                id: 3,
-                nombre: "La noche estrellada",
-                artista: "Vincent van Gogh",
-                artistaId: "vangogh",
-                genero: "pintura",
-                precio: 35000,
-                imagen: "https://picsum.photos/id/1044/300/200", // Abstracto
-                descripcion: "Pintura postimpresionista",
-                fechaCreacion: "1889",
-                caracteristicas: {
-                    tecnica: "Óleo sobre lienzo"
-                }
-            },
-            {
-                id: 4,
-                nombre: "El pensador",
-                artista: "Auguste Rodin",
-                artistaId: "rodin",
-                genero: "escultura",
-                precio: 18000,
-                imagen: "https://picsum.photos/id/107/300/200", // Persona pensando
-                descripcion: "Escultura de bronce",
-                fechaCreacion: "1904",
-                caracteristicas: {
-                    material: "Bronce",
-                    peso: "700 kg",
-                    dimensiones: "180 cm"
-                }
-            },
-            {
-                id: 5,
-                nombre: "Mona Lisa",
-                artista: "Leonardo da Vinci",
-                artistaId: "leonardo",
-                genero: "pintura",
-                precio: 80000,
-                imagen: "https://picsum.photos/id/1015/300/200", // Otro paisaje
-                descripcion: "Retrato famoso",
-                fechaCreacion: "1503",
-                caracteristicas: {
-                    tecnica: "Óleo sobre álamo"
-                }
-            },
-            {
-                id: 6,
-                nombre: "Vasija ceremonial",
-                artista: "María Martínez",
-                artistaId: "maria",
-                genero: "ceramica",
-                precio: 4500,
-                imagen: "https://picsum.photos/id/30/300/200", // Cerámica
-                descripcion: "Cerámica tradicional",
-                fechaCreacion: "1920",
-                caracteristicas: {
-                    tecnica: "Barro negro",
-                    dimensiones: "30 cm de alto"
-                }
-            },
-            {
-                id: 7,
-                nombre: "Collar de oro",
-                artista: "Luis Ortega",
-                artistaId: "luis",
-                genero: "orfebreria",
-                precio: 6200,
-                imagen: "https://picsum.photos/id/26/300/200", // Joyería
-                descripcion: "Orfebrería contemporánea",
-                fechaCreacion: "2015",
-                caracteristicas: {
-                    material: "Oro 18k",
-                    peso: "50 g"
-                }
-            },
-            {
-                id: 8,
-                nombre: "Retrato en blanco y negro",
-                artista: "Annie Leibovitz",
-                artistaId: "annie",
-                genero: "fotografia",
-                precio: 8900,
-                imagen: "https://picsum.photos/id/100/300/200", // Fotografía
-                descripcion: "Fotografía artística",
-                fechaCreacion: "1995",
-                caracteristicas: {
-                    tecnica: "Gelatina de plata"
-                }
-            }
-        ];
+        // Función para cargar obras desde localStorage
+        function cargarObras() {
+            const obrasGuardadas = localStorage.getItem('obras');
+            return obrasGuardadas ? JSON.parse(obrasGuardadas) : [];
+        }
 
-        // Extraer lista única de artistas para el filtro
+        let obras = cargarObras();
+
+        // Si no hay obras, usar datos de ejemplo para que se vea algo
+        if (obras.length === 0) {
+            obras = [
+                { id: 1, nombre: "El Grito", artista: "Edvard Munch", genero: "pintura", precio: 12000, imagen: "https://picsum.photos/id/1015/300/200", descripcion: "Obra expresionista", fechaCreacion: "1893", status: "Disponible", caracteristicas: { tecnica: "Óleo" } },
+                { id: 2, nombre: "David", artista: "Miguel Ángel", genero: "escultura", precio: 25000, imagen: "https://picsum.photos/id/1043/300/200", descripcion: "Escultura renacentista", fechaCreacion: "1504", status: "Disponible", caracteristicas: { material: "Mármol", peso: "5500 kg" } },
+                { id: 3, nombre: "La noche estrellada", artista: "Vincent van Gogh", genero: "pintura", precio: 35000, imagen: "https://picsum.photos/id/1044/300/200", descripcion: "Pintura postimpresionista", fechaCreacion: "1889", status: "Disponible", caracteristicas: { tecnica: "Óleo" } },
+                { id: 4, nombre: "El pensador", artista: "Auguste Rodin", genero: "escultura", precio: 18000, imagen: "https://picsum.photos/id/107/300/200", descripcion: "Escultura de bronce", fechaCreacion: "1904", status: "Disponible", caracteristicas: { material: "Bronce", peso: "700 kg" } },
+                { id: 5, nombre: "Mona Lisa", artista: "Leonardo da Vinci", genero: "pintura", precio: 80000, imagen: "https://picsum.photos/id/1015/300/200", descripcion: "Retrato famoso", fechaCreacion: "1503", status: "Disponible", caracteristicas: { tecnica: "Óleo" } },
+                { id: 6, nombre: "Vasija ceremonial", artista: "María Martínez", genero: "ceramica", precio: 4500, imagen: "https://picsum.photos/id/30/300/200", descripcion: "Cerámica tradicional", fechaCreacion: "1920", status: "Disponible", caracteristicas: { tecnica: "Barro negro" } },
+                { id: 7, nombre: "Collar de oro", artista: "Luis Ortega", genero: "orfebreria", precio: 6200, imagen: "https://picsum.photos/id/26/300/200", descripcion: "Orfebrería contemporánea", fechaCreacion: "2015", status: "Disponible", caracteristicas: { material: "Oro" } },
+                { id: 8, nombre: "Retrato en blanco y negro", artista: "Annie Leibovitz", genero: "fotografia", precio: 8900, imagen: "https://picsum.photos/id/100/300/200", descripcion: "Fotografía artística", fechaCreacion: "1995", status: "Disponible", caracteristicas: { tecnica: "Gelatina" } }
+            ];
+            localStorage.setItem('obras', JSON.stringify(obras));
+        }
+
+        // Extraer lista única de artistas y géneros para los filtros
         const artistas = [...new Set(obras.map(obra => obra.artista))].sort();
+        const generos = [...new Set(obras.map(obra => obra.genero))].sort();
 
-        // Llenar el select de artistas
+        // Llenar selects
+        const genreSelect = document.getElementById('genre');
+        generos.forEach(g => {
+            const option = document.createElement('option');
+            option.value = g;
+            option.textContent = g.charAt(0).toUpperCase() + g.slice(1);
+            genreSelect.appendChild(option);
+        });
+
         const artistSelect = document.getElementById('artist');
         artistas.forEach(artista => {
             const option = document.createElement('option');
@@ -437,24 +354,9 @@
             localStorage.removeItem('currentUser');
             updateAuthButtons();
             alert('Sesión cerrada');
-            // Opcional: recargar para actualizar vistas
             location.reload();
         };
 
-        // Funciones globales para login/logout simulados
-        window.login = function() {
-            localStorage.setItem('loggedIn', 'true');
-            updateAuthButtons();
-            alert('Sesión iniciada (simulación)');
-        };
-
-        window.logout = function() {
-            localStorage.removeItem('loggedIn');
-            updateAuthButtons();
-            alert('Sesión cerrada');
-        };
-
-        // Inicializar botones
         updateAuthButtons();
 
         // Función para renderizar las obras según filtros
@@ -462,6 +364,9 @@
             const generoSeleccionado = genreFilter.value;
             const artistaSeleccionado = artistFilter.value;
             const ordenarPorPrecio = sortCheckbox.checked;
+
+            // Recargar obras desde localStorage por si hubo cambios
+            obras = cargarObras();
 
             let obrasFiltradas = obras.filter(obra => {
                 if (generoSeleccionado !== 'todos' && obra.genero !== generoSeleccionado) return false;
@@ -493,6 +398,7 @@
                         <p class="card-artist">Artista: <a href="artista.html?nombre=${encodeURIComponent(obra.artista)}">${obra.artista}</a></p>
                         <span class="card-genre">${obra.genero.charAt(0).toUpperCase() + obra.genero.slice(1)}</span>
                         <div class="card-price">$${obra.precio.toLocaleString()}</div>
+                        <div class="card-status">Estado: ${obra.status || 'Disponible'}</div>
                     </div>
                 `;
                 gallery.appendChild(card);

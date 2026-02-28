@@ -27,6 +27,11 @@
             flex-wrap: wrap;
         }
 
+        .Titulo {
+            text-decoration: none;
+            color: white;
+        }
+
         .logo h1 {
             font-size: 1.5rem;
             font-weight: 400;
@@ -219,7 +224,7 @@
 <body>
     <header>
         <div class="logo">
-            <h1>🎨 Museo de Arte Contemporáneo</h1>
+            <h1><a class="Titulo" href="index.html">🎨 Museo de Arte Contemporáneo</a></h1>
         </div>
         <div class="auth-links" id="authLinks">
             <!-- Se llenará dinámicamente con JS -->
@@ -435,7 +440,6 @@
             const buyButton = loggedIn
                 ? `<button class="btn-comprar" onclick="window.location.href='confirmar-compra.html?id=${obra.id}'">Comprar</button>`
                 : `<button class="btn-comprar" onclick="alert('Debe iniciar sesión para comprar'); window.location.href='login.html';">Iniciar sesión para comprar</button>`;
-
             // HTML completo del detalle
             detailMain.innerHTML = `
                 <div class="detail-container">
