@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo de Arte Contemporáneo - Artista</title>
+    <style>
+        /* Estilos reutilizados (similar a detalle.html) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+        .auth-links .login-btn { background-color: #3498db; }
+        .auth-links .logout-btn { background-color: #e67e22; }
+        .auth-links .register-btn { background-color: #2ecc71; }
+        .auth-links a:hover { opacity: 0.8; }
+        .back-link {
+            margin: 1rem 2rem;
+        }
+        .back-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .artist-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .artist-header {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .artist-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+        }
+        .artist-info h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .artist-info p {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+        .artist-bio {
+            margin-top: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #444;
+        }
+        .obras-title {
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            color: #2c3e50;
+        }
+        .obras-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .obra-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .obra-card:hover {
+            transform: translateY(-5px);
+        }
+        .obra-image {
+            height: 150px;
+            background-color: #ccc;
+            background-size: cover;
+            background-position: center;
+        }
+        .obra-info {
+            padding: 1rem;
+        }
+        .obra-info h4 {
+            margin-bottom: 0.3rem;
+            color: #2c3e50;
+        }
+        .obra-info p {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .obra-info a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .not-found {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.5rem;
+            color: #777;
+        }
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>🎨 Museo de Arte Contemporáneo</h1>
+        </div>
+        <div class="auth-links" id="authLinks"></div>
+    </header>
+
+    <div class="back-link">
+        <a href="index.html">&larr; Volver al catálogo</a>
+    </div>
+
+    <main id="artistMain" class="artist-container">
+        <!-- Se llenará dinámicamente -->
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Museo de Arte Contemporáneo - Proyecto Final</p>
+    </footer>
+
+    <script>
+        // Base de datos de obras (debe coincidir con las anteriores)
+        const obras = [
+            { id:1, nombre:"El Grito", artista:"Edvard Munch", artistaId:"munch", genero:"pintura", precio:12000, imagen:"https://picsum.photos/id/1015/300/200", fechaCreacion:"1893", bioArtista:"Pintor noruego, precursor del expresionismo.", nacionalidad:"Noruega", fechaNacimiento:"12/12/1863", fotoArtista:"https://picsum.photos/id/102/200" },
+            { id:2, nombre:"David", artista:"Miguel Ángel", artistaId:"miguelangel", genero:"escultura", precio:25000, imagen:"https://picsum.photos/id/1043/300/200", fechaCreacion:"1504", bioArtista:"Escultor, pintor y arquitecto renacentista italiano.", nacionalidad:"Italiana", fechaNacimiento:"6/3/1475", fotoArtista:"https://picsum.photos/id/1040/200" },
+            { id:3, nombre:"La noche estrellada", artista:"Vincent van Gogh", artistaId:"vangogh", genero:"pintura", precio:35000, imagen:"https://picsum.photos/id/1044/300/200", fechaCreacion:"1889", bioArtista:"Pintor neerlandés, figura destacada del postimpresionismo.", nacionalidad:"Neerlandesa", fechaNacimiento:"30/3/1853", fotoArtista:"https://picsum.photos/id/1015/200" },
+            { id:4, nombre:"El pensador", artista:"Auguste Rodin", artistaId:"rodin", genero:"escultura", precio:18000, imagen:"https://picsum.photos/id/107/300/200", fechaCreacion:"1904", bioArtista:"Escultor francés, considerado el padre de la escultura moderna.", nacionalidad:"Francesa", fechaNacimiento:"12/11/1840", fotoArtista:"https://picsum.photos/id/1005/200" },
+            { id:5, nombre:"Mona Lisa", artista:"Leonardo da Vinci", artistaId:"leonardo", genero:"pintura", precio:80000, imagen:"https://picsum.photos/id/1015/300/200", fechaCreacion:"1503", bioArtista:"Polímata italiano del Renacimiento.", nacionalidad:"Italiana", fechaNacimiento:"15/4/1452", fotoArtista:"https://picsum.photos/id/1043/200" },
+            { id:6, nombre:"Vasija ceremonial", artista:"María Martínez", artistaId:"maria", genero:"ceramica", precio:4500, imagen:"https://picsum.photos/id/30/300/200", fechaCreacion:"1920", bioArtista:"Ceramista nativa americana, conocida por su técnica de barro negro.", nacionalidad:"Estadounidense", fechaNacimiento:"1887", fotoArtista:"https://picsum.photos/id/1025/200" },
+            { id:7, nombre:"Collar de oro", artista:"Luis Ortega", artistaId:"luis", genero:"orfebreria", precio:6200, imagen:"https://picsum.photos/id/26/300/200", fechaCreacion:"2015", bioArtista:"Orfebre contemporáneo especializado en joyería de autor.", nacionalidad:"Mexicana", fechaNacimiento:"1975", fotoArtista:"https://picsum.photos/id/107/200" },
+            { id:8, nombre:"Retrato en blanco y negro", artista:"Annie Leibovitz", artistaId:"annie", genero:"fotografia", precio:8900, imagen:"https://picsum.photos/id/100/300/200", fechaCreacion:"1995", bioArtista:"Fotógrafa estadounidense, famosa por sus retratos de celebridades.", nacionalidad:"Estadounidense", fechaNacimiento:"2/10/1949", fotoArtista:"https://picsum.photos/id/100/200" }
+        ];
+
+        // Función para obtener datos únicos de artista (simulados)
+        function obtenerArtista(nombre) {
+            const obra = obras.find(o => o.artista === nombre);
+            if (!obra) return null;
+            return {
+                nombre: obra.artista,
+                nacionalidad: obra.nacionalidad || "Desconocida",
+                fechaNacimiento: obra.fechaNacimiento || "Desconocida",
+                biografia: obra.bioArtista || "Sin biografía disponible.",
+                foto: obra.fotoArtista || "https://picsum.photos/id/100/200",
+                obras: obras.filter(o => o.artista === nombre)
+            };
+        }
+
+        // Manejo de autenticación
+        function updateAuthButtons() {
+            const loggedIn = localStorage.getItem('loggedIn') === 'true';
+            const authLinksDiv = document.getElementById('authLinks');
+            if (loggedIn) {
+                authLinksDiv.innerHTML = `
+                    <a class="logout-btn" onclick="logout()">Cerrar sesión</a>
+                    <a class="register-btn" href="registro.html">Registrarse</a>
+                `;
+            } else {
+                authLinksDiv.innerHTML = `
+                    <a class="login-btn" href="login.html">Iniciar sesión</a>
+                    <a class="register-btn" href="registro.html">Registrarse</a>
+                `;
+            }
+        }
+        window.logout = function() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('currentUser');
+            updateAuthButtons();
+            alert('Sesión cerrada');
+            location.reload();
+        };
+        updateAuthButtons();
+
+        // Obtener nombre de artista de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const nombreArtista = decodeURIComponent(urlParams.get('nombre') || '');
+
+        const mainDiv = document.getElementById('artistMain');
+        if (!nombreArtista) {
+            mainDiv.innerHTML = '<div class="not-found">No se especificó artista</div>';
+        } else {
+            const artista = obtenerArtista(nombreArtista);
+            if (!artista) {
+                mainDiv.innerHTML = '<div class="not-found">Artista no encontrado</div>';
+            } else {
+                // Construir HTML
+                let obrasHTML = '';
+                artista.obras.forEach(obra => {
+                    obrasHTML += `
+                        <div class="obra-card">
+                            <a href="detalle.html?id=${obra.id}">
+                                <div class="obra-image" style="background-image: url('${obra.imagen}');"></div>
+                                <div class="obra-info">
+                                    <h4>${obra.nombre}</h4>
+                                    <p>$${obra.precio.toLocaleString()}</p>
+                                </div>
+                            </a>
+                        </div>
+                    `;
+                });
+
+                mainDiv.innerHTML = `
+                    <div class="artist-header">
+                        <div class="artist-photo" style="background-image: url('${artista.foto}');"></div>
+                        <div class="artist-info">
+                            <h2>${artista.nombre}</h2>
+                            <p><strong>Nacionalidad:</strong> ${artista.nacionalidad}</p>
+                            <p><strong>Fecha de nacimiento:</strong> ${artista.fechaNacimiento}</p>
+                        </div>
+                    </div>
+                    <div class="artist-bio">
+                        <h3>Biografía</h3>
+                        <p>${artista.biografia}</p>
+                    </div>
+                    <h3 class="obras-title">Obras de ${artista.nombre}</h3>
+                    <div class="obras-grid">
+                        ${obrasHTML}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo de Arte Contemporáneo - Recuperar Código</title>
+    <style>
+        /* Estilos similares a login */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background-color: #3498db;
+        }
+        .container {
+            max-width: 500px;
+            margin: 3rem auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn-recuperar {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-recuperar:hover {
+            background-color: #d35400;
+        }
+        .links {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .links a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        #preguntasDiv {
+            display: none;
+            margin-top: 1.5rem;
+            border-top: 1px solid #eee;
+            padding-top: 1.5rem;
+        }
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>🎨 Museo de Arte Contemporáneo</h1>
+        </div>
+        <div class="auth-links">
+            <a href="login.html">Volver a login</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Recuperar Código de Seguridad</h2>
+        <form id="recuperarForm">
+            <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" required>
+            </div>
+            <button type="submit" class="btn-recuperar" id="btnBuscar">Buscar preguntas</button>
+        </form>
+
+        <div id="preguntasDiv">
+            <h3>Responda las preguntas de seguridad</h3>
+            <div id="preguntasContainer"></div>
+            <button class="btn-recuperar" id="btnVerificar">Verificar y enviar nuevo código</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Museo de Arte Contemporáneo</p>
+    </footer>
+
+    <script>
+        let compradorEncontrado = null;
+
+        document.getElementById('recuperarForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const compradores = JSON.parse(localStorage.getItem('compradores') || '[]');
+            compradorEncontrado = compradores.find(c => c.email === email);
+
+            if (!compradorEncontrado) {
+                alert('No existe un comprador con ese correo.');
+                return;
+            }
+
+            // Mostrar preguntas
+            const container = document.getElementById('preguntasContainer');
+            container.innerHTML = '';
+            const preg = compradorEncontrado.preguntas;
+            const preguntasArray = [
+                { pregunta: preg.p1.pregunta, respuesta: preg.p1.respuesta, index: 1 },
+                { pregunta: preg.p2.pregunta, respuesta: preg.p2.respuesta, index: 2 },
+                { pregunta: preg.p3.pregunta, respuesta: preg.p3.respuesta, index: 3 }
+            ];
+
+            preguntasArray.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.innerHTML = `
+                    <label>Pregunta ${idx+1}: ${item.pregunta}</label>
+                    <input type="text" id="resp${item.index}" placeholder="Tu respuesta" required>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('preguntasDiv').style.display = 'block';
+        });
+
+        document.getElementById('btnVerificar').addEventListener('click', function() {
+            if (!compradorEncontrado) return;
+
+            const resp1 = document.getElementById('resp1')?.value.trim().toLowerCase();
+            const resp2 = document.getElementById('resp2')?.value.trim().toLowerCase();
+            const resp3 = document.getElementById('resp3')?.value.trim().toLowerCase();
+
+            const preg = compradorEncontrado.preguntas;
+            if (resp1 === preg.p1.respuesta.toLowerCase() &&
+                resp2 === preg.p2.respuesta.toLowerCase() &&
+                resp3 === preg.p3.respuesta.toLowerCase()) {
+
+                // Generar nuevo código
+                const nuevoCodigo = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+                // Actualizar en localStorage
+                compradorEncontrado.codigoSeguridad = nuevoCodigo;
+                const compradores = JSON.parse(localStorage.getItem('compradores') || '[]');
+                const index = compradores.findIndex(c => c.email === compradorEncontrado.email);
+                if (index !== -1) {
+                    compradores[index] = compradorEncontrado;
+                    localStorage.setItem('compradores', JSON.stringify(compradores));
+                }
+
+                alert(`Se ha enviado un nuevo código a ${compradorEncontrado.email}.\n\nCódigo: ${nuevoCodigo} (simulado)`);
+                window.location.href = 'login.html';
+            } else {
+                alert('Las respuestas no son correctas.');
+            }
+        });
+    </script>
+</body>
+</html>

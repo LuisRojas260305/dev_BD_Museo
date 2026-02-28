@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo de Arte Contemporáneo - Registro</title>
+    <style>
+        /* Estilos similares a los anteriores */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .auth-links .login-btn { background-color: #3498db; }
+        .auth-links .register-btn { background-color: #2ecc71; }
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .btn-register {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-register:hover {
+            background-color: #2ecc71;
+        }
+        .security-questions {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .security-questions h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>🎨 Museo de Arte Contemporáneo</h1>
+        </div>
+        <div class="auth-links">
+            <a href="login.html" class="login-btn">Iniciar sesión</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Registro de Comprador</h2>
+        <form id="registroForm">
+            <div class="form-group">
+                <label for="nombre">Nombre completo</label>
+                <input type="text" id="nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="tel" id="telefono" required>
+            </div>
+            <div class="form-group">
+                <label for="direccion">Dirección</label>
+                <input type="text" id="direccion" required>
+            </div>
+            <div class="form-group">
+                <label for="tarjeta">Número de tarjeta de crédito</label>
+                <input type="text" id="tarjeta" placeholder="**** **** **** ****" required>
+            </div>
+            <div class="form-group">
+                <label for="expiracion">Fecha de expiración</label>
+                <input type="text" id="expiracion" placeholder="MM/AA" required>
+            </div>
+            <div class="form-group">
+                <label for="cvv">CVV</label>
+                <input type="text" id="cvv" placeholder="123" required>
+            </div>
+
+            <div class="security-questions">
+                <h3>Preguntas de seguridad (para recuperar código)</h3>
+                <div class="form-group">
+                    <label for="pregunta1">Pregunta 1</label>
+                    <select id="pregunta1">
+                        <option value="nombre_mascota">¿Nombre de tu primera mascota?</option>
+                        <option value="ciudad_nacimiento">¿Ciudad de nacimiento?</option>
+                        <option value="comida_favorita">¿Comida favorita?</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="respuesta1">Respuesta 1</label>
+                    <input type="text" id="respuesta1" required>
+                </div>
+                <div class="form-group">
+                    <label for="pregunta2">Pregunta 2</label>
+                    <select id="pregunta2">
+                        <option value="nombre_padre">¿Nombre de tu padre?</option>
+                        <option value="colegio">¿Nombre de tu colegio?</option>
+                        <option value="libro_favorito">¿Libro favorito?</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="respuesta2">Respuesta 2</label>
+                    <input type="text" id="respuesta2" required>
+                </div>
+                <div class="form-group">
+                    <label for="pregunta3">Pregunta 3</label>
+                    <select id="pregunta3">
+                        <option value="color_favorito">¿Color favorito?</option>
+                        <option value="nombre_mejor_amigo">¿Nombre de tu mejor amigo?</option>
+                        <option value="pelicula_favorita">¿Película favorita?</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="respuesta3">Respuesta 3</label>
+                    <input type="text" id="respuesta3" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-register">Registrarse (costo membresía $10)</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Museo de Arte Contemporáneo</p>
+    </footer>
+
+    <script>
+        document.getElementById('registroForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Simular pago de membresía y registro
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+
+            // Generar código de seguridad aleatorio
+            const codigoSeguridad = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+            // Guardar datos en localStorage (simulando base de datos)
+            const compradores = JSON.parse(localStorage.getItem('compradores') || '[]');
+            const nuevoComprador = {
+                id: Date.now(),
+                nombre,
+                email,
+                telefono: document.getElementById('telefono').value,
+                direccion: document.getElementById('direccion').value,
+                tarjeta: document.getElementById('tarjeta').value,
+                expiracion: document.getElementById('expiracion').value,
+                cvv: document.getElementById('cvv').value,
+                preguntas: {
+                    p1: { pregunta: document.getElementById('pregunta1').value, respuesta: document.getElementById('respuesta1').value },
+                    p2: { pregunta: document.getElementById('pregunta2').value, respuesta: document.getElementById('respuesta2').value },
+                    p3: { pregunta: document.getElementById('pregunta3').value, respuesta: document.getElementById('respuesta3').value }
+                },
+                codigoSeguridad,
+                fechaRegistro: new Date().toISOString()
+            };
+            compradores.push(nuevoComprador);
+            localStorage.setItem('compradores', JSON.stringify(compradores));
+
+            // Simular envío de código por correo
+            alert(`Registro exitoso. Se ha enviado un código de seguridad a ${email}.\n\nCódigo: ${codigoSeguridad} (simulado)`);
+
+            // Redirigir a login
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

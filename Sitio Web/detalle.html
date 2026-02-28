@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo de Arte Contemporáneo - Detalle de Obra</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .auth-links .login-btn {
+            background-color: #3498db;
+        }
+
+        .auth-links .logout-btn {
+            background-color: #e67e22;
+        }
+
+        .auth-links .register-btn {
+            background-color: #2ecc71;
+        }
+
+        .auth-links a:hover {
+            opacity: 0.8;
+        }
+
+        .back-link {
+            margin: 1rem 2rem;
+        }
+
+        .back-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .detail-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+
+        .detail-image {
+            width: 100%;
+            height: 400px;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+        }
+
+        .detail-info h2 {
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-artist {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-artist a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .detail-artist a:hover {
+            text-decoration: underline;
+        }
+
+        .detail-genre {
+            display: inline-block;
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+            font-size: 1rem;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 1rem;
+        }
+
+        .detail-status {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #f1c40f;
+            color: white;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .detail-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        .detail-features {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .detail-features h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .detail-features ul {
+            list-style: none;
+        }
+
+        .detail-features li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-features li:last-child {
+            border-bottom: none;
+        }
+
+        .btn-comprar {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.3rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .btn-comprar:hover {
+            background-color: #2ecc71;
+        }
+
+        .btn-comprar:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .not-found {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.5rem;
+            color: #777;
+        }
+
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .detail-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>🎨 Museo de Arte Contemporáneo</h1>
+        </div>
+        <div class="auth-links" id="authLinks">
+            <!-- Se llenará dinámicamente con JS -->
+        </div>
+    </header>
+
+    <div class="back-link">
+        <a href="index.html">&larr; Volver al catálogo</a>
+    </div>
+
+    <main id="detailMain">
+        <!-- El contenido se cargará dinámicamente -->
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Museo de Arte Contemporáneo - Proyecto Final</p>
+    </footer>
+
+    <script>
+        // Misma base de datos de obras (podría estar en un archivo externo)
+        const obras = [
+            {
+                id: 1,
+                nombre: "El Grito",
+                artista: "Edvard Munch",
+                artistaId: "munch",
+                genero: "pintura",
+                precio: 12000,
+                imagen: "https://picsum.photos/id/1015/600/400", // Imagen más grande
+                descripcion: "Obra expresionista que representa la angustia existencial.",
+                fechaCreacion: "1893",
+                status: "Disponible",
+                caracteristicas: {
+                    tecnica: "Óleo sobre cartón",
+                    dimensiones: "91 x 73.5 cm"
+                }
+            },
+            {
+                id: 2,
+                nombre: "David",
+                artista: "Miguel Ángel",
+                artistaId: "miguelangel",
+                genero: "escultura",
+                precio: 25000,
+                imagen: "https://picsum.photos/id/1043/600/400",
+                descripcion: "Escultura renacentista en mármol que representa al héroe bíblico.",
+                fechaCreacion: "1504",
+                status: "Disponible",
+                caracteristicas: {
+                    material: "Mármol",
+                    peso: "5,500 kg",
+                    dimensiones: "517 cm de altura"
+                }
+            },
+            {
+                id: 3,
+                nombre: "La noche estrellada",
+                artista: "Vincent van Gogh",
+                artistaId: "vangogh",
+                genero: "pintura",
+                precio: 35000,
+                imagen: "https://picsum.photos/id/1044/600/400",
+                descripcion: "Pintura postimpresionista del cielo nocturno.",
+                fechaCreacion: "1889",
+                status: "Disponible",
+                caracteristicas: {
+                    tecnica: "Óleo sobre lienzo",
+                    dimensiones: "73.7 x 92.1 cm"
+                }
+            },
+            {
+                id: 4,
+                nombre: "El pensador",
+                artista: "Auguste Rodin",
+                artistaId: "rodin",
+                genero: "escultura",
+                precio: 18000,
+                imagen: "https://picsum.photos/id/107/600/400",
+                descripcion: "Escultura de bronce que representa un hombre en meditación.",
+                fechaCreacion: "1904",
+                status: "Disponible",
+                caracteristicas: {
+                    material: "Bronce",
+                    peso: "700 kg",
+                    dimensiones: "180 cm"
+                }
+            },
+            {
+                id: 5,
+                nombre: "Mona Lisa",
+                artista: "Leonardo da Vinci",
+                artistaId: "leonardo",
+                genero: "pintura",
+                precio: 80000,
+                imagen: "https://picsum.photos/id/1015/600/400",
+                descripcion: "Retrato de Lisa Gherardini, esposa de Francesco del Giocondo.",
+                fechaCreacion: "1503",
+                status: "Disponible",
+                caracteristicas: {
+                    tecnica: "Óleo sobre álamo",
+                    dimensiones: "77 x 53 cm"
+                }
+            },
+            {
+                id: 6,
+                nombre: "Vasija ceremonial",
+                artista: "María Martínez",
+                artistaId: "maria",
+                genero: "ceramica",
+                precio: 4500,
+                imagen: "https://picsum.photos/id/30/600/400",
+                descripcion: "Cerámica tradicional de San Ildefonso.",
+                fechaCreacion: "1920",
+                status: "Disponible",
+                caracteristicas: {
+                    tecnica: "Barro negro",
+                    dimensiones: "30 cm de alto"
+                }
+            },
+            {
+                id: 7,
+                nombre: "Collar de oro",
+                artista: "Luis Ortega",
+                artistaId: "luis",
+                genero: "orfebreria",
+                precio: 6200,
+                imagen: "https://picsum.photos/id/26/600/400",
+                descripcion: "Collar de oro con diseños geométricos.",
+                fechaCreacion: "2015",
+                status: "Disponible",
+                caracteristicas: {
+                    material: "Oro 18k",
+                    peso: "50 g"
+                }
+            },
+            {
+                id: 8,
+                nombre: "Retrato en blanco y negro",
+                artista: "Annie Leibovitz",
+                artistaId: "annie",
+                genero: "fotografia",
+                precio: 8900,
+                imagen: "https://picsum.photos/id/100/600/400",
+                descripcion: "Fotografía artística en blanco y negro.",
+                fechaCreacion: "1995",
+                status: "Disponible",
+                caracteristicas: {
+                    tecnica: "Gelatina de plata",
+                    dimensiones: "40 x 60 cm"
+                }
+            }
+        ];
+
+        // Elementos DOM
+        const detailMain = document.getElementById('detailMain');
+        const authLinksDiv = document.getElementById('authLinks');
+
+        // Función para actualizar botones de autenticación
+        function updateAuthButtons() {
+            const loggedIn = localStorage.getItem('loggedIn') === 'true';
+            if (loggedIn) {
+                authLinksDiv.innerHTML = `
+                    <a class="logout-btn" onclick="logout()">Cerrar sesión</a>
+                    <a class="register-btn" href="#" onclick="alert('Registro no implementado en esta demo')">Registrarse</a>
+                `;
+            } else {
+                authLinksDiv.innerHTML = `
+                    <a class="login-btn" onclick="login()">Iniciar sesión</a>
+                    <a class="register-btn" href="#" onclick="alert('Registro no implementado en esta demo')">Registrarse</a>
+                `;
+            }
+        }
+
+        window.login = function() {
+            localStorage.setItem('loggedIn', 'true');
+            updateAuthButtons();
+            alert('Sesión iniciada (simulación)');
+            // Recargar la página para actualizar el estado del botón comprar
+            location.reload();
+        };
+
+        window.logout = function() {
+            localStorage.removeItem('loggedIn');
+            updateAuthButtons();
+            alert('Sesión cerrada');
+            location.reload();
+        };
+
+        updateAuthButtons();
+
+        // Obtener el ID de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const obraId = parseInt(urlParams.get('id'));
+
+        // Buscar la obra
+        const obra = obras.find(o => o.id === obraId);
+
+        if (!obra) {
+            detailMain.innerHTML = '<div class="not-found">Obra no encontrada</div>';
+        } else {
+            // Construir HTML de características según género
+            let featuresHTML = '';
+            if (obra.caracteristicas) {
+                featuresHTML = '<div class="detail-features"><h3>Características</h3><ul>';
+                for (let [key, value] of Object.entries(obra.caracteristicas)) {
+                    featuresHTML += `<li><strong>${key}:</strong> ${value}</li>`;
+                }
+                featuresHTML += '</ul></div>';
+            }
+
+            // Determinar si el usuario está logueado para habilitar el botón comprar
+            const loggedIn = localStorage.getItem('loggedIn') === 'true';
+            const buyButton = loggedIn
+                ? `<button class="btn-comprar" onclick="window.location.href='confirmar-compra.html?id=${obra.id}'">Comprar</button>`
+                : `<button class="btn-comprar" onclick="alert('Debe iniciar sesión para comprar'); window.location.href='login.html';">Iniciar sesión para comprar</button>`;
+
+            // HTML completo del detalle
+            detailMain.innerHTML = `
+                <div class="detail-container">
+                    <div class="detail-image" style="background-image: url('${obra.imagen}');"></div>
+                    <div class="detail-info">
+                        <h2>${obra.nombre}</h2>
+                        <p class="detail-artist">Artista: <a href="artista.html?nombre=${encodeURIComponent(obra.artista)}">${obra.artista}</a></p>
+                        <span class="detail-genre">${obra.genero.charAt(0).toUpperCase() + obra.genero.slice(1)}</span>
+                        <p class="detail-description">${obra.descripcion}</p>
+                        <p><strong>Fecha de creación:</strong> ${obra.fechaCreacion}</p>
+                        <div class="detail-price">$${obra.precio.toLocaleString()}</div>
+                        <div class="detail-status">Estado: ${obra.status}</div>
+                        ${featuresHTML}
+                        ${buyButton}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función de compra (simulada)
+        window.comprar = function(id) {
+            alert(`Procesando compra de la obra con ID ${id}. Será redirigido a la página de confirmación.`);
+            // Aquí iría la lógica real: redirigir a confirmación de compra, etc.
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo de Arte Contemporáneo - Inicio</title>
+    <style>
+        /* (los mismos estilos que antes, se mantienen) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .auth-links .login-btn {
+            background-color: #3498db;
+        }
+
+        .auth-links .logout-btn {
+            background-color: #e67e22;
+        }
+
+        .auth-links .register-btn {
+            background-color: #2ecc71;
+        }
+
+        .auth-links a:hover {
+            opacity: 0.8;
+        }
+
+        .filters {
+            background-color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .filter-group select, .filter-group input {
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .filter-group.checkbox {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-filter {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn-filter:hover {
+            background-color: #1a252f;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .card-image-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card-image {
+            height: 200px;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-content {
+            padding: 1.2rem;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .card-title a {
+            text-decoration: none;
+            color: #2c3e50;
+        }
+
+        .card-title a:hover {
+            text-decoration: underline;
+        }
+
+        .card-artist {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 0.3rem;
+        }
+
+        .card-artist a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .card-artist a:hover {
+            text-decoration: underline;
+        }
+
+        .card-genre {
+            display: inline-block;
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            margin-bottom: 0.8rem;
+        }
+
+        .card-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: #777;
+            grid-column: 1 / -1;
+        }
+
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            .auth-links {
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>🎨 Museo de Arte Contemporáneo</h1>
+        </div>
+        <div class="auth-links" id="authLinks">
+            <!-- Se llenará dinámicamente con JS -->
+        </div>
+    </header>
+
+    <section class="filters">
+        <div class="filter-group">
+            <label for="genre">Género</label>
+            <select id="genre">
+                <option value="todos">Todos</option>
+                <option value="pintura">Pintura</option>
+                <option value="escultura">Escultura</option>
+                <option value="fotografia">Fotografía</option>
+                <option value="ceramica">Cerámica</option>
+                <option value="orfebreria">Orfebrería</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="artist">Artista</label>
+            <select id="artist">
+                <option value="todos">Todos</option>
+                <!-- Se llenará dinámicamente con JS -->
+            </select>
+        </div>
+        <div class="filter-group checkbox">
+            <input type="checkbox" id="sortByPrice">
+            <label for="sortByPrice">Ordenar por precio (menor a mayor)</label>
+        </div>
+        <button class="btn-filter" id="applyFilters">Aplicar filtros</button>
+    </section>
+
+    <main class="gallery" id="gallery">
+        <!-- Las tarjetas se generarán dinámicamente con JavaScript -->
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Museo de Arte Contemporáneo - Proyecto Final</p>
+    </footer>
+
+    <script>
+        // Datos de ejemplo (obras)
+        const obras = [
+            {
+                id: 1,
+                nombre: "El Grito",
+                artista: "Edvard Munch",
+                artistaId: "munch",
+                genero: "pintura",
+                precio: 12000,
+                imagen: "https://picsum.photos/id/1015/300/200", // Paisaje
+                descripcion: "Obra expresionista",
+                fechaCreacion: "1893",
+                caracteristicas: {
+                    tecnica: "Óleo sobre cartón"
+                }
+            },
+            {
+                id: 2,
+                nombre: "David",
+                artista: "Miguel Ángel",
+                artistaId: "miguelangel",
+                genero: "escultura",
+                precio: 25000,
+                imagen: "https://picsum.photos/id/1043/300/200", // Escultura
+                descripcion: "Escultura renacentista",
+                fechaCreacion: "1504",
+                caracteristicas: {
+                    material: "Mármol",
+                    peso: "5,500 kg",
+                    dimensiones: "517 cm de altura"
+                }
+            },
+            {
+                id: 3,
+                nombre: "La noche estrellada",
+                artista: "Vincent van Gogh",
+                artistaId: "vangogh",
+                genero: "pintura",
+                precio: 35000,
+                imagen: "https://picsum.photos/id/1044/300/200", // Abstracto
+                descripcion: "Pintura postimpresionista",
+                fechaCreacion: "1889",
+                caracteristicas: {
+                    tecnica: "Óleo sobre lienzo"
+                }
+            },
+            {
+                id: 4,
+                nombre: "El pensador",
+                artista: "Auguste Rodin",
+                artistaId: "rodin",
+                genero: "escultura",
+                precio: 18000,
+                imagen: "https://picsum.photos/id/107/300/200", // Persona pensando
+                descripcion: "Escultura de bronce",
+                fechaCreacion: "1904",
+                caracteristicas: {
+                    material: "Bronce",
+                    peso: "700 kg",
+                    dimensiones: "180 cm"
+                }
+            },
+            {
+                id: 5,
+                nombre: "Mona Lisa",
+                artista: "Leonardo da Vinci",
+                artistaId: "leonardo",
+                genero: "pintura",
+                precio: 80000,
+                imagen: "https://picsum.photos/id/1015/300/200", // Otro paisaje
+                descripcion: "Retrato famoso",
+                fechaCreacion: "1503",
+                caracteristicas: {
+                    tecnica: "Óleo sobre álamo"
+                }
+            },
+            {
+                id: 6,
+                nombre: "Vasija ceremonial",
+                artista: "María Martínez",
+                artistaId: "maria",
+                genero: "ceramica",
+                precio: 4500,
+                imagen: "https://picsum.photos/id/30/300/200", // Cerámica
+                descripcion: "Cerámica tradicional",
+                fechaCreacion: "1920",
+                caracteristicas: {
+                    tecnica: "Barro negro",
+                    dimensiones: "30 cm de alto"
+                }
+            },
+            {
+                id: 7,
+                nombre: "Collar de oro",
+                artista: "Luis Ortega",
+                artistaId: "luis",
+                genero: "orfebreria",
+                precio: 6200,
+                imagen: "https://picsum.photos/id/26/300/200", // Joyería
+                descripcion: "Orfebrería contemporánea",
+                fechaCreacion: "2015",
+                caracteristicas: {
+                    material: "Oro 18k",
+                    peso: "50 g"
+                }
+            },
+            {
+                id: 8,
+                nombre: "Retrato en blanco y negro",
+                artista: "Annie Leibovitz",
+                artistaId: "annie",
+                genero: "fotografia",
+                precio: 8900,
+                imagen: "https://picsum.photos/id/100/300/200", // Fotografía
+                descripcion: "Fotografía artística",
+                fechaCreacion: "1995",
+                caracteristicas: {
+                    tecnica: "Gelatina de plata"
+                }
+            }
+        ];
+
+        // Extraer lista única de artistas para el filtro
+        const artistas = [...new Set(obras.map(obra => obra.artista))].sort();
+
+        // Llenar el select de artistas
+        const artistSelect = document.getElementById('artist');
+        artistas.forEach(artista => {
+            const option = document.createElement('option');
+            option.value = artista;
+            option.textContent = artista;
+            artistSelect.appendChild(option);
+        });
+
+        // Elementos del DOM
+        const gallery = document.getElementById('gallery');
+        const genreFilter = document.getElementById('genre');
+        const artistFilter = document.getElementById('artist');
+        const sortCheckbox = document.getElementById('sortByPrice');
+        const applyBtn = document.getElementById('applyFilters');
+        const authLinksDiv = document.getElementById('authLinks');
+
+        // Función para actualizar los botones de autenticación según localStorage
+        function updateAuthButtons() {
+            const loggedIn = localStorage.getItem('loggedIn') === 'true';
+            if (loggedIn) {
+                authLinksDiv.innerHTML = `
+                    <a class="logout-btn" onclick="logout()">Cerrar sesión</a>
+                    <a class="register-btn" href="registro.html">Registrarse</a>
+                `;
+            } else {
+                authLinksDiv.innerHTML = `
+                    <a class="login-btn" href="login.html">Iniciar sesión</a>
+                    <a class="register-btn" href="registro.html">Registrarse</a>
+                `;
+            }
+        }
+
+        // Función de logout global
+        window.logout = function() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('currentUser');
+            updateAuthButtons();
+            alert('Sesión cerrada');
+            // Opcional: recargar para actualizar vistas
+            location.reload();
+        };
+
+        // Funciones globales para login/logout simulados
+        window.login = function() {
+            localStorage.setItem('loggedIn', 'true');
+            updateAuthButtons();
+            alert('Sesión iniciada (simulación)');
+        };
+
+        window.logout = function() {
+            localStorage.removeItem('loggedIn');
+            updateAuthButtons();
+            alert('Sesión cerrada');
+        };
+
+        // Inicializar botones
+        updateAuthButtons();
+
+        // Función para renderizar las obras según filtros
+        function renderObras() {
+            const generoSeleccionado = genreFilter.value;
+            const artistaSeleccionado = artistFilter.value;
+            const ordenarPorPrecio = sortCheckbox.checked;
+
+            let obrasFiltradas = obras.filter(obra => {
+                if (generoSeleccionado !== 'todos' && obra.genero !== generoSeleccionado) return false;
+                if (artistaSeleccionado !== 'todos' && obra.artista !== artistaSeleccionado) return false;
+                return true;
+            });
+
+            if (ordenarPorPrecio) {
+                obrasFiltradas.sort((a, b) => a.precio - b.precio);
+            }
+
+            gallery.innerHTML = '';
+
+            if (obrasFiltradas.length === 0) {
+                gallery.innerHTML = '<div class="no-results">No se encontraron obras con los filtros seleccionados.</div>';
+                return;
+            }
+
+            obrasFiltradas.forEach(obra => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                card.innerHTML = `
+                    <a href="detalle.html?id=${obra.id}" class="card-image-link">
+                        <div class="card-image" style="background-image: url('${obra.imagen}');"></div>
+                    </a>
+                    <div class="card-content">
+                        <h3 class="card-title"><a href="detalle.html?id=${obra.id}">${obra.nombre}</a></h3>
+                        <p class="card-artist">Artista: <a href="artista.html?nombre=${encodeURIComponent(obra.artista)}">${obra.artista}</a></p>
+                        <span class="card-genre">${obra.genero.charAt(0).toUpperCase() + obra.genero.slice(1)}</span>
+                        <div class="card-price">$${obra.precio.toLocaleString()}</div>
+                    </div>
+                `;
+                gallery.appendChild(card);
+            });
+        }
+
+        // Render inicial
+        renderObras();
+
+        // Evento del botón aplicar filtros
+        applyBtn.addEventListener('click', renderObras);
+    </script>
+</body>
+</html>
