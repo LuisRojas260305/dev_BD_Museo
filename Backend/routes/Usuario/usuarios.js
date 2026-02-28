@@ -8,5 +8,6 @@ router.post('/login', usuarioController.login);
 router.get('/perfil', verificarToken, usuarioController.perfil);
 router.post('/membresia', verificarToken, usuarioController.pagarMembresia);
 router.post('/recuperar-codigo', usuarioController.recuperarCodigo);
+router.post('/seguridad', verificarToken, usuarioController.guardarRespuestasSeguridad);
 
 module.exports = router;

@@ -1,0 +1,1052 @@
+{
+    "administrador": [
+        {
+            "usuario_id": 1
+        }
+    ],
+    "arcilla": [
+        {
+            "arcilla_id": 1,
+            "nombre": "Arcilla roja",
+            "comentario": "Alta plasticidad"
+        },
+        {
+            "arcilla_id": 2,
+            "nombre": "Arcilla blanca",
+            "comentario": "Porcelana"
+        },
+        {
+            "arcilla_id": 3,
+            "nombre": "Gres",
+            "comentario": "Alta temperatura"
+        }
+    ],
+    "artista": [
+        {
+            "artista_id": 1,
+            "nombre": "Pablo",
+            "apellido": "Picasso",
+            "biografia": "Pintor y escultor español",
+            "fecha_nacimiento": "1881-10-25",
+            "nacionalidad_id": 1,
+            "foto_url": "picasso.jpg",
+            "porcentaje_ganancia": 7.5,
+            "comentario": "Genio del arte"
+        },
+        {
+            "artista_id": 2,
+            "nombre": "Frida",
+            "apellido": "Kahlo",
+            "biografia": "Pintora mexicana",
+            "fecha_nacimiento": "1907-07-06",
+            "nacionalidad_id": 2,
+            "foto_url": "frida.jpg",
+            "porcentaje_ganancia": 8.0,
+            "comentario": "Arte surrealista"
+        },
+        {
+            "artista_id": 3,
+            "nombre": "Artista Test",
+            "apellido": "Apellido Test",
+            "biografia": "Biografía de prueba",
+            "fecha_nacimiento": "1980-01-01",
+            "nacionalidad_id": 1,
+            "foto_url": "test.jpg",
+            "porcentaje_ganancia": 7.5,
+            "comentario": "Comentario"
+        },
+        {
+            "artista_id": 4,
+            "nombre": "Artista Test",
+            "apellido": "Apellido Test",
+            "biografia": "Biografía de prueba",
+            "fecha_nacimiento": "1980-01-01",
+            "nacionalidad_id": 1,
+            "foto_url": "test.jpg",
+            "porcentaje_ganancia": 7.5,
+            "comentario": "Comentario"
+        },
+        {
+            "artista_id": 5,
+            "nombre": "Artista Test",
+            "apellido": "Apellido Test",
+            "biografia": "Biografía de prueba",
+            "fecha_nacimiento": "1980-01-01",
+            "nacionalidad_id": 1,
+            "foto_url": "test.jpg",
+            "porcentaje_ganancia": 7.5,
+            "comentario": "Comentario"
+        },
+        {
+            "artista_id": 6,
+            "nombre": "Artista Test",
+            "apellido": "Apellido Test",
+            "biografia": "Biografía de prueba",
+            "fecha_nacimiento": "1980-01-01",
+            "nacionalidad_id": 1,
+            "foto_url": "test.jpg",
+            "porcentaje_ganancia": 7.5,
+            "comentario": "Comentario"
+        }
+    ],
+    "artista_genero": [
+        {
+            "artista_id": 1,
+            "genero_id": 1,
+            "comentario": null
+        },
+        {
+            "artista_id": 1,
+            "genero_id": 2,
+            "comentario": null
+        },
+        {
+            "artista_id": 2,
+            "genero_id": 1,
+            "comentario": null
+        },
+        {
+            "artista_id": 3,
+            "genero_id": 1,
+            "comentario": null
+        },
+        {
+            "artista_id": 3,
+            "genero_id": 2,
+            "comentario": null
+        },
+        {
+            "artista_id": 4,
+            "genero_id": 1,
+            "comentario": null
+        },
+        {
+            "artista_id": 4,
+            "genero_id": 2,
+            "comentario": null
+        },
+        {
+            "artista_id": 5,
+            "genero_id": 1,
+            "comentario": null
+        },
+        {
+            "artista_id": 5,
+            "genero_id": 2,
+            "comentario": null
+        },
+        {
+            "artista_id": 6,
+            "genero_id": 1,
+            "comentario": null
+        },
+        {
+            "artista_id": 6,
+            "genero_id": 2,
+            "comentario": null
+        }
+    ],
+    "camara": [
+        {
+            "camara_id": 1,
+            "nombre": "Réflex",
+            "comentario": "Cámara réflex de un solo lente"
+        },
+        {
+            "camara_id": 2,
+            "nombre": "Mirrorless",
+            "comentario": "Sin espejo"
+        },
+        {
+            "camara_id": 3,
+            "nombre": "Compacta",
+            "comentario": "Pequeña y automática"
+        }
+    ],
+    "ceramica": [],
+    "coccion": [
+        {
+            "coccion_id": 1,
+            "nombre": "Baja temperatura",
+            "comentario": "Hasta 1000°C"
+        },
+        {
+            "coccion_id": 2,
+            "nombre": "Alta temperatura",
+            "comentario": "Más de 1200°C"
+        },
+        {
+            "coccion_id": 3,
+            "nombre": "Raku",
+            "comentario": "Técnica japonesa"
+        }
+    ],
+    "epoca": [
+        {
+            "epoca_id": 1,
+            "nombre": "Renacimiento",
+            "ano_inicio": 1400,
+            "ano_final": 1600,
+            "descripcion": "Movimiento cultural europeo",
+            "comentario": ""
+        },
+        {
+            "epoca_id": 2,
+            "nombre": "Barroco",
+            "ano_inicio": 1600,
+            "ano_final": 1750,
+            "descripcion": "Estilo artístico",
+            "comentario": ""
+        },
+        {
+            "epoca_id": 3,
+            "nombre": "Moderno",
+            "ano_inicio": 1900,
+            "ano_final": 2000,
+            "descripcion": "Arte moderno",
+            "comentario": ""
+        },
+        {
+            "epoca_id": 4,
+            "nombre": "Contemporáneo",
+            "ano_inicio": 2000,
+            "ano_final": null,
+            "descripcion": "Arte actual",
+            "comentario": ""
+        }
+    ],
+    "escultura": [
+        {
+            "obra_id": 2,
+            "peso": 500.0,
+            "profundidad": 120.0,
+            "tipo_id": 1
+        }
+    ],
+    "escultura_material": [
+        {
+            "obra_id": 2,
+            "material_id": 2,
+            "comentario": null
+        }
+    ],
+    "escultura_tecnica": [
+        {
+            "obra_id": 2,
+            "tecnica_id": 3,
+            "comentario": null
+        }
+    ],
+    "esmaltado": [
+        {
+            "esmaltado_id": 1,
+            "nombre": "Vidriado",
+            "comentario": "Capa vítrea"
+        },
+        {
+            "esmaltado_id": 2,
+            "nombre": "Mate",
+            "comentario": "Sin brillo"
+        },
+        {
+            "esmaltado_id": 3,
+            "nombre": "Cristalino",
+            "comentario": "Transparente"
+        }
+    ],
+    "estilo": [
+        {
+            "estilo_id": 1,
+            "nombre": "Realismo",
+            "comentario": "Representación fiel de la realidad"
+        },
+        {
+            "estilo_id": 2,
+            "nombre": "Impresionismo",
+            "comentario": "Captura de la luz y el color"
+        },
+        {
+            "estilo_id": 3,
+            "nombre": "Cubismo",
+            "comentario": "Figuras geométricas"
+        },
+        {
+            "estilo_id": 4,
+            "nombre": "Surrealismo",
+            "comentario": "Mundo onírico"
+        }
+    ],
+    "factura": [
+        {
+            "factura_id": 1,
+            "venta_id": 1,
+            "admin_id": 1,
+            "fecha_emision": "2026-02-27 14:00:35",
+            "precio_obra": 1000.0,
+            "iva": 160.0,
+            "porcentaje_ganancia": 7.5,
+            "ganancia_museo": 75.0,
+            "total": 1000.0,
+            "direccion_envio": "Calle Falsa 123"
+        },
+        {
+            "factura_id": 2,
+            "venta_id": 2,
+            "admin_id": 1,
+            "fecha_emision": "2026-02-27 14:02:22",
+            "precio_obra": 1000.0,
+            "iva": 160.0,
+            "porcentaje_ganancia": 7.5,
+            "ganancia_museo": 75.0,
+            "total": 1000.0,
+            "direccion_envio": "Calle Falsa 123"
+        }
+    ],
+    "fotografia": [],
+    "genero": [
+        {
+            "genero_id": 1,
+            "nombre": "Pintura",
+            "descripcion": "Arte de representar imágenes mediante pigmentos",
+            "comentario": "Género principal"
+        },
+        {
+            "genero_id": 2,
+            "nombre": "Escultura",
+            "descripcion": "Arte de crear formas tridimensionales",
+            "comentario": "Género principal"
+        },
+        {
+            "genero_id": 3,
+            "nombre": "Fotografía",
+            "descripcion": "Arte de capturar imágenes mediante la luz",
+            "comentario": "Género principal"
+        },
+        {
+            "genero_id": 4,
+            "nombre": "Cerámica",
+            "descripcion": "Arte de crear objetos de barro o porcelana",
+            "comentario": "Género principal"
+        },
+        {
+            "genero_id": 5,
+            "nombre": "Orfebrería",
+            "descripcion": "Arte de trabajar metales preciosos",
+            "comentario": "Género principal"
+        }
+    ],
+    "impresion": [
+        {
+            "impresion_id": 1,
+            "nombre": "Papel brillante",
+            "comentario": "Acabado brillante"
+        },
+        {
+            "impresion_id": 2,
+            "nombre": "Papel mate",
+            "comentario": "Acabado mate"
+        },
+        {
+            "impresion_id": 3,
+            "nombre": "Metal",
+            "comentario": "Impresión sobre metal"
+        }
+    ],
+    "material": [
+        {
+            "material_id": 1,
+            "nombre": "Mármol",
+            "comentario": "Piedra metamórfica"
+        },
+        {
+            "material_id": 2,
+            "nombre": "Bronce",
+            "comentario": "Aleación de cobre y estaño"
+        },
+        {
+            "material_id": 3,
+            "nombre": "Madera",
+            "comentario": "Material orgánico"
+        },
+        {
+            "material_id": 4,
+            "nombre": "Arcilla",
+            "comentario": "Material cerámico"
+        }
+    ],
+    "membresia": [
+        {
+            "membresia_id": 1,
+            "usuario_id": 4,
+            "fecha_pago": "2026-02-27 13:46:42",
+            "monto": 10.0,
+            "codigo_generado": "9MQJ0OGV8P"
+        },
+        {
+            "membresia_id": 2,
+            "usuario_id": 5,
+            "fecha_pago": "2026-02-27 13:48:17",
+            "monto": 10.0,
+            "codigo_generado": "3TNRP92EHD"
+        },
+        {
+            "membresia_id": 3,
+            "usuario_id": 6,
+            "fecha_pago": "2026-02-27 13:48:47",
+            "monto": 10.0,
+            "codigo_generado": "HDBF9TLZJE"
+        },
+        {
+            "membresia_id": 4,
+            "usuario_id": 7,
+            "fecha_pago": "2026-02-27 13:50:17",
+            "monto": 10.0,
+            "codigo_generado": "KZ4B1L58GS"
+        },
+        {
+            "membresia_id": 5,
+            "usuario_id": 8,
+            "fecha_pago": "2026-02-27 13:50:39",
+            "monto": 10.0,
+            "codigo_generado": "C2WN5FCKUJ"
+        },
+        {
+            "membresia_id": 6,
+            "usuario_id": 9,
+            "fecha_pago": "2026-02-27 13:54:04",
+            "monto": 10.0,
+            "codigo_generado": "863AOENH59"
+        },
+        {
+            "membresia_id": 7,
+            "usuario_id": 10,
+            "fecha_pago": "2026-02-27 13:57:19",
+            "monto": 10.0,
+            "codigo_generado": "FI9G89GY0T"
+        },
+        {
+            "membresia_id": 8,
+            "usuario_id": 11,
+            "fecha_pago": "2026-02-27 14:00:34",
+            "monto": 10.0,
+            "codigo_generado": "7T5OGCQYGK"
+        },
+        {
+            "membresia_id": 9,
+            "usuario_id": 12,
+            "fecha_pago": "2026-02-27 14:02:21",
+            "monto": 10.0,
+            "codigo_generado": "THRCB6K50L"
+        }
+    ],
+    "metales": [
+        {
+            "metal_id": 1,
+            "nombre": "Oro",
+            "comentario": "Metal precioso amarillo"
+        },
+        {
+            "metal_id": 2,
+            "nombre": "Plata",
+            "comentario": "Metal precioso blanco"
+        },
+        {
+            "metal_id": 3,
+            "nombre": "Bronce",
+            "comentario": "Aleación"
+        },
+        {
+            "metal_id": 4,
+            "nombre": "Cobre",
+            "comentario": "Metal rojizo"
+        }
+    ],
+    "miembro": [
+        {
+            "usuario_id": 2,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Juan Pérez",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "ABC123XYZ"
+        },
+        {
+            "usuario_id": 4,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "9MQJ0OGV8P"
+        },
+        {
+            "usuario_id": 5,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "3TNRP92EHD"
+        },
+        {
+            "usuario_id": 6,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "HDBF9TLZJE"
+        },
+        {
+            "usuario_id": 7,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "KZ4B1L58GS"
+        },
+        {
+            "usuario_id": 8,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "C2WN5FCKUJ"
+        },
+        {
+            "usuario_id": 9,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "863AOENH59"
+        },
+        {
+            "usuario_id": 10,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "FI9G89GY0T"
+        },
+        {
+            "usuario_id": 11,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "7T5OGCQYGK"
+        },
+        {
+            "usuario_id": 12,
+            "tarjeta_numero": "4111111111111111",
+            "tarjeta_nombre": "Test User",
+            "tarjeta_expiracion": "2028-12-31",
+            "codigo_seguridad": "THRCB6K50L"
+        }
+    ],
+    "modelado": [
+        {
+            "modelado_id": 1,
+            "nombre": "Torno",
+            "comentario": "Modelado con torno"
+        },
+        {
+            "modelado_id": 2,
+            "nombre": "Manual",
+            "comentario": "Modelado a mano"
+        },
+        {
+            "modelado_id": 3,
+            "nombre": "Colada",
+            "comentario": "Vertido en molde"
+        }
+    ],
+    "nacionalidad": [
+        {
+            "nacionalidad_id": 1,
+            "nombre": "Española",
+            "comentario": "Nacionalidad de España"
+        },
+        {
+            "nacionalidad_id": 2,
+            "nombre": "Mexicana",
+            "comentario": "Nacionalidad de México"
+        },
+        {
+            "nacionalidad_id": 3,
+            "nombre": "Francesa",
+            "comentario": "Nacionalidad de Francia"
+        },
+        {
+            "nacionalidad_id": 4,
+            "nombre": "Italiana",
+            "comentario": "Nacionalidad de Italia"
+        },
+        {
+            "nacionalidad_id": 5,
+            "nombre": "Estadounidense",
+            "comentario": "Nacionalidad de EE.UU."
+        }
+    ],
+    "obra": [
+        {
+            "obra_id": 1,
+            "nombre": "Guernica",
+            "codigo_inventario": "INV001",
+            "artista_id": 1,
+            "genero_id": 1,
+            "epoca_id": 2,
+            "precio_venta": 1000000.0,
+            "alto": 349.3,
+            "ancho": 776.6,
+            "fecha_creacion": "1937-06-01",
+            "estado": "Disponible",
+            "foto_url": "guernica.jpg",
+            "descripcion": "Representación del bombardeo de Guernica",
+            "comentario": null
+        },
+        {
+            "obra_id": 2,
+            "nombre": "El Pensador",
+            "codigo_inventario": "INV002",
+            "artista_id": 1,
+            "genero_id": 2,
+            "epoca_id": 2,
+            "precio_venta": 500000.0,
+            "alto": 180.0,
+            "ancho": 140.0,
+            "fecha_creacion": "1904-01-01",
+            "estado": "Disponible",
+            "foto_url": "pensador.jpg",
+            "descripcion": "Escultura de bronce",
+            "comentario": null
+        },
+        {
+            "obra_id": 3,
+            "nombre": "Obra Test",
+            "codigo_inventario": "PIN-39184",
+            "artista_id": 4,
+            "genero_id": 1,
+            "epoca_id": 1,
+            "precio_venta": 1000.0,
+            "alto": 100.0,
+            "ancho": 80.0,
+            "fecha_creacion": "2023-01-01",
+            "estado": "Disponible",
+            "foto_url": "obra.jpg",
+            "descripcion": "Descripción",
+            "comentario": null
+        },
+        {
+            "obra_id": 4,
+            "nombre": "Obra Test",
+            "codigo_inventario": "PIN-35027",
+            "artista_id": 5,
+            "genero_id": 1,
+            "epoca_id": 1,
+            "precio_venta": 1000.0,
+            "alto": 100.0,
+            "ancho": 80.0,
+            "fecha_creacion": "2023-01-01",
+            "estado": "Vendida",
+            "foto_url": "obra.jpg",
+            "descripcion": "Descripción",
+            "comentario": null
+        },
+        {
+            "obra_id": 5,
+            "nombre": "Obra Test",
+            "codigo_inventario": "PIN-41892",
+            "artista_id": 6,
+            "genero_id": 1,
+            "epoca_id": 1,
+            "precio_venta": 1000.0,
+            "alto": 100.0,
+            "ancho": 80.0,
+            "fecha_creacion": "2023-01-01",
+            "estado": "Vendida",
+            "foto_url": "obra.jpg",
+            "descripcion": "Descripción",
+            "comentario": null
+        }
+    ],
+    "orfebreria": [],
+    "orfebreria_metales": [],
+    "pieza_orfebreria": [
+        {
+            "pieza_id": 1,
+            "nombre": "Anillo",
+            "comentario": "Joya para dedo"
+        },
+        {
+            "pieza_id": 2,
+            "nombre": "Collar",
+            "comentario": "Adorno para cuello"
+        },
+        {
+            "pieza_id": 3,
+            "nombre": "Pulsera",
+            "comentario": "Joya para muñeca"
+        },
+        {
+            "pieza_id": 4,
+            "nombre": "Cáliz",
+            "comentario": "Copa ceremonial"
+        }
+    ],
+    "pintura": [
+        {
+            "obra_id": 1,
+            "soporte_id": 1
+        },
+        {
+            "obra_id": 3,
+            "soporte_id": 1
+        },
+        {
+            "obra_id": 4,
+            "soporte_id": 1
+        },
+        {
+            "obra_id": 5,
+            "soporte_id": 1
+        }
+    ],
+    "pintura_estilo": [
+        {
+            "obra_id": 1,
+            "estilo_id": 1,
+            "comentario": null
+        },
+        {
+            "obra_id": 1,
+            "estilo_id": 2,
+            "comentario": null
+        },
+        {
+            "obra_id": 3,
+            "estilo_id": 1,
+            "comentario": null
+        },
+        {
+            "obra_id": 3,
+            "estilo_id": 2,
+            "comentario": null
+        },
+        {
+            "obra_id": 4,
+            "estilo_id": 1,
+            "comentario": null
+        },
+        {
+            "obra_id": 4,
+            "estilo_id": 2,
+            "comentario": null
+        },
+        {
+            "obra_id": 5,
+            "estilo_id": 1,
+            "comentario": null
+        },
+        {
+            "obra_id": 5,
+            "estilo_id": 2,
+            "comentario": null
+        }
+    ],
+    "pintura_tematica": [
+        {
+            "obra_id": 1,
+            "tematica_id": 3,
+            "comentario": null
+        },
+        {
+            "obra_id": 3,
+            "tematica_id": 1,
+            "comentario": null
+        },
+        {
+            "obra_id": 4,
+            "tematica_id": 1,
+            "comentario": null
+        },
+        {
+            "obra_id": 5,
+            "tematica_id": 1,
+            "comentario": null
+        }
+    ],
+    "preguntaseguridad": [
+        {
+            "pregunta_id": 1,
+            "pregunta_texto": "¿Cuál es el nombre de tu primera mascota?",
+            "comentario": ""
+        },
+        {
+            "pregunta_id": 2,
+            "pregunta_texto": "¿Cuál es tu ciudad de nacimiento?",
+            "comentario": ""
+        },
+        {
+            "pregunta_id": 3,
+            "pregunta_texto": "¿Cuál es tu comida favorita?",
+            "comentario": ""
+        },
+        {
+            "pregunta_id": 4,
+            "pregunta_texto": "¿Cuál es el nombre de tu mejor amigo de la infancia?",
+            "comentario": ""
+        }
+    ],
+    "respuestaseguridad": [
+        {
+            "usuario_id": 2,
+            "pregunta_id": 1,
+            "respuesta": "Firulais"
+        },
+        {
+            "usuario_id": 2,
+            "pregunta_id": 2,
+            "respuesta": "Caracas"
+        },
+        {
+            "usuario_id": 2,
+            "pregunta_id": 3,
+            "respuesta": "Pasta"
+        }
+    ],
+    "soporte": [
+        {
+            "soporte_id": 1,
+            "nombre": "Lienzo",
+            "comentario": "Tela de algodón o lino"
+        },
+        {
+            "soporte_id": 2,
+            "nombre": "Madera",
+            "comentario": "Tabla de madera"
+        },
+        {
+            "soporte_id": 3,
+            "nombre": "Papel",
+            "comentario": "Soporte de papel"
+        },
+        {
+            "soporte_id": 4,
+            "nombre": "Muro",
+            "comentario": "Pared o fresco"
+        }
+    ],
+    "tecnica_escultura": [
+        {
+            "tecnica_id": 1,
+            "nombre": "Talla directa",
+            "comentario": "Eliminación de material"
+        },
+        {
+            "tecnica_id": 2,
+            "nombre": "Modelado",
+            "comentario": "Adición de material"
+        },
+        {
+            "tecnica_id": 3,
+            "nombre": "Fundición",
+            "comentario": "Vaciado en molde"
+        }
+    ],
+    "tecnica_fotografica": [
+        {
+            "tecnica_id": 1,
+            "nombre": "Analógica",
+            "comentario": "Película química"
+        },
+        {
+            "tecnica_id": 2,
+            "nombre": "Digital",
+            "comentario": "Sensor electrónico"
+        },
+        {
+            "tecnica_id": 3,
+            "nombre": "Blanco y negro",
+            "comentario": "Monocromo"
+        }
+    ],
+    "tematica": [
+        {
+            "tematica_id": 1,
+            "nombre": "Religiosa",
+            "comentario": "Temas religiosos"
+        },
+        {
+            "tematica_id": 2,
+            "nombre": "Mitológica",
+            "comentario": "Dioses y héroes"
+        },
+        {
+            "tematica_id": 3,
+            "nombre": "Paisaje",
+            "comentario": "Vistas de la naturaleza"
+        },
+        {
+            "tematica_id": 4,
+            "nombre": "Retrato",
+            "comentario": "Personas"
+        }
+    ],
+    "tipo_escultura": [
+        {
+            "tipo_id": 1,
+            "nombre": "Bulto redondo",
+            "comentario": "Escultura exenta"
+        },
+        {
+            "tipo_id": 2,
+            "nombre": "Relieve",
+            "comentario": "Adherida a un fondo"
+        },
+        {
+            "tipo_id": 3,
+            "nombre": "Busto",
+            "comentario": "Representación de cabeza y hombros"
+        }
+    ],
+    "usuario": [
+        {
+            "usuario_id": 1,
+            "email": "admin@museo.com",
+            "password": "$2b$10$2XYe56hm9tPsNatuhczmleUsPCQNMyzAA9wV09zZJKKfuNGwZmuQC",
+            "nombre": "Admin",
+            "apellido": "Principal",
+            "tipo": "administrador",
+            "fecha_registro": "2026-02-27 13:16:39",
+            "comentario": "Administrador del sistema"
+        },
+        {
+            "usuario_id": 2,
+            "email": "miembro@museo.com",
+            "password": "$2b$10$2mE4X5yZ1q2r3s4t5u6v7w8x9y0z1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7",
+            "nombre": "Juan",
+            "apellido": "Pérez",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 13:16:41",
+            "comentario": "Miembro activo"
+        },
+        {
+            "usuario_id": 3,
+            "email": "user@museo.com",
+            "password": "$2b$10$8j9k0l1m2n3o4p5q6r7s8t9u0v1w2x3y4z5a6b7c8d9e0f1g2h3i4j5k6l7m8",
+            "nombre": "María",
+            "apellido": "Gómez",
+            "tipo": "usuario",
+            "fecha_registro": "2026-02-27 13:16:42",
+            "comentario": "Usuario registrado sin membresía"
+        },
+        {
+            "usuario_id": 4,
+            "email": "test1772214401513@example.com",
+            "password": "$2b$10$22lGkzTzrB3ILwk./5ALMO0c/mfzBxkCvj2qWf/DISoDGzbtvPOuG",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 13:46:41",
+            "comentario": null
+        },
+        {
+            "usuario_id": 5,
+            "email": "test1772214497566@example.com",
+            "password": "$2b$10$8NINUC6S/X7eFJlQ1ilOVeXjn6OobX/L.6o2nOKtur3OaK6CqTgtO",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 13:48:17",
+            "comentario": null
+        },
+        {
+            "usuario_id": 6,
+            "email": "test1772214527194@example.com",
+            "password": "$2b$10$FPl/sEIRaKZTWVLs5rEwYOE5qmWIjLz01Wie1r2urpSw89N5ikkgS",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 13:48:47",
+            "comentario": null
+        },
+        {
+            "usuario_id": 7,
+            "email": "test1772214617495@example.com",
+            "password": "$2b$10$Tvv7bH2hFsWFr.1lvX9MgewbiUuCdFzl8crDYgmaTVU3Wu4/dk8HW",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 13:50:17",
+            "comentario": null
+        },
+        {
+            "usuario_id": 8,
+            "email": "test1772214639352@example.com",
+            "password": "$2b$10$ZjdCJ9kXKJDzPMQvf3463ui3JD3z85jkbEV05THLBVE3wL723XWom",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 13:50:39",
+            "comentario": null
+        },
+        {
+            "usuario_id": 9,
+            "email": "test1772214843911@example.com",
+            "password": "$2b$10$B6zqCj3VDIUpdsXs7YAu0u3WF0BJBxvbgOgY/3U6tjcowN5OJhQ82",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 13:54:04",
+            "comentario": null
+        },
+        {
+            "usuario_id": 10,
+            "email": "test1772215038704@example.com",
+            "password": "$2b$10$o3UL5nZezpWVXNBwtPA4a.0KOlQDAstGKaxlpoCXH2zYbQrAIRSbi",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 13:57:18",
+            "comentario": null
+        },
+        {
+            "usuario_id": 11,
+            "email": "test1772215233768@example.com",
+            "password": "$2b$10$oP4vW8LUNPPbJZURky.nK.xq8caYjqRQq0Bsj8V0iq4c.42XEVxii",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 14:00:33",
+            "comentario": null
+        },
+        {
+            "usuario_id": 12,
+            "email": "test1772215341313@example.com",
+            "password": "$2b$10$QvugXhA97mQ64KZVdAxaguhnezNXc4UPhTZIqWXf.BPpuuTYJxTR6",
+            "nombre": "Test User",
+            "apellido": "Apellido",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-27 14:02:21",
+            "comentario": null
+        },
+        {
+            "usuario_id": 13,
+            "email": "luisalexanderrojasguevara@gmail.com",
+            "password": "$2b$10$HthTaZK9chnvONj.F6jjKeZ56Hotd1ek.J5v5ZCTbbIbgJ8ESDh1q",
+            "nombre": "Luis",
+            "apellido": "Rojas",
+            "tipo": "usuario",
+            "fecha_registro": "2026-02-28 13:04:33",
+            "comentario": null
+        }
+    ],
+    "venta": [
+        {
+            "venta_id": 1,
+            "obra_id": 4,
+            "comprador_id": 11,
+            "fecha_reserva": "2026-02-27 14:00:35",
+            "fecha_venta": "2026-02-27 14:00:35",
+            "estado": "vendida"
+        },
+        {
+            "venta_id": 2,
+            "obra_id": 5,
+            "comprador_id": 12,
+            "fecha_reserva": "2026-02-27 14:02:22",
+            "fecha_venta": "2026-02-27 14:02:22",
+            "estado": "vendida"
+        }
+    ]
+}

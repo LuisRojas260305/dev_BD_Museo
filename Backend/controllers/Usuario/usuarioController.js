@@ -137,6 +137,30 @@ const pagarMembresia = async (req, res) => {
   }
 };
 
+const guardarRespuestasSeguridad = async (req, res) => {
+  const { respuestas } = req.body; 
+  const usuario_id = req.usuario.usuario_id;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    // Opcional: eliminar respuestas anteriores si existen
+    await connection.query('DELETE FROM RespuestaSeguridad WHERE usuario_id = ?', [usuario_id]);
+    for (const r of respuestas) {
+      await connection.query(
+        'INSERT INTO RespuestaSeguridad (usuario_id, pregunta_id, respuesta) VALUES (?, ?, ?)',
+        [usuario_id, r.pregunta_id, r.respuesta]
+      );
+    }
+    await connection.commit();
+    res.json({ message: 'Respuestas guardadas' });
+  } catch (error) {
+    await connection.rollback();
+    res.status(500).json({ error: error.message });
+  } finally {
+    connection.release();
+  }
+};
+
 // Recuperar código de seguridad (respondiendo preguntas)
 const recuperarCodigo = async (req, res) => {
   try {
@@ -176,5 +200,6 @@ module.exports = {
   login,
   perfil,
   pagarMembresia,
-  recuperarCodigo
+  recuperarCodigo,
+  guardarRespuestasSeguridad
 };
