@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Gestión de Obras</title>
+    <style>
+        /* (Estilos iguales a los anteriores) */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#ecf0f1; }
+        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo h1 { font-size:1.5rem; }
+        .user-info { display:flex; align-items:center; gap:1rem; }
+        .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
+        .container { max-width:1200px; margin:2rem auto; padding:0 2rem; }
+        h2 { color:#2c3e50; margin-bottom:1rem; }
+        .btn { background:#3498db; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-block; margin:0.5rem 0; }
+        .btn-danger { background:#e74c3c; }
+        .btn-success { background:#27ae60; }
+        table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding:1rem; text-align:left; border-bottom:1px solid #ddd; }
+        th { background:#34495e; color:white; }
+        .form-container { background:white; padding:2rem; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:2rem; }
+        .form-group { margin-bottom:1rem; }
+        label { display:block; margin-bottom:0.3rem; font-weight:600; }
+        input, select, textarea { width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
+        .hidden { display:none; }
+        .thumbnail { width:50px; height:50px; object-fit:cover; border-radius:4px; }
+        .preview-image { max-width:200px; max-height:200px; margin-top:0.5rem; border:1px solid #ddd; border-radius:4px; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1>🎨 Admin - Obras</h1></div>
+        <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
+    </header>
+    <div class="container">
+        <h2>Gestión de Obras</h2>
+        <button class="btn btn-success" onclick="mostrarFormulario()">Nueva Obra</button>
+        <div id="formContainer" class="form-container hidden">
+            <h3 id="formTitle">Nueva Obra</h3>
+            <form id="obraForm">
+                <input type="hidden" id="obraId">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="codigo_inventario">Código de Inventario</label>
+                    <input type="text" id="codigo_inventario" required>
+                </div>
+                <div class="form-group">
+                    <label for="artista_id">Artista</label>
+                    <select id="artista_id" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="genero_id">Género</label>
+                    <select id="genero_id" required onchange="cargarCamposPorGenero()"></select>
+                </div>
+                <div class="form-group">
+                    <label for="epoca_id">Época</label>
+                    <select id="epoca_id" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="precio_venta">Precio de Venta</label>
+                    <input type="number" id="precio_venta" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_creacion">Fecha de Creación</label>
+                    <input type="date" id="fecha_creacion" required>
+                </div>
+                <div class="form-group">
+                    <label for="alto">Alto (cm)</label>
+                    <input type="number" id="alto" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="ancho">Ancho (cm)</label>
+                    <input type="number" id="ancho" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="imagen">Imagen de la obra</label>
+                    <input type="file" id="imagenFile" accept="image/*">
+                    <input type="hidden" id="foto_url" name="foto_url">
+                    <div id="previewContainer"></div>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" rows="3"></textarea>
+                </div>
+                <div id="camposEspecificos"></div>
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-danger" onclick="cancelarFormulario()">Cancelar</button>
+            </form>
+        </div>
+        <div id="obrasList">
+            <table>
+                <thead><tr><th>ID</th><th>Imagen</th><th>Nombre</th><th>Artista</th><th>Género</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody id="tablaObras"></tbody>
+            </table>
+        </div>
+    </div>
+    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        let artistas = [], generos = [], epocas = [];
+        let catalogos = {
+            soporte: [],
+            tipoEscultura: [],
+            material: [],
+            tecnicaEscultura: [],
+            // ... otros según necesidad
+        };
+        let editId = null;
+
+        (function() {
+            const user = getUser();
+            if (!user || user.tipo !== 'administrador') {
+                alert('Acceso no autorizado');
+                window.location.href = 'index.html';
+            }
+            document.getElementById('userEmail').innerText = user.email;
+        })();
+
+        // Cargar todos los catálogos
+        async function cargarArtistas() {
+            const res = await fetch(`${API_BASE}/artistas`);
+            artistas = await res.json();
+            llenarSelect('artista_id', artistas, 'artista_id', a => `${a.nombre} ${a.apellido || ''}`.trim());
+        }
+
+        async function cargarGeneros() {
+            const res = await fetch(`${API_BASE}/genero`);
+            generos = await res.json();
+            llenarSelect('genero_id', generos, 'genero_id', 'nombre');
+        }
+
+        async function cargarEpocas() {
+            const res = await fetch(`${API_BASE}/epoca`);
+            epocas = await res.json();
+            llenarSelect('epoca_id', epocas, 'epoca_id', 'nombre');
+        }
+
+        async function cargarCatalogo(url, key) {
+            const res = await fetch(`${API_BASE}/${url}`);
+            const data = await res.json();
+            catalogos[key] = data;
+        }
+
+        function llenarSelect(id, items, valueKey, textKey) {
+            const select = document.getElementById(id);
+            select.innerHTML = '<option value="">Seleccione</option>';
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valueKey];
+                option.textContent = typeof textKey === 'function' ? textKey(item) : item[textKey];
+                select.appendChild(option);
+            });
+        }
+
+        // Precarga de todos los catálogos necesarios
+        Promise.all([
+            cargarArtistas(),
+            cargarGeneros(),
+            cargarEpocas(),
+            cargarCatalogo('soporte', 'soporte'),
+            cargarCatalogo('tipo_escultura', 'tipoEscultura'),
+            cargarCatalogo('material', 'material'),
+            cargarCatalogo('tecnica_escultura', 'tecnicaEscultura'),
+            // ... otros (coccion, arcilla, etc.)
+        ]).then(() => cargarObras());
+
+        function cargarCamposPorGenero() {
+            const generoId = document.getElementById('genero_id').value;
+            const contenedor = document.getElementById('camposEspecificos');
+            contenedor.innerHTML = '';
+
+            switch (generoId) {
+                case '1': // Pintura
+                    contenedor.innerHTML = `
+                        <h4>Campos de Pintura</h4>
+                        <div class="form-group">
+                            <label for="soporte_id">Soporte</label>
+                            <select id="soporte_id" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="estilos">Estilos (IDs separados por coma)</label>
+                            <input type="text" id="estilos">
+                        </div>
+                        <div class="form-group">
+                            <label for="tematicas">Temáticas (IDs separados por coma)</label>
+                            <input type="text" id="tematicas">
+                        </div>
+                    `;
+                    llenarSelect('soporte_id', catalogos.soporte, 'soporte_id', 'nombre');
+                    break;
+                case '2': // Escultura
+                    contenedor.innerHTML = `
+                        <h4>Campos de Escultura</h4>
+                        <div class="form-group">
+                            <label for="tipo_id">Tipo de Escultura</label>
+                            <select id="tipo_id" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="peso">Peso (kg)</label>
+                            <input type="number" id="peso" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="profundidad">Profundidad (cm)</label>
+                            <input type="number" id="profundidad" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="materiales">Materiales (IDs separados por coma)</label>
+                            <input type="text" id="materiales">
+                        </div>
+                        <div class="form-group">
+                            <label for="tecnicas">Técnicas (IDs separados por coma)</label>
+                            <input type="text" id="tecnicas">
+                        </div>
+                    `;
+                    llenarSelect('tipo_id', catalogos.tipoEscultura, 'tipo_id', 'nombre');
+                    break;
+                // ... otros géneros (fotografia, ceramica, orfebreria) se pueden agregar similar
+            }
+        }
+
+        // Subida de imagen
+        document.getElementById('imagenFile').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('imagen', file);
+            try {
+                const res = await authFetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('foto_url').value = data.url;
+                    document.getElementById('previewContainer').innerHTML = `<img src="${data.url}" class="preview-image">`;
+                } else {
+                    alert('Error al subir imagen: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        });
+
+        async function cargarObras() {
+            const res = await fetch(`${API_BASE}/obras`);
+            const obras = await res.json();
+            const tbody = document.getElementById('tablaObras');
+            tbody.innerHTML = '';
+            obras.forEach(o => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${o.obra_id}</td>
+                    <td><img src="${o.foto_url || 'https://via.placeholder.com/50'}" class="thumbnail"></td>
+                    <td>${o.nombre}</td>
+                    <td>${o.artista_nombre}</td>
+                    <td>${o.genero_nombre}</td>
+                    <td>$${o.precio_venta}</td>
+                    <td>${o.estado}</td>
+                    <td>
+                        <button class="btn" onclick="editarObra(${o.obra_id})">Editar</button>
+                        <button class="btn btn-danger" onclick="eliminarObra(${o.obra_id})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.editarObra = function(id) {
+            alert('Edición no disponible');
+        };
+
+        window.eliminarObra = async function(id) {
+            if (!confirm('¿Eliminar obra?')) return;
+            try {
+                const res = await authFetch(`${API_BASE}/obras/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    alert('Obra eliminada');
+                    cargarObras();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        };
+
+        document.getElementById('obraForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            // Obtener datos del formulario
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            data.artista_id = parseInt(data.artista_id);
+            data.genero_id = parseInt(data.genero_id);
+            data.epoca_id = parseInt(data.epoca_id);
+            data.precio_venta = parseFloat(data.precio_venta);
+            data.alto = parseFloat(data.alto) || 0;
+            data.ancho = parseFloat(data.ancho) || 0;
+            data.estado = 'Disponible';
+            data.foto_url = document.getElementById('foto_url').value || null;
+
+            // Campos específicos
+            if (data.genero_id === 1) {
+                data.soporte_id = parseInt(document.getElementById('soporte_id').value);
+                data.estilos = document.getElementById('estilos').value.split(',').map(s => parseInt(s.trim())).filter(Boolean);
+                data.tematicas = document.getElementById('tematicas').value.split(',').map(t => parseInt(t.trim())).filter(Boolean);
+            } else if (data.genero_id === 2) {
+                data.tipo_id = parseInt(document.getElementById('tipo_id').value);
+                data.peso = parseFloat(document.getElementById('peso').value) || 0;
+                data.profundidad = parseFloat(document.getElementById('profundidad').value) || 0;
+                data.materiales = document.getElementById('materiales').value.split(',').map(m => parseInt(m.trim())).filter(Boolean);
+                data.tecnicas = document.getElementById('tecnicas').value.split(',').map(t => parseInt(t.trim())).filter(Boolean);
+            }
+
+            try {
+                const res = await authFetch(`${API_BASE}/obras`, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    alert('Obra creada');
+                    cancelarFormulario();
+                    cargarObras();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        });
+
+        function mostrarFormulario() {
+            document.getElementById('formContainer').classList.remove('hidden');
+            document.getElementById('obraForm').reset();
+            document.getElementById('previewContainer').innerHTML = '';
+            document.getElementById('foto_url').value = '';
+            editId = null;
+        }
+
+        function cancelarFormulario() {
+            document.getElementById('formContainer').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

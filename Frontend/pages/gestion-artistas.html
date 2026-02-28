@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Artistas</title>
+    <style>
+        /* (Estilos similares a gestion-obras) */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#ecf0f1; }
+        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo h1 { font-size:1.5rem; }
+        .user-info { display:flex; align-items:center; gap:1rem; }
+        .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
+        .container { max-width:1200px; margin:2rem auto; padding:0 2rem; }
+        h2 { color:#2c3e50; margin-bottom:1rem; }
+        .btn { background:#3498db; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-block; margin:0.5rem 0; }
+        .btn-danger { background:#e74c3c; }
+        .btn-success { background:#27ae60; }
+        table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding:1rem; text-align:left; border-bottom:1px solid #ddd; }
+        th { background:#34495e; color:white; }
+        .form-container { background:white; padding:2rem; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:2rem; }
+        .form-group { margin-bottom:1rem; }
+        label { display:block; margin-bottom:0.3rem; font-weight:600; }
+        input, select, textarea { width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
+        .hidden { display:none; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1>🎨 Admin - Artistas</h1></div>
+        <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
+    </header>
+    <div class="container">
+        <h2>Gestión de Artistas</h2>
+        <button class="btn btn-success" onclick="mostrarFormulario()">Nuevo Artista</button>
+        <div id="formContainer" class="form-container hidden">
+            <h3 id="formTitle">Nuevo Artista</h3>
+            <form id="artistaForm">
+                <input type="hidden" id="artistaId">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="apellido">Apellido</label>
+                    <input type="text" id="apellido">
+                </div>
+                <div class="form-group">
+                    <label for="nacionalidad_id">Nacionalidad</label>
+                    <select id="nacionalidad_id" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_nacimiento">Fecha de Nacimiento</label>
+                    <input type="date" id="fecha_nacimiento">
+                </div>
+                <div class="form-group">
+                    <label for="biografia">Biografía</label>
+                    <textarea id="biografia" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="foto_url">URL de la Foto</label>
+                    <input type="url" id="foto_url">
+                </div>
+                <div class="form-group">
+                    <label for="porcentaje_ganancia">% Ganancia</label>
+                    <input type="number" id="porcentaje_ganancia" step="0.1" min="0" max="100" value="5">
+                </div>
+                <div class="form-group">
+                    <label for="generos">Géneros (IDs separados por coma)</label>
+                    <input type="text" id="generos">
+                </div>
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-danger" onclick="cancelarFormulario()">Cancelar</button>
+            </form>
+        </div>
+        <div id="artistasList">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Nacionalidad</th><th>Géneros</th><th>% Ganancia</th><th>Acciones</th></tr></thead>
+                <tbody id="tablaArtistas"></tbody>
+            </table>
+        </div>
+    </div>
+    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        let nacionalidades = [];
+        let editId = null;
+
+        (function() {
+            const user = getUser();
+            if (!user || user.tipo !== 'administrador') {
+                alert('Acceso no autorizado');
+                window.location.href = 'index.html';
+            }
+            document.getElementById('userEmail').innerText = user.email;
+        })();
+
+        async function cargarNacionalidades() {
+            const res = await fetch(`${API_BASE}/nacionalidad`);
+            nacionalidades = await res.json();
+            const select = document.getElementById('nacionalidad_id');
+            select.innerHTML = '<option value="">Seleccione nacionalidad</option>';
+            nacionalidades.forEach(n => {
+                const option = document.createElement('option');
+                option.value = n.nacionalidad_id;
+                option.textContent = n.nombre;
+                select.appendChild(option);
+            });
+        }
+
+        async function cargarArtistas() {
+            const res = await fetch(`${API_BASE}/artistas`);
+            const artistas = await res.json();
+            const tbody = document.getElementById('tablaArtistas');
+            tbody.innerHTML = '';
+            for (const a of artistas) {
+                // Obtener nacionalidad
+                const n = nacionalidades.find(n => n.nacionalidad_id === a.nacionalidad_id);
+                const nacion = n ? n.nombre : '';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${a.artista_id}</td>
+                    <td>${a.nombre} ${a.apellido || ''}</td>
+                    <td>${nacion}</td>
+                    <td>${a.generos || ''}</td>
+                    <td>${a.porcentaje_ganancia}%</td>
+                    <td>
+                        <button class="btn" onclick="editarArtista(${a.artista_id})">Editar</button>
+                        <button class="btn btn-danger" onclick="eliminarArtista(${a.artista_id})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        window.editarArtista = async function(id) {
+            try {
+                const res = await fetch(`${API_BASE}/artistas/${id}`);
+                const artista = await res.json();
+                if (!res.ok) throw new Error(artista.error);
+                document.getElementById('artistaId').value = artista.artista_id;
+                document.getElementById('nombre').value = artista.nombre;
+                document.getElementById('apellido').value = artista.apellido || '';
+                document.getElementById('nacionalidad_id').value = artista.nacionalidad_id;
+                document.getElementById('fecha_nacimiento').value = artista.fecha_nacimiento ? artista.fecha_nacimiento.split('T')[0] : '';
+                document.getElementById('biografia').value = artista.biografia || '';
+                document.getElementById('foto_url').value = artista.foto_url || '';
+                document.getElementById('porcentaje_ganancia').value = artista.porcentaje_ganancia;
+                document.getElementById('generos').value = artista.generos || ''; // string separado por comas
+                document.getElementById('formTitle').innerText = 'Editar Artista';
+                document.getElementById('formContainer').classList.remove('hidden');
+                editId = id;
+            } catch (error) {
+                alert('Error al cargar artista: ' + error.message);
+            }
+        };
+
+        window.eliminarArtista = async function(id) {
+            if (!confirm('¿Eliminar artista?')) return;
+            try {
+                const res = await authFetch(`${API_BASE}/artistas/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    alert('Artista eliminado');
+                    cargarArtistas();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        };
+
+        document.getElementById('artistaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = {
+                nombre: document.getElementById('nombre').value,
+                apellido: document.getElementById('apellido').value || null,
+                nacionalidad_id: parseInt(document.getElementById('nacionalidad_id').value),
+                fecha_nacimiento: document.getElementById('fecha_nacimiento').value || null,
+                biografia: document.getElementById('biografia').value || null,
+                foto_url: document.getElementById('foto_url').value || null,
+                porcentaje_ganancia: parseFloat(document.getElementById('porcentaje_ganancia').value),
+                generos: document.getElementById('generos').value.split(',').map(g => parseInt(g.trim())).filter(Boolean)
+            };
+            try {
+                let url = `${API_BASE}/artistas`;
+                let method = 'POST';
+                if (editId) {
+                    url += `/${editId}`;
+                    method = 'PUT';
+                }
+                const res = await authFetch(url, { method, body: JSON.stringify(data) });
+                if (res.ok) {
+                    alert('Artista guardado');
+                    cancelarFormulario();
+                    cargarArtistas();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        });
+
+        function mostrarFormulario() {
+            document.getElementById('formContainer').classList.remove('hidden');
+            document.getElementById('artistaForm').reset();
+            document.getElementById('artistaId').value = '';
+            document.getElementById('formTitle').innerText = 'Nuevo Artista';
+            editId = null;
+        }
+
+        function cancelarFormulario() {
+            document.getElementById('formContainer').classList.add('hidden');
+        }
+
+        cargarNacionalidades().then(() => cargarArtistas());
+    </script>
+</body>
+</html>

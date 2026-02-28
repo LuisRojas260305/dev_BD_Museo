@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestionar Reservas</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#ecf0f1; }
+        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo h1 { font-size:1.5rem; }
+        .user-info { display:flex; align-items:center; gap:1rem; }
+        .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
+        .container { max-width:1200px; margin:2rem auto; padding:0 2rem; }
+        h2 { color:#2c3e50; margin-bottom:1rem; }
+        table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding:1rem; text-align:left; border-bottom:1px solid #ddd; }
+        th { background:#34495e; color:white; }
+        .btn { background:#3498db; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-block; margin:0.2rem; }
+        .btn-success { background:#27ae60; }
+        .btn-danger { background:#e74c3c; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; }
+        .modal-content { background:white; padding:2rem; border-radius:8px; max-width:400px; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1>🎨 Admin - Gestionar Reservas</h1></div>
+        <div class="user-info">
+            <span id="userEmail"></span>
+            <a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Reservas Pendientes</h2>
+        <table id="tablaReservas">
+            <thead>
+                <tr>
+                    <th>ID Venta</th>
+                    <th>Obra</th>
+                    <th>Artista</th>
+                    <th>Comprador</th>
+                    <th>Fecha Reserva</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="reservasBody">
+                <tr><td colspan="6">Cargando...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal para dirección de envío -->
+    <div id="modalEnvio" class="modal">
+        <div class="modal-content">
+            <h3>Concretar Venta</h3>
+            <label for="direccion">Dirección de envío:</label>
+            <input type="text" id="direccion" style="width:100%; padding:0.5rem; margin:1rem 0;">
+            <button class="btn btn-success" id="confirmarEnvio">Confirmar</button>
+            <button class="btn" onclick="cerrarModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        let ventaSeleccionada = null;
+
+        (function() {
+            const user = getUser();
+            if (!user || user.tipo !== 'administrador') {
+                alert('Acceso no autorizado');
+                window.location.href = 'index.html';
+            }
+            document.getElementById('userEmail').innerText = user.email;
+        })();
+
+        async function cargarReservas() {
+            try {
+                const res = await authFetch(`${API_BASE}/ventas?estado=reservada`);
+                if (!res.ok) throw new Error('Error al cargar reservas');
+                const reservas = await res.json();
+                const tbody = document.getElementById('reservasBody');
+                if (reservas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">No hay reservas pendientes</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                reservas.forEach(v => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${v.venta_id}</td>
+                        <td>${v.obra_nombre}</td>
+                        <td>${v.artista_nombre}</td>
+                        <td>${v.comprador_nombre} (${v.comprador_email})</td>
+                        <td>${new Date(v.fecha_reserva).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-success" onclick="abrirModalConcretar(${v.venta_id})">Concretar</button>
+                            <button class="btn btn-danger" onclick="cancelarReserva(${v.venta_id})">Cancelar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                document.getElementById('reservasBody').innerHTML = '<tr><td colspan="6">Error al cargar</td></tr>';
+            }
+        }
+
+        function abrirModalConcretar(ventaId) {
+            ventaSeleccionada = ventaId;
+            document.getElementById('modalEnvio').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEnvio').style.display = 'none';
+            ventaSeleccionada = null;
+        }
+
+        document.getElementById('confirmarEnvio').addEventListener('click', async function() {
+            const direccion = document.getElementById('direccion').value.trim();
+            if (!direccion) {
+                alert('Debe ingresar una dirección de envío');
+                return;
+            }
+            try {
+                const res = await authFetch(`${API_BASE}/ventas/${ventaSeleccionada}/concretar`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ direccion_envio: direccion })
+                });
+                if (res.ok) {
+                    alert('Venta concretada y factura generada');
+                    cerrarModal();
+                    cargarReservas();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        });
+
+        async function cancelarReserva(ventaId) {
+            if (!confirm('¿Está seguro de cancelar esta reserva? La obra volverá a estar disponible.')) return;
+            try {
+                const res = await authFetch(`${API_BASE}/ventas/${ventaId}/cancelar`, { method: 'PUT' });
+                if (res.ok) {
+                    alert('Reserva cancelada');
+                    cargarReservas();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        }
+
+        cargarReservas();
+    </script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de Obra</title>
+    <style>
+        /* mismos estilos que antes */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#f5f5f5; }
+        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo h1 { font-size:1.5rem; }
+        .auth-links a { color:white; text-decoration:none; margin-left:1rem; padding:0.5rem 1rem; border-radius:4px; }
+        .login-btn { background:#3498db; }
+        .logout-btn { background:#e67e22; }
+        .register-btn { background:#2ecc71; }
+        .back-link { margin:1rem 2rem; }
+        .back-link a { color:#3498db; text-decoration:none; }
+        .detail-container { max-width:1200px; margin:2rem auto; display:grid; grid-template-columns:1fr 1fr; gap:3rem; background:white; border-radius:12px; padding:2rem; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+        .detail-image { height:400px; background:#ddd; background-size:cover; background-position:center; border-radius:8px; }
+        .detail-info h2 { font-size:2.2rem; color:#2c3e50; }
+        .detail-artist { font-size:1.3rem; }
+        .detail-artist a { color:#3498db; text-decoration:none; }
+        .detail-genre { display:inline-block; background:#ecf0f1; color:#7f8c8d; padding:0.3rem 1rem; border-radius:20px; margin:1rem 0; }
+        .detail-price { font-size:2rem; font-weight:bold; color:#27ae60; margin:1rem 0; }
+        .detail-status { font-size:1.1rem; margin:1rem 0; padding:0.5rem 1rem; background:#f1c40f; color:white; border-radius:4px; display:inline-block; }
+        .detail-features { background:#f9f9f9; padding:1.5rem; border-radius:8px; margin:1rem 0; }
+        .btn-comprar { background:#27ae60; color:white; border:none; padding:1rem 2rem; font-size:1.3rem; border-radius:8px; cursor:pointer; width:100%; }
+        .btn-comprar:hover { background:#2ecc71; }
+        .btn-comprar:disabled { background:#95a5a6; cursor:not-allowed; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1>🎨 Museo de Arte Contemporáneo</h1></div>
+        <div class="auth-links" id="authLinks"></div>
+    </header>
+
+    <div class="back-link"><a href="index.html">&larr; Volver al catálogo</a></div>
+
+    <main id="detailMain"></main>
+
+    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const obraId = urlParams.get('id');
+
+        function updateAuthButtons() {
+            const loggedIn = isLoggedIn();
+            const user = getUser();
+            const authLinksDiv = document.getElementById('authLinks');
+            if (loggedIn) {
+                authLinksDiv.innerHTML = `
+                    <span style="color:white;">${user.nombre}</span>
+                    <a href="perfil.html" style="color:white;">Mi perfil</a>
+                    <a class="logout-btn" onclick="logout()">Cerrar sesión</a>
+                `;
+            } else {
+                authLinksDiv.innerHTML = `
+                    <a class="login-btn" href="login.html">Iniciar sesión</a>
+                    <a class="register-btn" href="registro.html">Registrarse</a>
+                `;
+            }
+        }
+
+        async function cargarObra() {
+            try {
+                const res = await fetch(`${API_BASE}/obras/${obraId}`);
+                if (!res.ok) throw new Error('No encontrada');
+                const obra = await res.json();
+                render(obra);
+            } catch (error) {
+                document.getElementById('detailMain').innerHTML = '<div class="not-found">Obra no encontrada</div>';
+            }
+        }
+
+        function render(obra) {
+            const main = document.getElementById('detailMain');
+            const user = getUser();
+            const puedeComprar = (obra.estado === 'Disponible') && user && (user.tipo === 'miembro' || user.tipo === 'administrador');
+            const botonCompra = puedeComprar 
+                ? `<button class="btn-comprar" onclick="window.location.href='confirmar-compra.html?id=${obra.obra_id}'">Comprar</button>`
+                : (obra.estado !== 'Disponible' 
+                    ? `<button class="btn-comprar" disabled>No disponible</button>`
+                    : `<button class="btn-comprar" onclick="alert('Debes ser miembro para comprar'); window.location.href='login.html';">Iniciar sesión como miembro</button>`);
+
+            // Construir características según género
+            let featuresHTML = '';
+            if (obra.detalles) {
+                featuresHTML = '<div class="detail-features"><h3>Características</h3><ul>';
+                for (let key in obra.detalles) {
+                    if (key !== 'obra_id' && key !== 'soporte_id' && key !== 'tipo_id' && obra.detalles[key]) {
+                        featuresHTML += `<li><strong>${key}:</strong> ${obra.detalles[key]}</li>`;
+                    }
+                }
+                featuresHTML += '</ul></div>';
+            }
+
+            main.innerHTML = `
+                <div class="detail-container">
+                    <div class="detail-image" style="background-image: url('${obra.foto_url || 'https://via.placeholder.com/600x400'}');"></div>
+                    <div class="detail-info">
+                        <h2>${obra.nombre}</h2>
+                        <p class="detail-artist">Artista: <a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a></p>
+                        <span class="detail-genre">${obra.genero_nombre}</span>
+                        <p class="detail-description">${obra.descripcion || ''}</p>
+                        <p><strong>Fecha de creación:</strong> ${obra.fecha_creacion}</p>
+                        <div class="detail-price">$${obra.precio_venta}</div>
+                        <div class="detail-status">Estado: ${obra.estado}</div>
+                        ${featuresHTML}
+                        ${botonCompra}
+                    </div>
+                </div>
+            `;
+        }
+
+        updateAuthButtons();
+        cargarObra();
+    </script>
+</body>
+</html>

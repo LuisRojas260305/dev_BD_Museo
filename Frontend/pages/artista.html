@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Artista</title>
+    <style>/* estilos */</style>
+</head>
+<body>
+    <header>...</header>
+    <div class="back-link"><a href="index.html">&larr; Volver</a></div>
+    <main id="artistMain" class="artist-container">Cargando...</main>
+    <footer>...</footer>
+    <script src="../js/auth.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const artistaId = urlParams.get('id');
+
+        async function cargarArtista() {
+            try {
+                const resArtista = await fetch(`${API_BASE}/artistas/${artistaId}`);
+                if (!resArtista.ok) throw new Error('Artista no encontrado');
+                const artista = await resArtista.json();
+
+                const resObras = await fetch(`${API_BASE}/obras?artista_id=${artistaId}`);
+                const obras = await resObras.json();
+
+                renderizar(artista, obras);
+            } catch (error) {
+                document.getElementById('artistMain').innerHTML = `<div class="not-found">${error.message}</div>`;
+            }
+        }
+
+        function renderizar(artista, obras) {
+            let obrasHTML = '';
+            obras.forEach(obra => {
+                obrasHTML += `
+                    <div class="obra-card">
+                        <a href="detalle.html?id=${obra.obra_id}">
+                            <div class="obra-image" style="background-image: url('${obra.foto_url || 'https://via.placeholder.com/200x150?text=Sin+imagen'}');"></div>
+                            <div class="obra-info">
+                                <h4>${obra.nombre}</h4>
+                                <p>$${Number(obra.precio_venta).toLocaleString()}</p>
+                            </div>
+                        </a>
+                    </div>
+                `;
+            });
+
+            document.getElementById('artistMain').innerHTML = `
+                <div class="artist-header">
+                    <div class="artist-photo" style="background-image: url('${artista.foto_url || 'https://via.placeholder.com/200'}');"></div>
+                    <div class="artist-info">
+                        <h2>${artista.nombre} ${artista.apellido || ''}</h2>
+                        <p><strong>Nacionalidad:</strong> ${artista.nacionalidad_nombre || 'Desconocida'}</p>
+                        <p><strong>Fecha de nacimiento:</strong> ${artista.fecha_nacimiento || 'Desconocida'}</p>
+                    </div>
+                </div>
+                <div class="artist-bio">
+                    <h3>Biografía</h3>
+                    <p>${artista.biografia || 'Sin biografía disponible.'}</p>
+                </div>
+                <h3 class="obras-title">Obras de ${artista.nombre}</h3>
+                <div class="obras-grid">${obrasHTML || '<p>No hay obras de este artista.</p>'}</div>
+            `;
+        }
+
+        cargarArtista();
+    </script>
+</body>
+</html>

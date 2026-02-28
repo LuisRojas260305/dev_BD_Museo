@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar Compra</title>
+    <style>
+        /* mismos estilos */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#f5f5f5; }
+        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo h1 { font-size:1.5rem; }
+        .auth-links a { color:white; text-decoration:none; margin-left:1rem; padding:0.5rem 1rem; border-radius:4px; background:#e67e22; }
+        .container { max-width:600px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color:#2c3e50; margin-bottom:1.5rem; }
+        .obra-resumen { background:#f9f9f9; padding:1rem; border-radius:8px; margin-bottom:2rem; }
+        .form-group { margin-bottom:1.2rem; }
+        label { display:block; margin-bottom:0.3rem; font-weight:600; }
+        input { width:100%; padding:0.8rem; border:1px solid #ccc; border-radius:4px; }
+        .btn-confirmar { background:#27ae60; color:white; border:none; padding:1rem; font-size:1.2rem; border-radius:4px; cursor:pointer; width:100%; }
+        .btn-confirmar:hover { background:#2ecc71; }
+        .error { color:red; margin-top:0.5rem; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1>🎨 Museo de Arte Contemporáneo</h1></div>
+        <div class="auth-links"><a href="#" onclick="logout()">Cerrar sesión</a></div>
+    </header>
+
+    <div class="container" id="container">
+        <!-- Se llenará con JS -->
+    </div>
+
+    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const obraId = urlParams.get('id');
+
+        // Verificar que el usuario es miembro
+        const user = getUser();
+        if (!user || (user.tipo !== 'miembro' && user.tipo !== 'administrador')) {
+            alert('Debes ser miembro para comprar');
+            window.location.href = 'login.html';
+        }
+
+        async function cargarObra() {
+            const res = await fetch(`${API_BASE}/obras/${obraId}`);
+            if (!res.ok) {
+                document.getElementById('container').innerHTML = '<h2>Obra no encontrada</h2>';
+                return;
+            }
+            const obra = await res.json();
+            render(obra);
+        }
+
+        function render(obra) {
+            const container = document.getElementById('container');
+            container.innerHTML = `
+                <h2>Confirmar Compra</h2>
+                <div class="obra-resumen">
+                    <p><strong>Obra:</strong> ${obra.nombre}</p>
+                    <p><strong>Artista:</strong> ${obra.artista_nombre}</p>
+                    <p><strong>Precio:</strong> $${obra.precio_venta}</p>
+                    <p><strong>Estado actual:</strong> ${obra.estado}</p>
+                </div>
+                <form id="confirmForm">
+                    <div class="form-group">
+                        <label for="codigo">Código de Seguridad</label>
+                        <input type="text" id="codigo" required placeholder="Ej: A1B2C3D4">
+                    </div>
+                    <button type="submit" class="btn-confirmar">Confirmar Reserva</button>
+                    <p class="error" id="errorMsg"></p>
+                </form>
+            `;
+            document.getElementById('confirmForm').addEventListener('submit', reservar);
+        }
+
+        async function reservar(e) {
+            e.preventDefault();
+            const codigo = document.getElementById('codigo').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            try {
+                const res = await authFetch(`${API_BASE}/ventas/reservar`, {
+                    method: 'POST',
+                    body: JSON.stringify({ obra_id: obraId, codigo_seguridad: codigo })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`Reserva exitosa. La obra ha pasado a estado RESERVADA. ID de venta: ${data.venta_id}`);
+                    window.location.href = 'index.html';
+                } else {
+                    errorMsg.innerText = 'Error: ' + data.error;
+                }
+            } catch (error) {
+                errorMsg.innerText = 'Error de conexión';
+            }
+        }
+
+        cargarObra();
+    </script>
+</body>
+</html>

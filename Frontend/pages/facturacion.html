@@ -1,0 +1,23 @@
+// Obtener todas las ventas (solo admin) con filtro opcional por estado
+const getVentas = async (req, res) => {
+    try {
+        const { estado } = req.query;
+        let query = `
+            SELECT v.*, o.nombre as obra_nombre, o.precio_venta, a.nombre as artista_nombre,
+                   u.email as comprador_email, u.nombre as comprador_nombre
+            FROM Venta v
+            JOIN Obra o ON v.obra_id = o.obra_id
+            JOIN Artista a ON o.artista_id = a.artista_id
+            JOIN Usuario u ON v.comprador_id = u.usuario_id
+        `;
+        const params = [];
+        if (estado) {
+            query += ' WHERE v.estado = ?';
+            params.push(estado);
+        }
+        const [rows] = await pool.query(query, params);
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

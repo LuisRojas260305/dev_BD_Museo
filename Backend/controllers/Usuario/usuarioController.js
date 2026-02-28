@@ -138,26 +138,29 @@ const pagarMembresia = async (req, res) => {
 };
 
 const guardarRespuestasSeguridad = async (req, res) => {
-  const { respuestas } = req.body; 
-  const usuario_id = req.usuario.usuario_id;
-  const connection = await pool.getConnection();
   try {
-    await connection.beginTransaction();
-    // Opcional: eliminar respuestas anteriores si existen
-    await connection.query('DELETE FROM RespuestaSeguridad WHERE usuario_id = ?', [usuario_id]);
+    const { respuestas } = req.body; 
+    const usuario_id = req.usuario.id; // ¡Importante! Viene del middleware verificarToken
+
+    if (!respuestas || respuestas.length < 3) {
+      return res.status(400).json({ error: 'Debes responder 3 preguntas' });
+    }
+
+    // Insertar cada respuesta
     for (const r of respuestas) {
-      await connection.query(
+      await pool.query(
         'INSERT INTO RespuestaSeguridad (usuario_id, pregunta_id, respuesta) VALUES (?, ?, ?)',
         [usuario_id, r.pregunta_id, r.respuesta]
       );
     }
-    await connection.commit();
-    res.json({ message: 'Respuestas guardadas' });
+
+    // Opcional: Actualizar el tipo de usuario a 'miembro' si no se hizo en el pago
+    await pool.query("UPDATE Usuario SET tipo = 'miembro' WHERE usuario_id = ?", [usuario_id]);
+
+    res.json({ message: 'Preguntas guardadas con éxito' });
   } catch (error) {
-    await connection.rollback();
-    res.status(500).json({ error: error.message });
-  } finally {
-    connection.release();
+    console.error(error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
@@ -195,7 +198,143 @@ const recuperarCodigo = async (req, res) => {
   }
 };
 
+// Cambiar contraseña directamente en el perfil
+const cambiarPasswordPerfil = async (req, res) => {
+    try {
+        const { nuevaPassword } = req.body;
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(nuevaPassword, salt);
+        await pool.query('UPDATE Usuario SET password = ? WHERE usuario_id = ?', [hashedPassword, req.usuario.id]);
+        res.json({ message: 'Contraseña actualizada correctamente' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al cambiar contraseña' });
+    }
+};
+
+// Obtener las preguntas del usuario actual (Para el Perfil)
+const obtenerMisPreguntas = async (req, res) => {
+    try {
+        const query = `
+            SELECT p.pregunta_id, p.pregunta_texto 
+            FROM RespuestaSeguridad rs
+            JOIN PreguntaSeguridad p ON rs.pregunta_id = p.pregunta_id
+            WHERE rs.usuario_id = ?`;
+        const [preguntas] = await pool.query(query, [req.usuario.id]);
+        res.json(preguntas);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener preguntas' });
+    }
+};
+
+// Regenerar Código de Seguridad (Validando preguntas)
+const regenerarCodigoSeguridad = async (req, res) => {
+    try {
+        const { respuestas } = req.body;
+        const usuario_id = req.usuario.id;
+
+        for (const r of respuestas) {
+            const [row] = await pool.query(
+                'SELECT respuesta FROM RespuestaSeguridad WHERE usuario_id = ? AND pregunta_id = ?',
+                [usuario_id, r.pregunta_id]
+            );
+            if (row.length === 0 || row[0].respuesta.toLowerCase() !== r.respuesta.toLowerCase()) {
+                return res.status(401).json({ error: 'Respuestas incorrectas. No se generó el código.' });
+            }
+        }
+
+        const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
+        await pool.query('UPDATE Miembro SET codigo_seguridad = ? WHERE usuario_id = ?', [nuevoCodigo, usuario_id]);
+        res.json({ message: 'Código regenerado', codigo_seguridad: nuevoCodigo });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al regenerar código' });
+    }
+};
+
+// Cambiar preguntas de seguridad
+const actualizarPreguntasSeguridad = async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+        const { passwordActual, nuevasRespuestas } = req.body;
+        const usuario_id = req.usuario.id;
+
+        const [user] = await connection.query('SELECT password FROM Usuario WHERE usuario_id = ?', [usuario_id]);
+        const valid = await bcrypt.compare(passwordActual, user[0].password);
+        if (!valid) throw new Error('Contraseña actual incorrecta');
+
+        await connection.query('DELETE FROM RespuestaSeguridad WHERE usuario_id = ?', [usuario_id]);
+
+        for (const r of nuevasRespuestas) {
+            await connection.query(
+                'INSERT INTO RespuestaSeguridad (usuario_id, pregunta_id, respuesta) VALUES (?, ?, ?)',
+                [usuario_id, r.pregunta_id, r.respuesta]
+            );
+        }
+
+        await connection.commit();
+        res.json({ message: 'Preguntas de seguridad actualizadas' });
+    } catch (error) {
+        await connection.rollback();
+        res.status(400).json({ error: error.message });
+    } finally {
+        connection.release();
+    }
+};
+
+// Obtener preguntas por Email (Para Recuperar Password externo)
+const obtenerPreguntasUsuario = async (req, res) => {
+    try {
+        const { email } = req.params;
+        const query = `
+            SELECT p.pregunta_id, p.pregunta_texto 
+            FROM RespuestaSeguridad rs
+            JOIN PreguntaSeguridad p ON rs.pregunta_id = p.pregunta_id
+            JOIN Usuario u ON rs.usuario_id = u.usuario_id
+            WHERE u.email = ?`;
+        const [preguntas] = await pool.query(query, [email]);
+        if (preguntas.length === 0) return res.status(404).json({ error: 'Usuario no encontrado o sin preguntas configuradas' });
+        res.json(preguntas);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al buscar usuario' });
+    }
+};
+
+// Recuperar Password externo (Valida preguntas y cambia pass)
+const recuperarPasswordExterno = async (req, res) => {
+    try {
+        const { email, respuestas, nuevaPassword } = req.body;
+        const [usuarios] = await pool.query('SELECT usuario_id FROM Usuario WHERE email = ?', [email]);
+        if (usuarios.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+        
+        const usuario_id = usuarios[0].usuario_id;
+
+        for (const r of respuestas) {
+            const [row] = await pool.query(
+                'SELECT respuesta FROM RespuestaSeguridad WHERE usuario_id = ? AND pregunta_id = ?',
+                [usuario_id, r.pregunta_id]
+            );
+            if (row.length === 0 || row[0].respuesta.toLowerCase() !== r.respuesta.toLowerCase()) {
+                return res.status(401).json({ error: 'Una o más respuestas son incorrectas' });
+            }
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(nuevaPassword, salt);
+        await pool.query('UPDATE Usuario SET password = ? WHERE usuario_id = ?', [hashedPassword, usuario_id]);
+        
+        res.json({ message: 'Contraseña recuperada exitosamente' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al recuperar contraseña' });
+    }
+};
+
 module.exports = {
+  cambiarPasswordPerfil,
+  obtenerMisPreguntas,
+  regenerarCodigoSeguridad,
+  actualizarPreguntasSeguridad,
+  obtenerPreguntasUsuario,
+  recuperarPasswordExterno,
   registro,
   login,
   perfil,

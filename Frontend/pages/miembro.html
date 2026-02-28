@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Activar Membresía</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background-color: #e67e22;
+        }
+        .container {
+            max-width: 500px;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .btn-pagar {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .btn-pagar:hover {
+            background-color: #2ecc71;
+        }
+        .error {
+            color: red;
+            margin-top: 0.5rem;
+        }
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>🎨 Museo de Arte Contemporáneo</h1>
+        </div>
+        <div class="nav-links">
+            <a href="perfil.html">Volver a mi perfil</a>
+            <a href="#" onclick="logout()">Cerrar sesión</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Activar Membresía ($10)</h2>
+        <form id="membresiaForm">
+            <h3>Datos de pago</h3>
+            <div class="form-group">
+                <label for="tarjeta_numero">Número de tarjeta</label>
+                <input type="text" id="tarjeta_numero" required>
+            </div>
+            <div class="form-group">
+                <label for="tarjeta_nombre">Nombre en la tarjeta</label>
+                <input type="text" id="tarjeta_nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="tarjeta_expiracion">Fecha de expiración (MM/AA)</label>
+                <input type="text" id="tarjeta_expiracion" placeholder="MM/AA" required>
+            </div>
+
+            <h3>Preguntas de seguridad</h3>
+            <div id="preguntasContainer"></div>
+
+            <button type="submit" class="btn-pagar">Pagar membresía</button>
+            <p class="error" id="errorMsg"></p>
+        </form>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Museo de Arte Contemporáneo</p>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        async function cargarPreguntas() {
+            try {
+                const response = await fetch(`${API_BASE}/preguntas-seguridad`);
+                const preguntas = await response.json();
+                const container = document.getElementById('preguntasContainer');
+                for (let i = 1; i <= 3; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'form-group';
+                    div.innerHTML = `
+                        <label>Pregunta ${i}</label>
+                        <select id="pregunta${i}" required>
+                            ${preguntas.map(p => `<option value="${p.pregunta_id}">${p.pregunta_texto}</option>`).join('')}
+                        </select>
+                        <label>Respuesta ${i}</label>
+                        <input type="text" id="respuesta${i}" required>
+                    `;
+                    container.appendChild(div);
+                }
+            } catch (error) {
+                document.getElementById('errorMsg').innerText = 'Error al cargar preguntas';
+            }
+        }
+
+        document.getElementById('membresiaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.innerText = '';
+
+            // Datos de membresía
+            const membresiaData = {
+                tarjeta_numero: document.getElementById('tarjeta_numero').value,
+                tarjeta_nombre: document.getElementById('tarjeta_nombre').value,
+                tarjeta_expiracion: document.getElementById('tarjeta_expiracion').value
+            };
+
+            // Primero pagar membresía
+            const resMembresia = await authFetch(`${API_BASE}/usuarios/membresia`, {
+                method: 'POST',
+                body: JSON.stringify(membresiaData)
+            });
+            const dataMembresia = await resMembresia.json();
+            if (!resMembresia.ok) {
+                errorMsg.innerText = 'Error al pagar membresía: ' + dataMembresia.error;
+                return;
+            }
+            const codigoSeguridad = dataMembresia.codigo_seguridad;
+
+            // Guardar respuestas
+            const respuestas = [];
+            for (let i = 1; i <= 3; i++) {
+                respuestas.push({
+                    pregunta_id: document.getElementById(`pregunta${i}`).value,
+                    respuesta: document.getElementById(`respuesta${i}`).value
+                });
+            }
+            const resSeguridad = await authFetch(`${API_BASE}/usuarios/seguridad`, {
+                method: 'POST',
+                body: JSON.stringify({ respuestas })
+            });
+            if (resSeguridad.ok) {
+                alert(`Membresía activada. Tu código de seguridad es: ${codigoSeguridad}. Guárdalo bien.`);
+                window.location.href = 'perfil.html';
+            } else {
+                const err = await resSeguridad.json();
+                errorMsg.innerText = 'Error al guardar preguntas: ' + err.error;
+            }
+        });
+
+        cargarPreguntas();
+    </script>
+</body>
+</html>

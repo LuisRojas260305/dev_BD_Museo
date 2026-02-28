@@ -6,5 +6,6 @@ const { verificarToken, verificarMiembro, verificarAdmin } = require('../../midd
 router.post('/reservar', verificarToken, verificarMiembro, ventaController.reservarObra);
 router.put('/:id/concretar', verificarToken, verificarAdmin, ventaController.concretarVenta);
 router.put('/:id/cancelar', verificarToken, verificarAdmin, ventaController.cancelarVenta);
+router.get('/', verificarToken, verificarAdmin, ventaController.getVentas);
 
 module.exports = router;

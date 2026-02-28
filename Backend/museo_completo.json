@@ -45,17 +45,6 @@
             "comentario": "Arte surrealista"
         },
         {
-            "artista_id": 3,
-            "nombre": "Artista Test",
-            "apellido": "Apellido Test",
-            "biografia": "Biografía de prueba",
-            "fecha_nacimiento": "1980-01-01",
-            "nacionalidad_id": 1,
-            "foto_url": "test.jpg",
-            "porcentaje_ganancia": 7.5,
-            "comentario": "Comentario"
-        },
-        {
             "artista_id": 4,
             "nombre": "Artista Test",
             "apellido": "Apellido Test",
@@ -103,16 +92,6 @@
         {
             "artista_id": 2,
             "genero_id": 1,
-            "comentario": null
-        },
-        {
-            "artista_id": 3,
-            "genero_id": 1,
-            "comentario": null
-        },
-        {
-            "artista_id": 3,
-            "genero_id": 2,
             "comentario": null
         },
         {
@@ -300,6 +279,18 @@
             "ganancia_museo": 75.0,
             "total": 1000.0,
             "direccion_envio": "Calle Falsa 123"
+        },
+        {
+            "factura_id": 3,
+            "venta_id": 3,
+            "admin_id": 1,
+            "fecha_emision": "2026-02-28 19:16:33",
+            "precio_obra": 1000000.0,
+            "iva": 160000.0,
+            "porcentaje_ganancia": 7.5,
+            "ganancia_museo": 75000.0,
+            "total": 1000000.0,
+            "direccion_envio": "San felix"
         }
     ],
     "fotografia": [],
@@ -437,6 +428,13 @@
             "fecha_pago": "2026-02-27 14:02:21",
             "monto": 10.0,
             "codigo_generado": "THRCB6K50L"
+        },
+        {
+            "membresia_id": 10,
+            "usuario_id": 14,
+            "fecha_pago": "2026-02-28 14:32:40",
+            "monto": 10.0,
+            "codigo_generado": "V8Y9Z9LALX"
         }
     ],
     "metales": [
@@ -531,6 +529,13 @@
             "tarjeta_nombre": "Test User",
             "tarjeta_expiracion": "2028-12-31",
             "codigo_seguridad": "THRCB6K50L"
+        },
+        {
+            "usuario_id": 14,
+            "tarjeta_numero": "1111 1111 1111 1111",
+            "tarjeta_nombre": "puticlub",
+            "tarjeta_expiracion": null,
+            "codigo_seguridad": "V8Y9Z9LALX"
         }
     ],
     "modelado": [
@@ -589,7 +594,7 @@
             "alto": 349.3,
             "ancho": 776.6,
             "fecha_creacion": "1937-06-01",
-            "estado": "Disponible",
+            "estado": "Vendida",
             "foto_url": "guernica.jpg",
             "descripcion": "Representación del bombardeo de Guernica",
             "comentario": null
@@ -802,6 +807,21 @@
             "usuario_id": 2,
             "pregunta_id": 3,
             "respuesta": "Pasta"
+        },
+        {
+            "usuario_id": 14,
+            "pregunta_id": 1,
+            "respuesta": "roberta"
+        },
+        {
+            "usuario_id": 14,
+            "pregunta_id": 2,
+            "respuesta": "el infierno"
+        },
+        {
+            "usuario_id": 14,
+            "pregunta_id": 3,
+            "respuesta": "pizza"
         }
     ],
     "soporte": [
@@ -1029,6 +1049,16 @@
             "tipo": "usuario",
             "fecha_registro": "2026-02-28 13:04:33",
             "comentario": null
+        },
+        {
+            "usuario_id": 14,
+            "email": "1234@gmail.com",
+            "password": "$2b$10$zgJOXvFtsYN0v80IJ88mCODcXyKsk888ZR/lJhxpfBcOnudyT4.DO",
+            "nombre": "Daniel",
+            "apellido": "Reyna",
+            "tipo": "miembro",
+            "fecha_registro": "2026-02-28 14:02:21",
+            "comentario": null
         }
     ],
     "venta": [
@@ -1046,6 +1076,14 @@
             "comprador_id": 12,
             "fecha_reserva": "2026-02-27 14:02:22",
             "fecha_venta": "2026-02-27 14:02:22",
+            "estado": "vendida"
+        },
+        {
+            "venta_id": 3,
+            "obra_id": 1,
+            "comprador_id": 14,
+            "fecha_reserva": "2026-02-28 18:26:44",
+            "fecha_venta": "2026-02-28 19:16:33",
             "estado": "vendida"
         }
     ]

@@ -67,11 +67,20 @@ app.use('/api/genero', require('./routes/Obra/genero'));
 // Usuarios
 app.use('/api/usuarios', require('./routes/Usuario/usuarios'));
 
+// Preguntas de seguridad
+app.use('/api/preguntas-seguridad', require('./routes/Usuario/preguntas'));
+
 // Obras
 app.use('/api/obras', require('./routes/Obra/obras'));
 
+// Epocas
+app.use('/api/epoca', require('./routes/Obra/epoca'));
+
 // Ventas
 app.use('/api/ventas', require('./routes/Compra/ventas'));
+
+// Upload
+app.use('/api/upload', require('./routes/Compra/upload'));
 
 // Reportes (protegidas para admin)
 app.use('/api/reportes', require('./routes/Compra/reportes'));
