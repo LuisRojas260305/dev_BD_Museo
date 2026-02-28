@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Géneros</title>
+    <style>
+        /* mismos estilos */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#ecf0f1; }
+        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .Titulo {
+            text-decoration: none;
+            color: white;
+        }
+        .logo h1 { font-size:1.5rem; }
+        .user-info { display:flex; align-items:center; gap:1rem; }
+        .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
+        .container { max-width:800px; margin:2rem auto; padding:0 2rem; }
+        h2 { color:#2c3e50; }
+        .btn { background:#3498db; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-block; margin:0.5rem 0; }
+        .btn-danger { background:#e74c3c; }
+        .btn-success { background:#27ae60; }
+        table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding:1rem; text-align:left; border-bottom:1px solid #ddd; }
+        th { background:#34495e; color:white; }
+        .form-container { background:white; padding:2rem; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:2rem; }
+        .form-group { margin-bottom:1rem; }
+        label { display:block; margin-bottom:0.3rem; font-weight:600; }
+        input { width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
+        .hidden { display:none; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1><a class="Titulo" href="index.html">🎨 Admin - Géneros</a></h1></div>
+        <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
+    </header>
+    <div class="container">
+        <h2>Gestión de Géneros</h2>
+        <button class="btn btn-success" onclick="mostrarFormulario()">Nuevo Género</button>
+        <div id="formContainer" class="form-container hidden">
+            <h3 id="formTitle">Nuevo Género</h3>
+            <form id="generoForm">
+                <input type="hidden" id="generoId">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="atributos">Atributos (separados por coma)</label>
+                    <input type="text" id="atributos" placeholder="Ej: tecnica,dimensiones,peso">
+                </div>
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-danger" onclick="cancelarFormulario()">Cancelar</button>
+            </form>
+        </div>
+        <div id="generosList">
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Atributos</th><th>Acciones</th></tr></thead>
+                <tbody id="tablaGeneros"></tbody>
+            </table>
+        </div>
+    </div>
+    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+
+    <script>
+        // Verificar admin
+        (function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (currentUser.role !== 'admin') { alert('Acceso no autorizado'); window.location.href='index.html'; }
+            document.getElementById('userEmail').innerText = currentUser.email;
+        })();
+
+        let generos = JSON.parse(localStorage.getItem('generos') || '[]');
+        if (generos.length === 0) {
+            generos = [
+                { id:1, nombre:"pintura", atributos:"tecnica,dimensiones" },
+                { id:2, nombre:"escultura", atributos:"material,peso,dimensiones" },
+                { id:3, nombre:"fotografia", atributos:"tecnica,dimensiones" },
+                { id:4, nombre:"ceramica", atributos:"tecnica,dimensiones" },
+                { id:5, nombre:"orfebreria", atributos:"material,peso" }
+            ];
+            localStorage.setItem('generos', JSON.stringify(generos));
+        }
+
+        const tbody = document.getElementById('tablaGeneros');
+        const formContainer = document.getElementById('formContainer');
+        const generoForm = document.getElementById('generoForm');
+        const formTitle = document.getElementById('formTitle');
+        let editId = null;
+
+        function cargarGeneros() {
+            tbody.innerHTML = '';
+            generos.forEach(g => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${g.id}</td>
+                    <td>${g.nombre}</td>
+                    <td>${g.atributos || ''}</td>
+                    <td>
+                        <button class="btn" onclick="editarGenero(${g.id})">Editar</button>
+                        <button class="btn btn-danger" onclick="eliminarGenero(${g.id})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function mostrarFormulario(genero = null) {
+            formContainer.classList.remove('hidden');
+            if (genero) {
+                formTitle.innerText = 'Editar Género';
+                document.getElementById('generoId').value = genero.id;
+                document.getElementById('nombre').value = genero.nombre;
+                document.getElementById('atributos').value = genero.atributos || '';
+                editId = genero.id;
+            } else {
+                formTitle.innerText = 'Nuevo Género';
+                generoForm.reset();
+                document.getElementById('generoId').value = '';
+                editId = null;
+            }
+        }
+
+        function cancelarFormulario() {
+            formContainer.classList.add('hidden');
+        }
+
+        generoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nuevoGenero = {
+                id: editId || Date.now(),
+                nombre: document.getElementById('nombre').value,
+                atributos: document.getElementById('atributos').value
+            };
+            if (editId) {
+                const index = generos.findIndex(g => g.id === editId);
+                if (index !== -1) generos[index] = nuevoGenero;
+            } else {
+                generos.push(nuevoGenero);
+            }
+            localStorage.setItem('generos', JSON.stringify(generos));
+            cargarGeneros();
+            cancelarFormulario();
+        });
+
+        window.editarGenero = function(id) {
+            const genero = generos.find(g => g.id === id);
+            if (genero) mostrarFormulario(genero);
+        };
+
+        window.eliminarGenero = function(id) {
+            if (confirm('¿Eliminar género?')) {
+                generos = generos.filter(g => g.id !== id);
+                localStorage.setItem('generos', JSON.stringify(generos));
+                cargarGeneros();
+            }
+        };
+
+        window.logout = function() { localStorage.removeItem('loggedIn'); localStorage.removeItem('currentUser'); window.location.href='index.html'; };
+
+        cargarGeneros();
+    </script>
+</body>
+</html>

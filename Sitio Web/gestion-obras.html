@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - Obras</title>
+    <style>
+        /* Estilos generales (similares a admin-dashboard) */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#ecf0f1; }
+        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .Titulo {
+            text-decoration: none;
+            color: white;
+        }
+        .logo h1 { font-size:1.5rem; }
+        .user-info { display:flex; align-items:center; gap:1rem; }
+        .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
+        .container { max-width:1200px; margin:2rem auto; padding:0 2rem; }
+        h2 { color:#2c3e50; margin-bottom:1rem; }
+        .btn { background:#3498db; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; display:inline-block; margin:0.5rem 0; }
+        .btn-danger { background:#e74c3c; }
+        .btn-success { background:#27ae60; }
+        table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding:1rem; text-align:left; border-bottom:1px solid #ddd; }
+        th { background:#34495e; color:white; }
+        .form-container { background:white; padding:2rem; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:2rem; }
+        .form-group { margin-bottom:1rem; }
+        label { display:block; margin-bottom:0.3rem; font-weight:600; }
+        input, select, textarea { width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
+        .hidden { display:none; }
+        .preview-image { max-width:100px; max-height:100px; margin-top:0.5rem; border:1px solid #ddd; border-radius:4px; }
+        .thumbnail { width:50px; height:50px; object-fit:cover; border-radius:4px; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1><a class="Titulo" href="index.html">🎨 Admin - Obras</a></h1></div>
+        <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
+    </header>
+    <div class="container">
+        <h2>Gestión de Obras</h2>
+        <button class="btn btn-success" onclick="mostrarFormulario()">Nueva Obra</button>
+        <div id="formContainer" class="form-container hidden">
+            <h3 id="formTitle">Nueva Obra</h3>
+            <form id="obraForm">
+                <input type="hidden" id="obraId">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="artista">Artista</label>
+                    <select id="artista" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="genero">Género</label>
+                    <select id="genero" required onchange="cambiarCamposPorGenero()">
+                        <option value="">Seleccione</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="precio">Precio (USD)</label>
+                    <input type="number" id="precio" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="fechaCreacion">Fecha de creación</label>
+                    <input type="text" id="fechaCreacion" placeholder="Ej: 1889" required>
+                </div>
+                <div class="form-group">
+                    <label for="imagen">Imagen de la obra</label>
+                    <input type="file" id="imagenFile" accept="image/*" onchange="previewImagen(event)">
+                    <input type="hidden" id="imagenBase64">
+                    <div id="previewContainer"></div>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" rows="3"></textarea>
+                </div>
+                <div id="camposDinamicos"></div>
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-danger" onclick="cancelarFormulario()">Cancelar</button>
+            </form>
+        </div>
+        <div id="obrasList">
+            <table>
+                <thead><tr><th>ID</th><th>Imagen</th><th>Nombre</th><th>Artista</th><th>Género</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody id="tablaObras"></tbody>
+            </table>
+        </div>
+    </div>
+    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+
+    <script>
+        // Verificar admin
+        (function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (currentUser.role !== 'admin') {
+                alert('Acceso no autorizado');
+                window.location.href = 'index.html';
+            }
+            document.getElementById('userEmail').innerText = currentUser.email || 'Admin';
+        })();
+
+        // Datos simulados (inicializar si no existen)
+        let obras = JSON.parse(localStorage.getItem('obras') || '[]');
+        let artistas = JSON.parse(localStorage.getItem('artistas') || '[]');
+        let generos = JSON.parse(localStorage.getItem('generos') || '[]');
+
+        // Si no hay datos, crear ejemplos (con imágenes Base64 de ejemplo, usaremos URLs externas como fallback)
+        if (obras.length === 0) {
+            obras = [
+                { id: 1, nombre: "El Grito", artista: "Edvard Munch", genero: "pintura", precio: 12000, fechaCreacion: "1893", imagen: "https://picsum.photos/id/1015/300/200", descripcion: "Obra expresionista", caracteristicas: { tecnica: "Óleo" }, status: "Disponible" },
+                { id: 2, nombre: "David", artista: "Miguel Ángel", genero: "escultura", precio: 25000, fechaCreacion: "1504", imagen: "https://picsum.photos/id/1043/300/200", descripcion: "Escultura renacentista", caracteristicas: { material: "Mármol", peso: "5500 kg" }, status: "Disponible" }
+            ];
+            localStorage.setItem('obras', JSON.stringify(obras));
+        }
+        if (artistas.length === 0) {
+            artistas = [
+                { id: 1, nombre: "Edvard Munch", nacionalidad: "Noruega", fechaNacimiento: "1863", biografia: "...", foto: "https://picsum.photos/id/102/200" },
+                { id: 2, nombre: "Miguel Ángel", nacionalidad: "Italiana", fechaNacimiento: "1475", biografia: "...", foto: "https://picsum.photos/id/1040/200" }
+            ];
+            localStorage.setItem('artistas', JSON.stringify(artistas));
+        }
+        if (generos.length === 0) {
+            generos = [
+                { id: 1, nombre: "pintura", atributos: "tecnica,dimensiones" },
+                { id: 2, nombre: "escultura", atributos: "material,peso,dimensiones" },
+                { id: 3, nombre: "fotografia", atributos: "tecnica,dimensiones" },
+                { id: 4, nombre: "ceramica", atributos: "tecnica,dimensiones" },
+                { id: 5, nombre: "orfebreria", atributos: "material,peso" }
+            ];
+            localStorage.setItem('generos', JSON.stringify(generos));
+        }
+
+        // Referencias
+        const tbody = document.getElementById('tablaObras');
+        const selectArtista = document.getElementById('artista');
+        const selectGenero = document.getElementById('genero');
+        const camposDinamicos = document.getElementById('camposDinamicos');
+        const formContainer = document.getElementById('formContainer');
+        const obraForm = document.getElementById('obraForm');
+        const formTitle = document.getElementById('formTitle');
+        const imagenFile = document.getElementById('imagenFile');
+        const imagenBase64 = document.getElementById('imagenBase64');
+        const previewContainer = document.getElementById('previewContainer');
+        let editId = null;
+
+        // Cargar artistas en select
+        function cargarArtistas() {
+            selectArtista.innerHTML = '';
+            artistas.forEach(a => {
+                const option = document.createElement('option');
+                option.value = a.nombre;
+                option.textContent = a.nombre;
+                selectArtista.appendChild(option);
+            });
+        }
+        // Cargar géneros en select
+        function cargarGeneros() {
+            selectGenero.innerHTML = '<option value="">Seleccione</option>';
+            generos.forEach(g => {
+                const option = document.createElement('option');
+                option.value = g.nombre;
+                option.textContent = g.nombre.charAt(0).toUpperCase() + g.nombre.slice(1);
+                selectGenero.appendChild(option);
+            });
+        }
+
+        function cambiarCamposPorGenero() {
+            const generoSeleccionado = selectGenero.value;
+            const genero = generos.find(g => g.nombre === generoSeleccionado);
+            camposDinamicos.innerHTML = '';
+            if (genero && genero.atributos) {
+                const atributos = genero.atributos.split(',');
+                atributos.forEach(attr => {
+                    const div = document.createElement('div');
+                    div.className = 'form-group';
+                    div.innerHTML = `
+                        <label for="attr_${attr}">${attr.charAt(0).toUpperCase() + attr.slice(1)}</label>
+                        <input type="text" id="attr_${attr}" name="attr_${attr}">
+                    `;
+                    camposDinamicos.appendChild(div);
+                });
+            }
+        }
+
+        // Vista previa de imagen
+        window.previewImagen = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagenBase64.value = e.target.result;
+                    previewContainer.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.innerHTML = '';
+                imagenBase64.value = '';
+            }
+        };
+
+        function cargarObras() {
+            tbody.innerHTML = '';
+            obras.forEach(obra => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${obra.id}</td>
+                    <td><img src="${obra.imagen}" class="thumbnail" alt="miniatura" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td>${obra.nombre}</td>
+                    <td>${obra.artista}</td>
+                    <td>${obra.genero}</td>
+                    <td>$${obra.precio.toLocaleString()}</td>
+                    <td>${obra.status || 'Disponible'}</td>
+                    <td>
+                        <button class="btn" onclick="editarObra(${obra.id})">Editar</button>
+                        <button class="btn btn-danger" onclick="eliminarObra(${obra.id})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function mostrarFormulario(obra = null) {
+            formContainer.classList.remove('hidden');
+            // Limpiar preview
+            previewContainer.innerHTML = '';
+            imagenFile.value = '';
+            imagenBase64.value = '';
+
+            if (obra) {
+                formTitle.innerText = 'Editar Obra';
+                document.getElementById('obraId').value = obra.id;
+                document.getElementById('nombre').value = obra.nombre;
+                document.getElementById('artista').value = obra.artista;
+                document.getElementById('genero').value = obra.genero;
+                document.getElementById('precio').value = obra.precio;
+                document.getElementById('fechaCreacion').value = obra.fechaCreacion;
+                document.getElementById('descripcion').value = obra.descripcion || '';
+                // Mostrar imagen actual como preview
+                if (obra.imagen) {
+                    previewContainer.innerHTML = `<img src="${obra.imagen}" class="preview-image">`;
+                    imagenBase64.value = obra.imagen; // mantener el valor original
+                }
+                // Cargar campos dinámicos
+                cambiarCamposPorGenero();
+                if (obra.caracteristicas) {
+                    for (let key in obra.caracteristicas) {
+                        const input = document.getElementById(`attr_${key}`);
+                        if (input) input.value = obra.caracteristicas[key];
+                    }
+                }
+                editId = obra.id;
+            } else {
+                formTitle.innerText = 'Nueva Obra';
+                obraForm.reset();
+                document.getElementById('obraId').value = '';
+                camposDinamicos.innerHTML = '';
+                editId = null;
+            }
+        }
+
+        function cancelarFormulario() {
+            formContainer.classList.add('hidden');
+        }
+
+        obraForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Si no se ha seleccionado nueva imagen, mantener la anterior (si existe)
+            let imagen = imagenBase64.value;
+            if (!imagen) {
+                // Si es edición y no se subió nueva, se mantiene la que ya estaba (ya está en imagenBase64.value)
+                // Pero si es nueva obra y no hay imagen, asignar una por defecto
+                if (!editId) {
+                    imagen = 'https://via.placeholder.com/300x200?text=Sin+imagen';
+                }
+            }
+
+            const nuevaObra = {
+                id: editId || Date.now(),
+                nombre: document.getElementById('nombre').value,
+                artista: document.getElementById('artista').value,
+                genero: document.getElementById('genero').value,
+                precio: parseFloat(document.getElementById('precio').value),
+                fechaCreacion: document.getElementById('fechaCreacion').value,
+                imagen: imagen,
+                descripcion: document.getElementById('descripcion').value,
+                status: 'Disponible',
+                caracteristicas: {}
+            };
+            // Recoger campos dinámicos
+            const inputs = camposDinamicos.querySelectorAll('input');
+            inputs.forEach(input => {
+                const key = input.id.replace('attr_', '');
+                nuevaObra.caracteristicas[key] = input.value;
+            });
+
+            if (editId) {
+                const index = obras.findIndex(o => o.id === editId);
+                if (index !== -1) {
+                    obras[index] = { ...obras[index], ...nuevaObra, id: editId };
+                }
+            } else {
+                obras.push(nuevaObra);
+            }
+            localStorage.setItem('obras', JSON.stringify(obras));
+            cargarObras();
+            cancelarFormulario();
+        });
+
+        window.editarObra = function(id) {
+            const obra = obras.find(o => o.id === id);
+            if (obra) mostrarFormulario(obra);
+        };
+
+        window.eliminarObra = function(id) {
+            if (confirm('¿Eliminar obra?')) {
+                obras = obras.filter(o => o.id !== id);
+                localStorage.setItem('obras', JSON.stringify(obras));
+                cargarObras();
+            }
+        };
+
+        window.logout = function() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        };
+
+        // Inicializar
+        cargarArtistas();
+        cargarGeneros();
+        cargarObras();
+    </script>
+</body>
+</html>
