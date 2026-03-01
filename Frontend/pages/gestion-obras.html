@@ -27,6 +27,8 @@
         .preview-image { max-width:200px; max-height:200px; margin-top:0.5rem; border:1px solid #ddd; border-radius:4px; }
         footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
         .readonly-input { background-color:#f5f5f5; cursor:not-allowed; }
+        .checkbox-group { max-height:200px; overflow-y:auto; border:1px solid #ccc; padding:0.5rem; border-radius:4px; }
+        .checkbox-group div { margin-bottom:0.3rem; }
     </style>
 </head>
 <body>
@@ -224,15 +226,45 @@
                             <select id="soporte_id" required></select>
                         </div>
                         <div class="form-group">
-                            <label for="estilos">Estilos (IDs separados por coma)</label>
-                            <input type="text" id="estilos" placeholder="Ej: 1,2,3">
+                            <label>Estilos</label>
+                            <div id="estilosCheckbox" class="checkbox-group"></div>
                         </div>
                         <div class="form-group">
-                            <label for="tematicas">Temáticas (IDs separados por coma)</label>
-                            <input type="text" id="tematicas" placeholder="Ej: 1,2,3">
+                            <label>Temáticas</label>
+                            <div id="tematicasCheckbox" class="checkbox-group"></div>
                         </div>
                     `;
                     llenarSelect('soporte_id', catalogos.soporte, 'soporte_id', 'nombre');
+                    // Generar checkboxes para estilos
+                    const estilosDiv = document.getElementById('estilosCheckbox');
+                    catalogos.estilo.forEach(e => {
+                        const div = document.createElement('div');
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.value = e.estilo_id;
+                        cb.id = `estilo_${e.estilo_id}`;
+                        const label = document.createElement('label');
+                        label.htmlFor = `estilo_${e.estilo_id}`;
+                        label.textContent = e.nombre;
+                        div.appendChild(cb);
+                        div.appendChild(label);
+                        estilosDiv.appendChild(div);
+                    });
+                    // Generar checkboxes para temáticas
+                    const tematicasDiv = document.getElementById('tematicasCheckbox');
+                    catalogos.tematica.forEach(t => {
+                        const div = document.createElement('div');
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.value = t.tematica_id;
+                        cb.id = `tematica_${t.tematica_id}`;
+                        const label = document.createElement('label');
+                        label.htmlFor = `tematica_${t.tematica_id}`;
+                        label.textContent = t.nombre;
+                        div.appendChild(cb);
+                        div.appendChild(label);
+                        tematicasDiv.appendChild(div);
+                    });
                     break;
                 case '2': // Escultura
                     contenedor.innerHTML = `
@@ -250,15 +282,45 @@
                             <input type="number" id="profundidad" step="0.01" value="0">
                         </div>
                         <div class="form-group">
-                            <label for="materiales">Materiales (IDs separados por coma)</label>
-                            <input type="text" id="materiales" placeholder="Ej: 1,2,3">
+                            <label>Materiales</label>
+                            <div id="materialesCheckbox" class="checkbox-group"></div>
                         </div>
                         <div class="form-group">
-                            <label for="tecnicas">Técnicas (IDs separados por coma)</label>
-                            <input type="text" id="tecnicas" placeholder="Ej: 1,2,3">
+                            <label>Técnicas</label>
+                            <div id="tecnicasCheckbox" class="checkbox-group"></div>
                         </div>
                     `;
                     llenarSelect('tipo_id', catalogos.tipoEscultura, 'tipo_id', 'nombre');
+                    // Materiales
+                    const materialesDiv = document.getElementById('materialesCheckbox');
+                    catalogos.material.forEach(m => {
+                        const div = document.createElement('div');
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.value = m.material_id;
+                        cb.id = `material_${m.material_id}`;
+                        const label = document.createElement('label');
+                        label.htmlFor = `material_${m.material_id}`;
+                        label.textContent = m.nombre;
+                        div.appendChild(cb);
+                        div.appendChild(label);
+                        materialesDiv.appendChild(div);
+                    });
+                    // Técnicas
+                    const tecnicasDiv = document.getElementById('tecnicasCheckbox');
+                    catalogos.tecnicaEscultura.forEach(t => {
+                        const div = document.createElement('div');
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.value = t.tecnica_id;
+                        cb.id = `tecnica_${t.tecnica_id}`;
+                        const label = document.createElement('label');
+                        label.htmlFor = `tecnica_${t.tecnica_id}`;
+                        label.textContent = t.nombre;
+                        div.appendChild(cb);
+                        div.appendChild(label);
+                        tecnicasDiv.appendChild(div);
+                    });
                     break;
                 case '3': // Fotografía
                     contenedor.innerHTML = `
@@ -365,12 +427,27 @@
                             <select id="metal_predominante_id" required></select>
                         </div>
                         <div class="form-group">
-                            <label for="otros_metales">Otros Metales (IDs separados por coma)</label>
-                            <input type="text" id="otros_metales" placeholder="Ej: 1,2,3">
+                            <label>Otros Metales</label>
+                            <div id="otrosMetalesCheckbox" class="checkbox-group"></div>
                         </div>
                     `;
                     llenarSelect('pieza_id', catalogos.piezaOrfebreria, 'pieza_id', 'nombre');
                     llenarSelect('metal_predominante_id', catalogos.metales, 'metal_id', 'nombre');
+                    // Otros metales
+                    const otrosDiv = document.getElementById('otrosMetalesCheckbox');
+                    catalogos.metales.forEach(m => {
+                        const div = document.createElement('div');
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.value = m.metal_id;
+                        cb.id = `otroMetal_${m.metal_id}`;
+                        const label = document.createElement('label');
+                        label.htmlFor = `otroMetal_${m.metal_id}`;
+                        label.textContent = m.nombre;
+                        div.appendChild(cb);
+                        div.appendChild(label);
+                        otrosDiv.appendChild(div);
+                    });
                     break;
             }
         }
@@ -447,8 +524,7 @@
                 // Cargar campos específicos según género
                 cargarCamposPorGenero();
 
-                // Rellenar campos específicos (simplificado, no se implementa la edición completa)
-                // En una versión real, se deberían mapear los datos de obra.detalles a los campos.
+                // Rellenar checkboxes si hay detalles (simplificado, no se implementa la edición completa)
                 alert('La edición de obras no está completamente implementada. Se cargarán solo los datos básicos.');
 
                 document.getElementById('formTitle').innerText = 'Editar Obra';
@@ -499,18 +575,34 @@
             switch (generoId) {
                 case '1': // Pintura
                     formData.append('soporte_id', document.getElementById('soporte_id').value);
-                    const estilos = document.getElementById('estilos').value.split(',').map(s => parseInt(s.trim())).filter(Boolean);
-                    const tematicas = document.getElementById('tematicas').value.split(',').map(t => parseInt(t.trim())).filter(Boolean);
+                    // Recoger estilos seleccionados
+                    const estilos = [];
+                    document.querySelectorAll('#estilosCheckbox input[type=checkbox]:checked').forEach(cb => {
+                        estilos.push(parseInt(cb.value));
+                    });
                     formData.append('estilos', JSON.stringify(estilos));
+                    // Recoger temáticas seleccionadas
+                    const tematicas = [];
+                    document.querySelectorAll('#tematicasCheckbox input[type=checkbox]:checked').forEach(cb => {
+                        tematicas.push(parseInt(cb.value));
+                    });
                     formData.append('tematicas', JSON.stringify(tematicas));
                     break;
                 case '2': // Escultura
                     formData.append('tipo_id', document.getElementById('tipo_id').value);
                     formData.append('peso', document.getElementById('peso').value);
                     formData.append('profundidad', document.getElementById('profundidad').value);
-                    const materiales = document.getElementById('materiales').value.split(',').map(m => parseInt(m.trim())).filter(Boolean);
-                    const tecnicas = document.getElementById('tecnicas').value.split(',').map(t => parseInt(t.trim())).filter(Boolean);
+                    // Materiales seleccionados
+                    const materiales = [];
+                    document.querySelectorAll('#materialesCheckbox input[type=checkbox]:checked').forEach(cb => {
+                        materiales.push(parseInt(cb.value));
+                    });
                     formData.append('materiales', JSON.stringify(materiales));
+                    // Técnicas seleccionadas
+                    const tecnicas = [];
+                    document.querySelectorAll('#tecnicasCheckbox input[type=checkbox]:checked').forEach(cb => {
+                        tecnicas.push(parseInt(cb.value));
+                    });
                     formData.append('tecnicas', JSON.stringify(tecnicas));
                     break;
                 case '3': // Fotografía
@@ -539,7 +631,11 @@
                     formData.append('peso', document.getElementById('peso_orfebreria').value);
                     formData.append('pieza_id', document.getElementById('pieza_id').value);
                     formData.append('metal_predominante_id', document.getElementById('metal_predominante_id').value);
-                    const otrosMetales = document.getElementById('otros_metales').value.split(',').map(m => parseInt(m.trim())).filter(Boolean);
+                    // Otros metales seleccionados
+                    const otrosMetales = [];
+                    document.querySelectorAll('#otrosMetalesCheckbox input[type=checkbox]:checked').forEach(cb => {
+                        otrosMetales.push(parseInt(cb.value));
+                    });
                     formData.append('otros_metales', JSON.stringify(otrosMetales));
                     break;
             }
