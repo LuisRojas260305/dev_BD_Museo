@@ -43,39 +43,6 @@
             "foto_url": "frida.jpg",
             "porcentaje_ganancia": 8.0,
             "comentario": "Arte surrealista"
-        },
-        {
-            "artista_id": 4,
-            "nombre": "Artista Test",
-            "apellido": "Apellido Test",
-            "biografia": "Biografía de prueba",
-            "fecha_nacimiento": "1980-01-01",
-            "nacionalidad_id": 1,
-            "foto_url": "test.jpg",
-            "porcentaje_ganancia": 7.5,
-            "comentario": "Comentario"
-        },
-        {
-            "artista_id": 5,
-            "nombre": "Artista Test",
-            "apellido": "Apellido Test",
-            "biografia": "Biografía de prueba",
-            "fecha_nacimiento": "1980-01-01",
-            "nacionalidad_id": 1,
-            "foto_url": "test.jpg",
-            "porcentaje_ganancia": 7.5,
-            "comentario": "Comentario"
-        },
-        {
-            "artista_id": 6,
-            "nombre": "Artista Test",
-            "apellido": "Apellido Test",
-            "biografia": "Biografía de prueba",
-            "fecha_nacimiento": "1980-01-01",
-            "nacionalidad_id": 1,
-            "foto_url": "test.jpg",
-            "porcentaje_ganancia": 7.5,
-            "comentario": "Comentario"
         }
     ],
     "artista_genero": [
@@ -92,36 +59,6 @@
         {
             "artista_id": 2,
             "genero_id": 1,
-            "comentario": null
-        },
-        {
-            "artista_id": 4,
-            "genero_id": 1,
-            "comentario": null
-        },
-        {
-            "artista_id": 4,
-            "genero_id": 2,
-            "comentario": null
-        },
-        {
-            "artista_id": 5,
-            "genero_id": 1,
-            "comentario": null
-        },
-        {
-            "artista_id": 5,
-            "genero_id": 2,
-            "comentario": null
-        },
-        {
-            "artista_id": 6,
-            "genero_id": 1,
-            "comentario": null
-        },
-        {
-            "artista_id": 6,
-            "genero_id": 2,
             "comentario": null
         }
     ],
@@ -255,44 +192,7 @@
             "comentario": "Mundo onírico"
         }
     ],
-    "factura": [
-        {
-            "factura_id": 1,
-            "venta_id": 1,
-            "admin_id": 1,
-            "fecha_emision": "2026-02-27 14:00:35",
-            "precio_obra": 1000.0,
-            "iva": 160.0,
-            "porcentaje_ganancia": 7.5,
-            "ganancia_museo": 75.0,
-            "total": 1000.0,
-            "direccion_envio": "Calle Falsa 123"
-        },
-        {
-            "factura_id": 2,
-            "venta_id": 2,
-            "admin_id": 1,
-            "fecha_emision": "2026-02-27 14:02:22",
-            "precio_obra": 1000.0,
-            "iva": 160.0,
-            "porcentaje_ganancia": 7.5,
-            "ganancia_museo": 75.0,
-            "total": 1000.0,
-            "direccion_envio": "Calle Falsa 123"
-        },
-        {
-            "factura_id": 3,
-            "venta_id": 3,
-            "admin_id": 1,
-            "fecha_emision": "2026-02-28 19:16:33",
-            "precio_obra": 1000000.0,
-            "iva": 160000.0,
-            "porcentaje_ganancia": 7.5,
-            "ganancia_museo": 75000.0,
-            "total": 1000000.0,
-            "direccion_envio": "San felix"
-        }
-    ],
+    "factura": [],
     "fotografia": [],
     "genero": [
         {
@@ -365,78 +265,7 @@
             "comentario": "Material cerámico"
         }
     ],
-    "membresia": [
-        {
-            "membresia_id": 1,
-            "usuario_id": 4,
-            "fecha_pago": "2026-02-27 13:46:42",
-            "monto": 10.0,
-            "codigo_generado": "9MQJ0OGV8P"
-        },
-        {
-            "membresia_id": 2,
-            "usuario_id": 5,
-            "fecha_pago": "2026-02-27 13:48:17",
-            "monto": 10.0,
-            "codigo_generado": "3TNRP92EHD"
-        },
-        {
-            "membresia_id": 3,
-            "usuario_id": 6,
-            "fecha_pago": "2026-02-27 13:48:47",
-            "monto": 10.0,
-            "codigo_generado": "HDBF9TLZJE"
-        },
-        {
-            "membresia_id": 4,
-            "usuario_id": 7,
-            "fecha_pago": "2026-02-27 13:50:17",
-            "monto": 10.0,
-            "codigo_generado": "KZ4B1L58GS"
-        },
-        {
-            "membresia_id": 5,
-            "usuario_id": 8,
-            "fecha_pago": "2026-02-27 13:50:39",
-            "monto": 10.0,
-            "codigo_generado": "C2WN5FCKUJ"
-        },
-        {
-            "membresia_id": 6,
-            "usuario_id": 9,
-            "fecha_pago": "2026-02-27 13:54:04",
-            "monto": 10.0,
-            "codigo_generado": "863AOENH59"
-        },
-        {
-            "membresia_id": 7,
-            "usuario_id": 10,
-            "fecha_pago": "2026-02-27 13:57:19",
-            "monto": 10.0,
-            "codigo_generado": "FI9G89GY0T"
-        },
-        {
-            "membresia_id": 8,
-            "usuario_id": 11,
-            "fecha_pago": "2026-02-27 14:00:34",
-            "monto": 10.0,
-            "codigo_generado": "7T5OGCQYGK"
-        },
-        {
-            "membresia_id": 9,
-            "usuario_id": 12,
-            "fecha_pago": "2026-02-27 14:02:21",
-            "monto": 10.0,
-            "codigo_generado": "THRCB6K50L"
-        },
-        {
-            "membresia_id": 10,
-            "usuario_id": 14,
-            "fecha_pago": "2026-02-28 14:32:40",
-            "monto": 10.0,
-            "codigo_generado": "V8Y9Z9LALX"
-        }
-    ],
+    "membresia": [],
     "metales": [
         {
             "metal_id": 1,
@@ -466,76 +295,6 @@
             "tarjeta_nombre": "Juan Pérez",
             "tarjeta_expiracion": "2028-12-31",
             "codigo_seguridad": "ABC123XYZ"
-        },
-        {
-            "usuario_id": 4,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "9MQJ0OGV8P"
-        },
-        {
-            "usuario_id": 5,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "3TNRP92EHD"
-        },
-        {
-            "usuario_id": 6,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "HDBF9TLZJE"
-        },
-        {
-            "usuario_id": 7,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "KZ4B1L58GS"
-        },
-        {
-            "usuario_id": 8,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "C2WN5FCKUJ"
-        },
-        {
-            "usuario_id": 9,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "863AOENH59"
-        },
-        {
-            "usuario_id": 10,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "FI9G89GY0T"
-        },
-        {
-            "usuario_id": 11,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "7T5OGCQYGK"
-        },
-        {
-            "usuario_id": 12,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Test User",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "THRCB6K50L"
-        },
-        {
-            "usuario_id": 14,
-            "tarjeta_numero": "1111 1111 1111 1111",
-            "tarjeta_nombre": "puticlub",
-            "tarjeta_expiracion": null,
-            "codigo_seguridad": "V8Y9Z9LALX"
         }
     ],
     "modelado": [
@@ -594,7 +353,7 @@
             "alto": 349.3,
             "ancho": 776.6,
             "fecha_creacion": "1937-06-01",
-            "estado": "Vendida",
+            "estado": "Disponible",
             "foto_url": "guernica.jpg",
             "descripcion": "Representación del bombardeo de Guernica",
             "comentario": null
@@ -613,54 +372,6 @@
             "estado": "Disponible",
             "foto_url": "pensador.jpg",
             "descripcion": "Escultura de bronce",
-            "comentario": null
-        },
-        {
-            "obra_id": 3,
-            "nombre": "Obra Test",
-            "codigo_inventario": "PIN-39184",
-            "artista_id": 4,
-            "genero_id": 1,
-            "epoca_id": 1,
-            "precio_venta": 1000.0,
-            "alto": 100.0,
-            "ancho": 80.0,
-            "fecha_creacion": "2023-01-01",
-            "estado": "Disponible",
-            "foto_url": "obra.jpg",
-            "descripcion": "Descripción",
-            "comentario": null
-        },
-        {
-            "obra_id": 4,
-            "nombre": "Obra Test",
-            "codigo_inventario": "PIN-35027",
-            "artista_id": 5,
-            "genero_id": 1,
-            "epoca_id": 1,
-            "precio_venta": 1000.0,
-            "alto": 100.0,
-            "ancho": 80.0,
-            "fecha_creacion": "2023-01-01",
-            "estado": "Vendida",
-            "foto_url": "obra.jpg",
-            "descripcion": "Descripción",
-            "comentario": null
-        },
-        {
-            "obra_id": 5,
-            "nombre": "Obra Test",
-            "codigo_inventario": "PIN-41892",
-            "artista_id": 6,
-            "genero_id": 1,
-            "epoca_id": 1,
-            "precio_venta": 1000.0,
-            "alto": 100.0,
-            "ancho": 80.0,
-            "fecha_creacion": "2023-01-01",
-            "estado": "Vendida",
-            "foto_url": "obra.jpg",
-            "descripcion": "Descripción",
             "comentario": null
         }
     ],
@@ -692,18 +403,6 @@
         {
             "obra_id": 1,
             "soporte_id": 1
-        },
-        {
-            "obra_id": 3,
-            "soporte_id": 1
-        },
-        {
-            "obra_id": 4,
-            "soporte_id": 1
-        },
-        {
-            "obra_id": 5,
-            "soporte_id": 1
         }
     ],
     "pintura_estilo": [
@@ -716,57 +415,12 @@
             "obra_id": 1,
             "estilo_id": 2,
             "comentario": null
-        },
-        {
-            "obra_id": 3,
-            "estilo_id": 1,
-            "comentario": null
-        },
-        {
-            "obra_id": 3,
-            "estilo_id": 2,
-            "comentario": null
-        },
-        {
-            "obra_id": 4,
-            "estilo_id": 1,
-            "comentario": null
-        },
-        {
-            "obra_id": 4,
-            "estilo_id": 2,
-            "comentario": null
-        },
-        {
-            "obra_id": 5,
-            "estilo_id": 1,
-            "comentario": null
-        },
-        {
-            "obra_id": 5,
-            "estilo_id": 2,
-            "comentario": null
         }
     ],
     "pintura_tematica": [
         {
             "obra_id": 1,
             "tematica_id": 3,
-            "comentario": null
-        },
-        {
-            "obra_id": 3,
-            "tematica_id": 1,
-            "comentario": null
-        },
-        {
-            "obra_id": 4,
-            "tematica_id": 1,
-            "comentario": null
-        },
-        {
-            "obra_id": 5,
-            "tematica_id": 1,
             "comentario": null
         }
     ],
@@ -807,21 +461,6 @@
             "usuario_id": 2,
             "pregunta_id": 3,
             "respuesta": "Pasta"
-        },
-        {
-            "usuario_id": 14,
-            "pregunta_id": 1,
-            "respuesta": "roberta"
-        },
-        {
-            "usuario_id": 14,
-            "pregunta_id": 2,
-            "respuesta": "el infierno"
-        },
-        {
-            "usuario_id": 14,
-            "pregunta_id": 3,
-            "respuesta": "pizza"
         }
     ],
     "soporte": [
@@ -923,11 +562,11 @@
         {
             "usuario_id": 1,
             "email": "admin@museo.com",
-            "password": "$2b$10$2XYe56hm9tPsNatuhczmleUsPCQNMyzAA9wV09zZJKKfuNGwZmuQC",
+            "password": "$2b$10$3lOo2xZVfVv0I7qYxY5x9eB8X9X9X9X9X9X9X9X9X9X9X9X9X9",
             "nombre": "Admin",
             "apellido": "Principal",
             "tipo": "administrador",
-            "fecha_registro": "2026-02-27 13:16:39",
+            "fecha_registro": "2026-03-01 17:05:36",
             "comentario": "Administrador del sistema"
         },
         {
@@ -937,7 +576,7 @@
             "nombre": "Juan",
             "apellido": "Pérez",
             "tipo": "miembro",
-            "fecha_registro": "2026-02-27 13:16:41",
+            "fecha_registro": "2026-03-01 17:05:38",
             "comentario": "Miembro activo"
         },
         {
@@ -947,144 +586,9 @@
             "nombre": "María",
             "apellido": "Gómez",
             "tipo": "usuario",
-            "fecha_registro": "2026-02-27 13:16:42",
+            "fecha_registro": "2026-03-01 17:05:42",
             "comentario": "Usuario registrado sin membresía"
-        },
-        {
-            "usuario_id": 4,
-            "email": "test1772214401513@example.com",
-            "password": "$2b$10$22lGkzTzrB3ILwk./5ALMO0c/mfzBxkCvj2qWf/DISoDGzbtvPOuG",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 13:46:41",
-            "comentario": null
-        },
-        {
-            "usuario_id": 5,
-            "email": "test1772214497566@example.com",
-            "password": "$2b$10$8NINUC6S/X7eFJlQ1ilOVeXjn6OobX/L.6o2nOKtur3OaK6CqTgtO",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 13:48:17",
-            "comentario": null
-        },
-        {
-            "usuario_id": 6,
-            "email": "test1772214527194@example.com",
-            "password": "$2b$10$FPl/sEIRaKZTWVLs5rEwYOE5qmWIjLz01Wie1r2urpSw89N5ikkgS",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 13:48:47",
-            "comentario": null
-        },
-        {
-            "usuario_id": 7,
-            "email": "test1772214617495@example.com",
-            "password": "$2b$10$Tvv7bH2hFsWFr.1lvX9MgewbiUuCdFzl8crDYgmaTVU3Wu4/dk8HW",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 13:50:17",
-            "comentario": null
-        },
-        {
-            "usuario_id": 8,
-            "email": "test1772214639352@example.com",
-            "password": "$2b$10$ZjdCJ9kXKJDzPMQvf3463ui3JD3z85jkbEV05THLBVE3wL723XWom",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 13:50:39",
-            "comentario": null
-        },
-        {
-            "usuario_id": 9,
-            "email": "test1772214843911@example.com",
-            "password": "$2b$10$B6zqCj3VDIUpdsXs7YAu0u3WF0BJBxvbgOgY/3U6tjcowN5OJhQ82",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 13:54:04",
-            "comentario": null
-        },
-        {
-            "usuario_id": 10,
-            "email": "test1772215038704@example.com",
-            "password": "$2b$10$o3UL5nZezpWVXNBwtPA4a.0KOlQDAstGKaxlpoCXH2zYbQrAIRSbi",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 13:57:18",
-            "comentario": null
-        },
-        {
-            "usuario_id": 11,
-            "email": "test1772215233768@example.com",
-            "password": "$2b$10$oP4vW8LUNPPbJZURky.nK.xq8caYjqRQq0Bsj8V0iq4c.42XEVxii",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 14:00:33",
-            "comentario": null
-        },
-        {
-            "usuario_id": 12,
-            "email": "test1772215341313@example.com",
-            "password": "$2b$10$QvugXhA97mQ64KZVdAxaguhnezNXc4UPhTZIqWXf.BPpuuTYJxTR6",
-            "nombre": "Test User",
-            "apellido": "Apellido",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-27 14:02:21",
-            "comentario": null
-        },
-        {
-            "usuario_id": 13,
-            "email": "luisalexanderrojasguevara@gmail.com",
-            "password": "$2b$10$HthTaZK9chnvONj.F6jjKeZ56Hotd1ek.J5v5ZCTbbIbgJ8ESDh1q",
-            "nombre": "Luis",
-            "apellido": "Rojas",
-            "tipo": "usuario",
-            "fecha_registro": "2026-02-28 13:04:33",
-            "comentario": null
-        },
-        {
-            "usuario_id": 14,
-            "email": "1234@gmail.com",
-            "password": "$2b$10$zgJOXvFtsYN0v80IJ88mCODcXyKsk888ZR/lJhxpfBcOnudyT4.DO",
-            "nombre": "Daniel",
-            "apellido": "Reyna",
-            "tipo": "miembro",
-            "fecha_registro": "2026-02-28 14:02:21",
-            "comentario": null
         }
     ],
-    "venta": [
-        {
-            "venta_id": 1,
-            "obra_id": 4,
-            "comprador_id": 11,
-            "fecha_reserva": "2026-02-27 14:00:35",
-            "fecha_venta": "2026-02-27 14:00:35",
-            "estado": "vendida"
-        },
-        {
-            "venta_id": 2,
-            "obra_id": 5,
-            "comprador_id": 12,
-            "fecha_reserva": "2026-02-27 14:02:22",
-            "fecha_venta": "2026-02-27 14:02:22",
-            "estado": "vendida"
-        },
-        {
-            "venta_id": 3,
-            "obra_id": 1,
-            "comprador_id": 14,
-            "fecha_reserva": "2026-02-28 18:26:44",
-            "fecha_venta": "2026-02-28 19:16:33",
-            "estado": "vendida"
-        }
-    ]
+    "venta": []
 }

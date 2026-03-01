@@ -1,6 +1,6 @@
 const { pool } = require('../../config/database');
 
-// Obtener todos los artistas (con géneros incluidos)
+// Obtener todos los artistas (con géneros en cadena separada por comas)
 const getAllArtistas = async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -18,22 +18,30 @@ const getAllArtistas = async (req, res) => {
   }
 };
 
-// Obtener un artista por ID (con géneros)
+// Obtener un artista por ID (con géneros en array)
 const getArtistaById = async (req, res) => {
   try {
     const { id } = req.params;
     const [rows] = await pool.query(`
-      SELECT a.*, n.nombre as nacionalidad_nombre,
-             (SELECT GROUP_CONCAT(g.nombre) 
-              FROM Artista_Genero ag 
-              JOIN Genero g ON ag.genero_id = g.genero_id 
-              WHERE ag.artista_id = a.artista_id) as generos
+      SELECT a.*, n.nombre as nacionalidad_nombre
       FROM Artista a
       JOIN Nacionalidad n ON a.nacionalidad_id = n.nacionalidad_id
       WHERE a.artista_id = ?
     `, [id]);
     if (rows.length === 0) return res.status(404).json({ error: 'Artista no encontrado' });
-    res.json(rows[0]);
+
+    const artista = rows[0];
+
+    // Obtener géneros del artista como array de objetos
+    const [generos] = await pool.query(`
+      SELECT g.genero_id, g.nombre
+      FROM Artista_Genero ag
+      JOIN Genero g ON ag.genero_id = g.genero_id
+      WHERE ag.artista_id = ?
+    `, [id]);
+
+    artista.generos = generos; // array de objetos
+    res.json(artista);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
