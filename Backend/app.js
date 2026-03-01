@@ -7,7 +7,22 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middlewares
-app.use(cors());
+// 1. Borra app.use(cors()) y app.options(...)
+// 2. Pega este bloque justo después de "const app = express();"
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+    
+    // Si la petición es OPTIONS (el navegador preguntando permisos), respondemos de una vez
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
+
 app.use(express.json());
 
 // Rutas Tablas artistas
