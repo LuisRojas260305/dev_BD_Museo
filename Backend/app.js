@@ -7,45 +7,31 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middlewares
-// 1. Borra app.use(cors()) y app.options(...)
-// 2. Pega este bloque justo después de "const app = express();"
-
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
     
-    // Si la petición es OPTIONS (el navegador preguntando permisos), respondemos de una vez
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
     }
     next();
 });
 
-
-app.use(express.json());
+// Aumentar límite para JSON (opcional, para otros endpoints)
+app.use(express.json({ limit: '10mb' }));
 
 // Rutas Tablas artistas
 {
-    // Artistas
     app.use('/api/artistas', require('./routes/Artista/artistas'));
-
-    // Nacionalidad
     app.use('/api/nacionalidad', require('./routes/Artista/nacionalidad'));
 }
 
 // Rutas Tablas Ceramica
 {
-    // Arcilla
     app.use('/api/arcilla', require('./routes/Ceramica/arcilla'));
-
-    // Coccion
     app.use('/api/coccion', require('./routes/Ceramica/coccion'));
-
-    // Esmaltado
     app.use('/api/esmaltado', require('./routes/Ceramica/esmaltado'));
-
-    // Modelado
     app.use('/api/modelado', require('./routes/Ceramica/modelado'));
 }
 
@@ -81,23 +67,15 @@ app.use('/api/genero', require('./routes/Obra/genero'));
 
 // Usuarios
 app.use('/api/usuarios', require('./routes/Usuario/usuarios'));
-
-// Preguntas de seguridad
 app.use('/api/preguntas-seguridad', require('./routes/Usuario/preguntas'));
 
 // Obras
 app.use('/api/obras', require('./routes/Obra/obras'));
-
-// Epocas
 app.use('/api/epoca', require('./routes/Obra/epoca'));
 
 // Ventas
 app.use('/api/ventas', require('./routes/Compra/ventas'));
-
-// Upload
 app.use('/api/upload', require('./routes/Compra/upload'));
-
-// Reportes (protegidas para admin)
 app.use('/api/reportes', require('./routes/Compra/reportes'));
 
 // Ruta de prueba
@@ -105,10 +83,18 @@ app.get('/', (req, res) => {
     res.send('El servidor funciona');
 });
 
+// Manejador de errores (para capturar errores de Multer, etc.)
+app.use((err, req, res, next) => {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'El archivo excede el tamaño permitido (5 MB).' });
+    }
+    console.error(err.stack);
+    res.status(500).json({ error: err.message });
+});
+
 // Iniciar servidor
 async function startServer() {
-    // Espera a probar la conexion
-    await testConnection(); 
+    await testConnection();
     app.listen(port, () => {
         console.log(`Servidor en http://localhost:${port}`);
     });

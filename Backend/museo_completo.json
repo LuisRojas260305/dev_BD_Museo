@@ -562,7 +562,7 @@
         {
             "usuario_id": 1,
             "email": "admin@museo.com",
-            "password": "$2b$10$3lOo2xZVfVv0I7qYxY5x9eB8X9X9X9X9X9X9X9X9X9X9X9X9X9",
+            "password": "$2b$10$Czvlb6VT54sBmsKEj7zArej8IQ58.XHTvAri2s7viwWZpXO.GLXvS",
             "nombre": "Admin",
             "apellido": "Principal",
             "tipo": "administrador",
