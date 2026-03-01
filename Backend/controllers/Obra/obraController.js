@@ -140,6 +140,24 @@ const createObra = async (req, res) => {
   try {
     await connection.beginTransaction();
 
+    // Parsear arrays que vienen como JSON string (desde FormData)
+    const parseArrayField = (field) => {
+      if (field && typeof field === 'string') {
+        try {
+          return JSON.parse(field);
+        } catch {
+          return [];
+        }
+      }
+      return Array.isArray(field) ? field : [];
+    };
+
+    req.body.estilos = parseArrayField(req.body.estilos);
+    req.body.tematicas = parseArrayField(req.body.tematicas);
+    req.body.materiales = parseArrayField(req.body.materiales);
+    req.body.tecnicas = parseArrayField(req.body.tecnicas);
+    req.body.otros_metales = parseArrayField(req.body.otros_metales);
+
     // Datos comunes
     const { nombre, codigo_inventario, artista_id, genero_id, epoca_id,
             precio_venta, alto, ancho, fecha_creacion, estado,
@@ -162,7 +180,7 @@ const createObra = async (req, res) => {
     const obraId = result.insertId;
 
     // Insertar datos específicos según género
-    switch (genero_id) {
+    switch (parseInt(genero_id)) {
       case 1:
         await insertPintura(connection, obraId, req.body);
         break;
@@ -191,7 +209,6 @@ const createObra = async (req, res) => {
     connection.release();
   }
 };
-
 // Actualizar una obra (complejo, podría omitirse o hacerse solo para datos básicos)
 // Por simplicidad, no implementaremos update completo de obras con todas sus relaciones.
 // Se puede hacer un endpoint que actualice solo los campos básicos de Obra.
