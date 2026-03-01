@@ -4,11 +4,17 @@ const {
   insertCeramica, insertOrfebreria
 } = require('../../services/obraServices');
 
-// Obtener todas las obras (con filtros opcionales)
+// Obtener todas las obras (sin la foto)
 const getAllObras = async (req, res) => {
   try {
     let query = `
-      SELECT o.*, a.nombre as artista_nombre, g.nombre as genero_nombre, e.nombre as epoca_nombre
+      SELECT 
+        o.obra_id, o.nombre, o.codigo_inventario, o.artista_id, o.genero_id, o.epoca_id,
+        o.precio_venta, o.alto, o.ancho, o.fecha_creacion, o.estado,
+        o.descripcion, o.comentario,
+        a.nombre as artista_nombre, 
+        g.nombre as genero_nombre, 
+        e.nombre as epoca_nombre
       FROM Obra o
       JOIN Artista a ON o.artista_id = a.artista_id
       JOIN Genero g ON o.genero_id = g.genero_id
@@ -16,7 +22,6 @@ const getAllObras = async (req, res) => {
     `;
     const params = [];
 
-    // Filtros opcionales
     const { genero_id, artista_id, orden } = req.query;
     if (genero_id) {
       query += ' WHERE o.genero_id = ?';
@@ -35,15 +40,15 @@ const getAllObras = async (req, res) => {
     const [rows] = await pool.query(query, params);
     res.json(rows);
   } catch (error) {
+    console.error('Error en getAllObras:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Obtener una obra por ID (con detalles específicos según género)
+// Obtener una obra por ID (sin la foto)
 const getObraById = async (req, res) => {
   try {
     const { id } = req.params;
-    // Primero obtenemos la obra base
     const [obra] = await pool.query(`
       SELECT o.*, a.nombre as artista_nombre, g.nombre as genero_nombre, e.nombre as epoca_nombre
       FROM Obra o
@@ -56,6 +61,8 @@ const getObraById = async (req, res) => {
     if (obra.length === 0) return res.status(404).json({ error: 'Obra no encontrada' });
 
     const result = obra[0];
+    // Eliminar el campo foto para no enviar el BLOB en esta respuesta
+    delete result.foto;
 
     // Según el género, traer datos adicionales
     switch (result.genero_id) {
@@ -130,17 +137,34 @@ const getObraById = async (req, res) => {
 
     res.json(result);
   } catch (error) {
+    console.error('Error en getObraById:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Crear una nueva obra (con datos específicos según género)
+// Obtener la foto de una obra
+const getObraFoto = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query('SELECT foto FROM Obra WHERE obra_id = ?', [id]);
+    if (rows.length === 0 || !rows[0].foto) {
+      return res.status(404).send('Foto no encontrada');
+    }
+    res.set('Content-Type', 'image/jpeg');
+    res.send(rows[0].foto);
+  } catch (error) {
+    console.error('Error en getObraFoto:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Crear una nueva obra (con datos específicos según género y foto)
 const createObra = async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Parsear arrays que vienen como JSON string (desde FormData)
+    // Parsear arrays que vienen como JSON string
     const parseArrayField = (field) => {
       if (field && typeof field === 'string') {
         try {
@@ -161,21 +185,22 @@ const createObra = async (req, res) => {
     // Datos comunes
     const { nombre, codigo_inventario, artista_id, genero_id, epoca_id,
             precio_venta, alto, ancho, fecha_creacion, estado,
-            foto_url, descripcion, comentario } = req.body;
+            descripcion, comentario } = req.body;
+    const foto = req.file ? req.file.buffer : null;
 
     if (!codigo_inventario || !artista_id || !genero_id || !epoca_id || !precio_venta) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    // Insertar en Obra
+    // Insertar en Obra (incluyendo foto si existe)
     const [result] = await connection.query(
       `INSERT INTO Obra 
        (nombre, codigo_inventario, artista_id, genero_id, epoca_id, precio_venta,
-        alto, ancho, fecha_creacion, estado, foto_url, descripcion, comentario)
+        alto, ancho, fecha_creacion, estado, foto, descripcion, comentario)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [nombre || 'Sin Titulo', codigo_inventario, artista_id, genero_id, epoca_id,
        precio_venta, alto || 0, ancho || 0, fecha_creacion, estado || 'Disponible',
-       foto_url || 'Frontend/images', descripcion || null, comentario || null]
+       foto, descripcion || null, comentario || null]
     );
     const obraId = result.insertId;
 
@@ -204,14 +229,12 @@ const createObra = async (req, res) => {
     res.status(201).json({ id: obraId, message: 'Obra creada correctamente' });
   } catch (error) {
     await connection.rollback();
+    console.error('Error en createObra:', error);
     res.status(500).json({ error: error.message });
   } finally {
     connection.release();
   }
 };
-// Actualizar una obra (complejo, podría omitirse o hacerse solo para datos básicos)
-// Por simplicidad, no implementaremos update completo de obras con todas sus relaciones.
-// Se puede hacer un endpoint que actualice solo los campos básicos de Obra.
 
 // Eliminar una obra (solo admin)
 const deleteObra = async (req, res) => {
@@ -223,6 +246,7 @@ const deleteObra = async (req, res) => {
     }
     res.json({ message: 'Obra eliminada' });
   } catch (error) {
+    console.error('Error en deleteObra:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -230,6 +254,7 @@ const deleteObra = async (req, res) => {
 module.exports = {
   getAllObras,
   getObraById,
+  getObraFoto,
   createObra,
   deleteObra
 };

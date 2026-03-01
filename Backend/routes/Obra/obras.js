@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // 5 MB
+});
 const obraController = require('../../controllers/Obra/obraController');
-const { verificarToken, verificarAdmin } = require('../../middlewares/auth');
 
-// Rutas públicas
 router.get('/', obraController.getAllObras);
 router.get('/:id', obraController.getObraById);
-
-// Rutas protegidas (solo admin)
-router.post('/', verificarToken, verificarAdmin, obraController.createObra);
-router.delete('/:id', verificarToken, verificarAdmin, obraController.deleteObra);
+router.get('/:id/foto', obraController.getObraFoto);
+router.post('/', upload.single('foto'), obraController.createObra);
+// router.put('/:id', upload.single('foto'), obraController.updateObra); // No implementado
+router.delete('/:id', obraController.deleteObra);
 
 module.exports = router;
