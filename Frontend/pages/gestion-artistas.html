@@ -24,12 +24,16 @@
         label { display:block; margin-bottom:0.3rem; font-weight:600; }
         input, select, textarea { width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
         .hidden { display:none; }
+        .Nav{
+            text-decoration: none;
+            color: whitesmoke;
+        }
         footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo"><h1>🎨 Admin - Artistas</h1></div>
+        <div class="logo"><h1><a class="Nav" href="admin-dashboard.html">🎨 Admin - Artistas</a></h1></div>
         <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
     </header>
     <div class="container">

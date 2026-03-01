@@ -20,12 +20,16 @@
         .menu-card li { margin:0.8rem 0; }
         .menu-card a { color:#3498db; text-decoration:none; font-size:1.1rem; }
         .menu-card a:hover { text-decoration:underline; }
+        .Nav{
+            text-decoration: none;
+            color: whitesmoke;
+        }
         footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo"><h1>🎨 Admin - Panel</h1></div>
+        <div class="logo"><h1><a class="Nav" href="admin-dashboard.html">🎨 Admin - Panel</a></h1></div>
         <div class="user-info">
             <span id="bienvenida"></span>
             <a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a>
