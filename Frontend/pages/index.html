@@ -271,11 +271,13 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 Museo de Arte Contemporáneo - Proyecto Final</p>
+        <p>&copy; 2026 Museo de Arte Contemporáneo - Proyecto Final</p>
     </footer>
 
     <script src="../js/auth.js"></script>
     <script>
+
+        
         
         let generos = [];
         let artistas = [];
@@ -298,6 +300,8 @@
                 `;
             }
         }
+
+        
 
         // Cargar géneros para el filtro
         async function cargarGeneros() {
@@ -339,6 +343,7 @@
             const generoId = document.getElementById('genre').value;
             const artistaId = document.getElementById('artist').value;
             const ordenar = document.getElementById('sortByPrice').checked;
+            
 
             let url = `${API_BASE}/obras?`;
             const params = new URLSearchParams();

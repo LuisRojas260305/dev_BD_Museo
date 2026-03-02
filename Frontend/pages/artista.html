@@ -2,14 +2,177 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Artista</title>
-    <style>/* estilos */</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo de Arte Contemporáneo - Artista</title>
+    <style>
+        /* Estilos reutilizados (similar a detalle.html) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .Titulo {
+            text-decoration: none;
+            color: white;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+        .auth-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+        .auth-links .login-btn { background-color: #3498db; }
+        .auth-links .logout-btn { background-color: #e67e22; }
+        .auth-links .register-btn { background-color: #2ecc71; }
+        .auth-links a:hover { opacity: 0.8; }
+        .back-link {
+            margin: 1rem 2rem;
+        }
+        .back-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        .artist-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .artist-header {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .artist-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+        }
+        .artist-info h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .artist-info p {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+        .artist-bio {
+            margin-top: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #444;
+        }
+        .obras-title {
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            color: #2c3e50;
+        }
+        .obras-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .obra-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .obra-card:hover {
+            transform: translateY(-5px);
+        }
+        .obra-image {
+            height: 150px;
+            background-color: #ccc;
+            background-size: cover;
+            background-position: center;
+        }
+        .obra-info {
+            padding: 1rem;
+        }
+        .obra-info h4 {
+            margin-bottom: 0.3rem;
+            color: #2c3e50;
+        }
+        .obra-info p {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .obra-info a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .not-found {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.5rem;
+            color: #777;
+        }
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
 </head>
 <body>
-    <header>...</header>
-    <div class="back-link"><a href="index.html">&larr; Volver</a></div>
-    <main id="artistMain" class="artist-container">Cargando...</main>
-    <footer>...</footer>
+    <header>
+        <div class="logo">
+            <h1><a class="Titulo" href="index.html">🎨 Museo de Arte Contemporáneo</a></h1>
+        </div>
+        <div class="auth-links" id="authLinks"></div>
+    </header>
+
+    <div class="back-link">
+        <a href="index.html">&larr; Volver al catálogo</a>
+    </div>
+
+    <main id="artistMain" class="artist-container">
+        <!-- Se llenará dinámicamente -->
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Museo de Arte Contemporáneo - Proyecto Final</p>
+    </footer>
     <script src="../js/auth.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);

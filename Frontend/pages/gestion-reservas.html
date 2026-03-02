@@ -66,7 +66,7 @@
         </div>
     </div>
 
-    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+    <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
     <script src="../js/auth.js"></script>
     <script>
@@ -74,10 +74,12 @@
 
         (function() {
             const user = getUser();
+            
             if (!user || user.tipo !== 'administrador') {
                 alert('Acceso no autorizado');
                 window.location.href = 'index.html';
             }
+                
             document.getElementById('userEmail').innerText = user.email;
         })();
 
