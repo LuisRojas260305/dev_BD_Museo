@@ -10,22 +10,18 @@ const registro = async (req, res) => {
 
     const { email, password, nombre, apellido, comentario } = req.body;
 
-    // Validaciones básicas
     if (!email || !password || !nombre) {
       return res.status(400).json({ error: 'Email, password y nombre son obligatorios' });
     }
 
-    // Verificar email único
     const [exist] = await connection.query('SELECT usuario_id FROM Usuario WHERE email = ?', [email]);
     if (exist.length > 0) {
       return res.status(409).json({ error: 'El email ya está registrado' });
     }
 
-    // Hashear password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Insertar usuario
     const [result] = await connection.query(
       `INSERT INTO Usuario (email, password, nombre, apellido, tipo, comentario) 
       VALUES (?, ?, ?, ?, 'usuario', ?)`,
@@ -50,22 +46,18 @@ const registroadmin = async (req, res) => {
 
     const { email, password, nombre, apellido, comentario } = req.body;
 
-    // Validaciones básicas
     if (!email || !password || !nombre) {
       return res.status(400).json({ error: 'Email, password y nombre son obligatorios' });
     }
 
-    // Verificar email único
     const [exist] = await connection.query('SELECT usuario_id FROM Usuario WHERE email = ?', [email]);
     if (exist.length > 0) {
       return res.status(409).json({ error: 'El email ya está registrado' });
     }
 
-    // Hashear password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Insertar usuario
     const [result] = await connection.query(
       `INSERT INTO Usuario (email, password, nombre, apellido, tipo, comentario) 
       VALUES (?, ?, ?, ?, 'administrador', ?)`,
@@ -98,7 +90,6 @@ const login = async (req, res) => {
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
-    // Crear token
     const token = jwt.sign(
       { usuario_id: usuario.usuario_id, email: usuario.email, tipo: usuario.tipo },
       process.env.JWT_SECRET,
@@ -129,20 +120,27 @@ const perfil = async (req, res) => {
   }
 };
 
-// Pago de membresía (usuario registrado se convierte en miembro)
 const pagarMembresia = async (req, res) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
     const { tarjeta_numero, tarjeta_nombre, tarjeta_expiracion } = req.body;
-    const usuario_id = req.usuario.usuario_id;
+    const usuario_id = req.usuario.usuario_id; // Corregido
 
     // Verificar que el usuario existe y no es ya miembro
     const [usuario] = await connection.query('SELECT tipo FROM Usuario WHERE usuario_id = ?', [usuario_id]);
     if (usuario.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
     if (usuario[0].tipo === 'miembro') {
       return res.status(400).json({ error: 'El usuario ya es miembro' });
+    }
+
+    // Convertir fecha de expiración
+    let fechaExpiracion;
+    try {
+      fechaExpiracion = convertirExpiracion(tarjeta_expiracion);
+    } catch (e) {
+      return res.status(400).json({ error: 'Formato de fecha de expiración inválido. Use MM/AA' });
     }
 
     // Generar código de seguridad aleatorio
@@ -152,7 +150,7 @@ const pagarMembresia = async (req, res) => {
     await connection.query(
       `INSERT INTO Miembro (usuario_id, tarjeta_numero, tarjeta_nombre, tarjeta_expiracion, codigo_seguridad)
        VALUES (?, ?, ?, ?, ?)`,
-      [usuario_id, tarjeta_numero, tarjeta_nombre, tarjeta_expiracion, codigo]
+      [usuario_id, tarjeta_numero, tarjeta_nombre, fechaExpiracion, codigo]
     );
 
     // Registrar el pago en Membresia
@@ -164,13 +162,11 @@ const pagarMembresia = async (req, res) => {
     // Actualizar tipo de usuario a 'miembro'
     await connection.query('UPDATE Usuario SET tipo = "miembro" WHERE usuario_id = ?', [usuario_id]);
 
-    // Aquí podrías enviar el código por email (simulado)
-    console.log(`Código de seguridad para usuario ${usuario_id}: ${codigo}`);
-
     await connection.commit();
     res.json({ message: 'Membresía activada', codigo_seguridad: codigo });
   } catch (error) {
     await connection.rollback();
+    console.error(error);
     res.status(500).json({ error: error.message });
   } finally {
     connection.release();
@@ -180,13 +176,12 @@ const pagarMembresia = async (req, res) => {
 const guardarRespuestasSeguridad = async (req, res) => {
   try {
     const { respuestas } = req.body; 
-    const usuario_id = req.usuario.id; // ¡Importante! Viene del middleware verificarToken
+    const usuario_id = req.usuario.usuario_id; // CORREGIDO
 
     if (!respuestas || respuestas.length < 3) {
       return res.status(400).json({ error: 'Debes responder 3 preguntas' });
     }
 
-    // Insertar cada respuesta
     for (const r of respuestas) {
       await pool.query(
         'INSERT INTO RespuestaSeguridad (usuario_id, pregunta_id, respuesta) VALUES (?, ?, ?)',
@@ -194,7 +189,7 @@ const guardarRespuestasSeguridad = async (req, res) => {
       );
     }
 
-    // Opcional: Actualizar el tipo de usuario a 'miembro' si no se hizo en el pago
+    // Actualizar el tipo de usuario a 'miembro' si no se hizo en el pago (por si acaso)
     await pool.query("UPDATE Usuario SET tipo = 'miembro' WHERE usuario_id = ?", [usuario_id]);
 
     res.json({ message: 'Preguntas guardadas con éxito' });
@@ -207,20 +202,16 @@ const guardarRespuestasSeguridad = async (req, res) => {
 // Recuperar código de seguridad (respondiendo preguntas)
 const recuperarCodigo = async (req, res) => {
   try {
-    const { email, respuestas } = req.body; // respuestas: array de { pregunta_id, respuesta }
+    const { email, respuestas } = req.body;
 
-    // Buscar usuario
     const [usuario] = await pool.query('SELECT usuario_id FROM Usuario WHERE email = ?', [email]);
     if (usuario.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
 
     const usuario_id = usuario[0].usuario_id;
 
-    // Verificar que sea miembro (tiene código)
     const [miembro] = await pool.query('SELECT codigo_seguridad FROM Miembro WHERE usuario_id = ?', [usuario_id]);
     if (miembro.length === 0) return res.status(404).json({ error: 'El usuario no es miembro' });
 
-    // Verificar respuestas (asumiendo que el usuario tiene 3 preguntas registradas)
-    // Necesitamos obtener las respuestas almacenadas y comparar
     for (const r of respuestas) {
       const [row] = await pool.query(
         'SELECT respuesta FROM RespuestaSeguridad WHERE usuario_id = ? AND pregunta_id = ?',
@@ -231,7 +222,6 @@ const recuperarCodigo = async (req, res) => {
       }
     }
 
-    // Si todo ok, devolver el código (en un sistema real se enviaría por email)
     res.json({ codigo_seguridad: miembro[0].codigo_seguridad });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -244,7 +234,7 @@ const cambiarPasswordPerfil = async (req, res) => {
         const { nuevaPassword } = req.body;
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(nuevaPassword, salt);
-        await pool.query('UPDATE Usuario SET password = ? WHERE usuario_id = ?', [hashedPassword, req.usuario.id]);
+        await pool.query('UPDATE Usuario SET password = ? WHERE usuario_id = ?', [hashedPassword, req.usuario.usuario_id]); // CORREGIDO
         res.json({ message: 'Contraseña actualizada correctamente' });
     } catch (error) {
         res.status(500).json({ error: 'Error al cambiar contraseña' });
@@ -259,7 +249,7 @@ const obtenerMisPreguntas = async (req, res) => {
             FROM RespuestaSeguridad rs
             JOIN PreguntaSeguridad p ON rs.pregunta_id = p.pregunta_id
             WHERE rs.usuario_id = ?`;
-        const [preguntas] = await pool.query(query, [req.usuario.id]);
+        const [preguntas] = await pool.query(query, [req.usuario.usuario_id]); // CORREGIDO
         res.json(preguntas);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener preguntas' });
@@ -270,7 +260,7 @@ const obtenerMisPreguntas = async (req, res) => {
 const regenerarCodigoSeguridad = async (req, res) => {
     try {
         const { respuestas } = req.body;
-        const usuario_id = req.usuario.id;
+        const usuario_id = req.usuario.usuario_id; // CORREGIDO
 
         for (const r of respuestas) {
             const [row] = await pool.query(
@@ -296,7 +286,7 @@ const actualizarPreguntasSeguridad = async (req, res) => {
     try {
         await connection.beginTransaction();
         const { passwordActual, nuevasRespuestas } = req.body;
-        const usuario_id = req.usuario.id;
+        const usuario_id = req.usuario.usuario_id; // CORREGIDO
 
         const [user] = await connection.query('SELECT password FROM Usuario WHERE usuario_id = ?', [usuario_id]);
         const valid = await bcrypt.compare(passwordActual, user[0].password);
@@ -368,6 +358,20 @@ const recuperarPasswordExterno = async (req, res) => {
     }
 };
 
+// Función para convertir "MM/AA" a fecha YYYY-MM-DD (último día del mes)
+function convertirExpiracion(expString) {
+    const partes = expString.split('/');
+    if (partes.length !== 2) throw new Error('Formato de fecha inválido (use MM/AA)');
+    let mes = parseInt(partes[0], 10);
+    let año = parseInt(partes[1], 10);
+    if (año < 100) año += 2000;
+    // Crear fecha del primer día del mes siguiente y restar un día
+    const primerDiaMes = new Date(año, mes - 1, 1);
+    const primerDiaMesSiguiente = new Date(primerDiaMes.getFullYear(), primerDiaMes.getMonth() + 1, 1);
+    const ultimoDia = new Date(primerDiaMesSiguiente - 86400000); // 86400000 = 1 día en ms
+    return ultimoDia.toISOString().split('T')[0];
+}
+
 module.exports = {
   cambiarPasswordPerfil,
   obtenerMisPreguntas,
@@ -381,5 +385,6 @@ module.exports = {
   perfil,
   pagarMembresia,
   recuperarCodigo,
-  guardarRespuestasSeguridad
+  guardarRespuestasSeguridad,
+  convertirExpiracion
 };
