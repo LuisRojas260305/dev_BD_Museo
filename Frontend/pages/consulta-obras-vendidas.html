@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Obras Vendidas</title>
+    <style>
+        /* mismos estilos */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+        body { background:#ecf0f1; }
+        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .Titulo {
+            text-decoration: none;
+            color: white;
+        }
+        .logo h1 { font-size:1.5rem; }
+        .user-info { display:flex; align-items:center; gap:1rem; }
+        .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
+        .container { max-width:1000px; margin:2rem auto; padding:0 2rem; }
+        h2 { color:#2c3e50; }
+        .form-group { margin-bottom:1rem; }
+        label { display:block; margin-bottom:0.3rem; font-weight:600; }
+        input { padding:0.5rem; border:1px solid #ccc; border-radius:4px; width:200px; }
+        .btn { background:#3498db; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; }
+        table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-top:1rem; }
+        th, td { padding:1rem; text-align:left; border-bottom:1px solid #ddd; }
+        th { background:#34495e; color:white; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1><a class="Titulo" href="admin-dashboard.html">🎨 Admin - Obras Vendidas</a></h1></div>
+        <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
+    </header>
+    <div class="container">
+        <h2>Consulta de Obras Vendidas por Período</h2>
+        <form id="periodoForm">
+            <div class="form-group">
+                <label for="fechaInicio">Fecha inicio</label>
+                <input type="date" id="fechaInicio" required>
+            </div>
+            <div class="form-group">
+                <label for="fechaFin">Fecha fin</label>
+                <input type="date" id="fechaFin" required>
+            </div>
+            <button type="submit" class="btn">Consultar</button>
+        </form>
+        <div id="resultado">
+            <table>
+                <thead><tr><th>Factura</th><th>Obra</th><th>Comprador</th><th>Fecha</th><th>Precio</th><th>Total + IVA</th></tr></thead>
+                <tbody id="tablaVentas"></tbody>
+            </table>
+        </div>
+    </div>
+    <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        // Si auth.js no define API_BASE, se usa un valor por defecto (ajusta según tu backend)
+        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
+
+        // Verificar que el usuario sea administrador
+        (function() {
+            const user = getUser();
+            if (!user || user.tipo !== 'administrador') {
+                alert('Acceso no autorizado');
+                window.location.href = 'index.html';
+            }
+            document.getElementById('userEmail').innerText = user.email;
+        })();
+
+        // Función para formatear fecha (YYYY-MM-DD a objeto Date)
+        function parseFechaLocal(fechaStr) {
+            const [year, month, day] = fechaStr.split('-').map(Number);
+            return new Date(year, month - 1, day); // Mes en JS es 0-indexado
+        }
+
+        // Evento del formulario
+        document.getElementById('periodoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+
+            if (!fechaInicio || !fechaFin) {
+                alert('Debe seleccionar ambas fechas');
+                return;
+            }
+
+            // Convertir a objetos Date para comparar (la API puede requerir formato ISO)
+            const inicio = parseFechaLocal(fechaInicio);
+            const fin = parseFechaLocal(fechaFin);
+            fin.setHours(23, 59, 59, 999); // incluir todo el día final
+
+            // Construir URL con parámetros de consulta
+            const params = new URLSearchParams({
+                desde: fechaInicio,  // o inicio.toISOString().split('T')[0] si el backend espera YYYY-MM-DD
+                hasta: fechaFin
+            });
+
+            try {
+                const response = await authFetch(`${API_BASE}/ventas?${params}`);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al obtener ventas');
+                }
+                const ventas = await response.json();
+
+                // Filtrar localmente si el backend no soporta filtrado por fecha
+                // Pero asumimos que el backend ya filtró. Si no, podemos filtrar aquí:
+                // const filtradas = ventas.filter(v => {
+                //     const fechaVenta = new Date(v.fecha);
+                //     return fechaVenta >= inicio && fechaVenta <= fin;
+                // });
+
+                renderVentas(ventas); // Si el backend ya filtró, usamos ventas directamente
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('tablaVentas').innerHTML = `<tr><td colspan="6" style="color:#e74c3c;">Error: ${error.message}</td></tr>`;
+            }
+        });
+
+        function renderVentas(ventas) {
+            const tbody = document.getElementById('tablaVentas');
+            tbody.innerHTML = '';
+
+            if (!ventas || ventas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No hay ventas en el período</td></tr>';
+                return;
+            }
+
+            ventas.forEach(v => {
+                // Ajusta los nombres de propiedades según lo que devuelva tu backend
+                // Ejemplo: v.venta_id, v.obra_nombre, v.comprador_nombre, v.fecha, v.precio_venta, v.total
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${v.venta_id || v.id}</td>
+                    <td>${v.obra_nombre || 'N/A'}</td>
+                    <td>${v.comprador_nombre || 'N/A'}</td>
+                    <td>${new Date(v.fecha).toLocaleDateString()}</td>
+                    <td>$${Number(v.precio_venta || v.precioObra).toFixed(2)}</td>
+                    <td>$${Number(v.total).toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Función de logout (usada en el enlace)
+        window.logout = function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>

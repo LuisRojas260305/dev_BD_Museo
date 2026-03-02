@@ -33,7 +33,7 @@
 </head>
 <body>
     <header>
-        <div class="logo"><a class="Titulo" href="index.html"><h1>🎨 Admin - Empleados</a></h1></div>
+        <div class="logo"><a class="Titulo" href="admin-dashboard.html"><h1>🎨 Admin - Empleados</a></h1></div>
         <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
     </header>
     <div class="container">
@@ -62,7 +62,7 @@
                 <div class="form-group">
                     <label for="rol">Rol</label>
                     <select id="rol">
-                        <option value="admin">Administrador</option>
+                        <option value="administrador">Administrador</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-success">Guardar</button>
@@ -76,43 +76,53 @@
             </table>
         </div>
     </div>
-    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+    <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
+    <script src="../js/auth.js"></script>
     <script>
-        // Verificar admin
+        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
+
         (function() {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-            if (currentUser.role !== 'admin') { alert('Acceso no autorizado'); window.location.href='index.html'; }
-            document.getElementById('userEmail').innerText = currentUser.email;
+            const user = getUser();
+            if (!user || user.tipo !== 'administrador') {
+                alert('Acceso no autorizado');
+                window.location.href = 'index.html';
+            }
+            document.getElementById('userEmail').innerText = user.email;
         })();
 
-        let empleados = JSON.parse(localStorage.getItem('empleados') || '[]');
-        if (empleados.length === 0) {
-            empleados = [
-                { id:1, nombre:"Admin Principal", email:"admin@museo.com", login:"admin", password:"admin123", rol:"admin" }
-            ];
-            localStorage.setItem('empleados', JSON.stringify(empleados));
-        }
-
+        let empleados = [];
         const tbody = document.getElementById('tablaEmpleados');
         const formContainer = document.getElementById('formContainer');
         const empleadoForm = document.getElementById('empleadoForm');
         const formTitle = document.getElementById('formTitle');
         let editId = null;
 
-        function cargarEmpleados() {
+        async function cargarEmpleados() {
+            try {
+                const res = await authFetch(`${API_BASE}/usuarios?tipo=administrador`); // Ajusta según backend
+                if (!res.ok) throw new Error('Error al cargar empleados');
+                empleados = await res.json();
+                renderEmpleados();
+            } catch (error) {
+                console.error(error);
+                alert('No se pudieron cargar los empleados');
+            }
+        }
+
+        function renderEmpleados() {
             tbody.innerHTML = '';
             empleados.forEach(e => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${e.id}</td>
+                    <td>${e.usuario_id}</td>
                     <td>${e.nombre}</td>
                     <td>${e.email}</td>
                     <td>${e.login}</td>
-                    <td>${e.rol}</td>
+                    <td>${e.tipo}</td>
                     <td>
-                        <button class="btn" onclick="editarEmpleado(${e.id})">Editar</button>
-                        <button class="btn btn-danger" onclick="eliminarEmpleado(${e.id})">Eliminar</button>
+                        <button class="btn" onclick="editarEmpleado(${e.usuario_id})">Editar</button>
+                        <button class="btn btn-danger" onclick="eliminarEmpleado(${e.usuario_id})">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -123,12 +133,12 @@
             formContainer.classList.remove('hidden');
             if (empleado) {
                 formTitle.innerText = 'Editar Empleado';
-                document.getElementById('empleadoId').value = empleado.id;
+                document.getElementById('empleadoId').value = empleado.usuario_id;
                 document.getElementById('nombre').value = empleado.nombre;
                 document.getElementById('email').value = empleado.email;
                 document.getElementById('login').value = empleado.login;
-                document.getElementById('password').value = empleado.password;
-                editId = empleado.id;
+                document.getElementById('password').value = empleado.password || '';
+                editId = empleado.usuario_id;
             } else {
                 formTitle.innerText = 'Nuevo Empleado';
                 empleadoForm.reset();
@@ -141,41 +151,71 @@
             formContainer.classList.add('hidden');
         }
 
-        empleadoForm.addEventListener('submit', function(e) {
+        empleadoForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const nuevoEmpleado = {
-                id: editId || Date.now(),
+            const empleadoData = {
                 nombre: document.getElementById('nombre').value,
                 email: document.getElementById('email').value,
                 login: document.getElementById('login').value,
                 password: document.getElementById('password').value,
-                rol: 'admin'
+                tipo: 'administrador'
             };
-            if (editId) {
-                const index = empleados.findIndex(e => e.id === editId);
-                if (index !== -1) empleados[index] = nuevoEmpleado;
-            } else {
-                empleados.push(nuevoEmpleado);
+
+            try {
+                let url = `${API_BASE}/usuarios`;
+                let method = 'POST';
+                if (editId) {
+                    url += `/${editId}`;
+                    method = 'PUT';
+                }
+                const res = await authFetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(empleadoData)
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Error al guardar');
+                }
+                alert(editId ? 'Empleado actualizado' : 'Empleado creado');
+                cancelarFormulario();
+                cargarEmpleados();
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
-            localStorage.setItem('empleados', JSON.stringify(empleados));
-            cargarEmpleados();
-            cancelarFormulario();
         });
 
-        window.editarEmpleado = function(id) {
-            const empleado = empleados.find(e => e.id === id);
-            if (empleado) mostrarFormulario(empleado);
-        };
-
-        window.eliminarEmpleado = function(id) {
-            if (confirm('¿Eliminar empleado?')) {
-                empleados = empleados.filter(e => e.id !== id);
-                localStorage.setItem('empleados', JSON.stringify(empleados));
-                cargarEmpleados();
+        window.editarEmpleado = async function(id) {
+            try {
+                const res = await authFetch(`${API_BASE}/usuarios/${id}`);
+                if (!res.ok) throw new Error('No se pudo obtener el empleado');
+                const empleado = await res.json();
+                mostrarFormulario(empleado);
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         };
 
-        window.logout = function() { localStorage.removeItem('loggedIn'); localStorage.removeItem('currentUser'); window.location.href='index.html'; };
+        window.eliminarEmpleado = async function(id) {
+            if (!confirm('¿Eliminar empleado?')) return;
+            try {
+                const res = await authFetch(`${API_BASE}/usuarios/${id}`, { method: 'DELETE' });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error);
+                }
+                alert('Empleado eliminado');
+                cargarEmpleados();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        };
+
+        window.logout = function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        };
 
         cargarEmpleados();
     </script>

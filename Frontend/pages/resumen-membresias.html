@@ -111,7 +111,7 @@
 <body>
     <header>
         <div class="logo">
-            <h1><a class="Titulo" href="index.html">🎨 Admin - Resumen de Membresías</a></h1>
+            <h1><a class="Titulo" href="admin-dashboard.html">🎨 Admin - Resumen de Membresías</a></h1>
         </div>
         <div class="user-info">
             <span id="userEmail"></span>
@@ -150,62 +150,79 @@
     </div>
 
     <footer>
-        <p>&copy; 2025 Museo de Arte Contemporáneo</p>
+        <p>&copy; 2026 Museo de Arte Contemporáneo</p>
     </footer>
 
+    <script src="../js/auth.js"></script>
     <script>
-        // Verificar que sea administrador
+        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
+
         (function() {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-            if (currentUser.role !== 'admin') {
+            const user = getUser();
+            if (!user || user.tipo !== 'administrador') {
                 alert('Acceso no autorizado');
                 window.location.href = 'index.html';
             }
-            document.getElementById('userEmail').innerText = currentUser.email || 'Admin';
+            document.getElementById('userEmail').innerText = user.email;
         })();
 
-        // Obtener compradores
-        let compradores = JSON.parse(localStorage.getItem('compradores') || '[]');
-
-        document.getElementById('periodoForm').addEventListener('submit', function(e) {
+        document.getElementById('periodoForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const inicio = new Date(document.getElementById('fechaInicio').value);
-            const fin = new Date(document.getElementById('fechaFin').value);
-            fin.setHours(23, 59, 59); // incluir todo el día final
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
 
-            // Filtrar compradores por fecha de registro (todos tienen membresía porque se cobró al registrar)
-            const filtrados = compradores.filter(c => {
-                const fechaReg = new Date(c.fechaRegistro);
-                return fechaReg >= inicio && fechaReg <= fin;
+            if (!fechaInicio || !fechaFin) {
+                alert('Debe seleccionar ambas fechas');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                desde: fechaInicio,
+                hasta: fechaFin,
+                tipo: 'miembro' // Asumiendo que el backend puede filtrar por tipo
             });
 
-            const tbody = document.getElementById('tablaMembresias');
-            tbody.innerHTML = '';
-            let total = 0;
-            filtrados.forEach(c => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${c.nombre}</td>
-                    <td>${c.email}</td>
-                    <td>${new Date(c.fechaRegistro).toLocaleDateString()}</td>
-                    <td>${c.codigoSeguridad}</td>
-                `;
-                tbody.appendChild(tr);
-                total++;
-            });
-
-            const foot = document.getElementById('totalMembresias');
-            if (filtrados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4">No hay membresías en el período</td></tr>';
-                foot.innerHTML = '';
-            } else {
-                foot.innerHTML = `<tr><td colspan="3" style="text-align:right;">Total de membresías:</td><td>${total}</td></tr>`;
+            try {
+                const res = await authFetch(`${API_BASE}/usuarios?${params}`);
+                if (!res.ok) throw new Error('Error al obtener usuarios');
+                const miembros = await res.json();
+                renderMembresias(miembros);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('tablaMembresias').innerHTML = `<tr><td colspan="4" style="color:#e74c3c;">Error: ${error.message}</td></tr>`;
+                document.getElementById('totalMembresias').innerHTML = '';
             }
         });
 
+        function renderMembresias(miembros) {
+            const tbody = document.getElementById('tablaMembresias');
+            tbody.innerHTML = '';
+
+            if (miembros.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">No hay membresías en el período</td></tr>';
+                document.getElementById('totalMembresias').innerHTML = '';
+                return;
+            }
+
+            miembros.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${m.nombre}</td>
+                    <td>${m.email}</td>
+                    <td>${new Date(m.fecha_registro).toLocaleDateString()}</td>
+                    <td>${m.codigo_seguridad || 'N/A'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('totalMembresias').innerHTML = `
+                <tr><td colspan="3" style="text-align:right;">Total de membresías:</td><td>${miembros.length}</td></tr>
+            `;
+        }
+
         window.logout = function() {
-            localStorage.removeItem('loggedIn');
-            localStorage.removeItem('currentUser');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             window.location.href = 'index.html';
         };
     </script>

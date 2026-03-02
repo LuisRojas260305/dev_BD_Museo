@@ -33,7 +33,7 @@
 </head>
 <body>
     <header>
-        <div class="logo"><h1><a class="Titulo" href="index.html">🎨 Admin - Géneros</a></h1></div>
+        <div class="logo"><h1><a class="Titulo" href="admin-dashboard.html">🎨 Admin - Géneros</a></h1></div>
         <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
     </header>
     <div class="container">
@@ -62,45 +62,51 @@
             </table>
         </div>
     </div>
-    <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
+    <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
+    <script src="../js/auth.js"></script>
     <script>
-        // Verificar admin
+        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
+
         (function() {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-            if (currentUser.role !== 'admin') { alert('Acceso no autorizado'); window.location.href='index.html'; }
-            document.getElementById('userEmail').innerText = currentUser.email;
+            const user = getUser();
+            if (!user || user.tipo !== 'administrador') {
+                alert('Acceso no autorizado');
+                window.location.href = 'index.html';
+            }
+            document.getElementById('userEmail').innerText = user.email;
         })();
 
-        let generos = JSON.parse(localStorage.getItem('generos') || '[]');
-        if (generos.length === 0) {
-            generos = [
-                { id:1, nombre:"pintura", atributos:"tecnica,dimensiones" },
-                { id:2, nombre:"escultura", atributos:"material,peso,dimensiones" },
-                { id:3, nombre:"fotografia", atributos:"tecnica,dimensiones" },
-                { id:4, nombre:"ceramica", atributos:"tecnica,dimensiones" },
-                { id:5, nombre:"orfebreria", atributos:"material,peso" }
-            ];
-            localStorage.setItem('generos', JSON.stringify(generos));
-        }
-
+        let generos = [];
         const tbody = document.getElementById('tablaGeneros');
         const formContainer = document.getElementById('formContainer');
         const generoForm = document.getElementById('generoForm');
         const formTitle = document.getElementById('formTitle');
         let editId = null;
 
-        function cargarGeneros() {
+        async function cargarGeneros() {
+            try {
+                const res = await fetch(`${API_BASE}/genero`); // público
+                if (!res.ok) throw new Error('Error al cargar géneros');
+                generos = await res.json();
+                renderGeneros();
+            } catch (error) {
+                console.error(error);
+                alert('No se pudieron cargar los géneros');
+            }
+        }
+
+        function renderGeneros() {
             tbody.innerHTML = '';
             generos.forEach(g => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${g.id}</td>
+                    <td>${g.genero_id}</td>
                     <td>${g.nombre}</td>
                     <td>${g.atributos || ''}</td>
                     <td>
-                        <button class="btn" onclick="editarGenero(${g.id})">Editar</button>
-                        <button class="btn btn-danger" onclick="eliminarGenero(${g.id})">Eliminar</button>
+                        <button class="btn" onclick="editarGenero(${g.genero_id})">Editar</button>
+                        <button class="btn btn-danger" onclick="eliminarGenero(${g.genero_id})">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -111,10 +117,10 @@
             formContainer.classList.remove('hidden');
             if (genero) {
                 formTitle.innerText = 'Editar Género';
-                document.getElementById('generoId').value = genero.id;
+                document.getElementById('generoId').value = genero.genero_id;
                 document.getElementById('nombre').value = genero.nombre;
                 document.getElementById('atributos').value = genero.atributos || '';
-                editId = genero.id;
+                editId = genero.genero_id;
             } else {
                 formTitle.innerText = 'Nuevo Género';
                 generoForm.reset();
@@ -127,38 +133,68 @@
             formContainer.classList.add('hidden');
         }
 
-        generoForm.addEventListener('submit', function(e) {
+        generoForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const nuevoGenero = {
-                id: editId || Date.now(),
+            const generoData = {
                 nombre: document.getElementById('nombre').value,
                 atributos: document.getElementById('atributos').value
             };
-            if (editId) {
-                const index = generos.findIndex(g => g.id === editId);
-                if (index !== -1) generos[index] = nuevoGenero;
-            } else {
-                generos.push(nuevoGenero);
+
+            try {
+                let url = `${API_BASE}/genero`;
+                let method = 'POST';
+                if (editId) {
+                    url += `/${editId}`;
+                    method = 'PUT';
+                }
+                const res = await authFetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(generoData)
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Error al guardar');
+                }
+                alert(editId ? 'Género actualizado' : 'Género creado');
+                cancelarFormulario();
+                cargarGeneros();
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
-            localStorage.setItem('generos', JSON.stringify(generos));
-            cargarGeneros();
-            cancelarFormulario();
         });
 
-        window.editarGenero = function(id) {
-            const genero = generos.find(g => g.id === id);
-            if (genero) mostrarFormulario(genero);
-        };
-
-        window.eliminarGenero = function(id) {
-            if (confirm('¿Eliminar género?')) {
-                generos = generos.filter(g => g.id !== id);
-                localStorage.setItem('generos', JSON.stringify(generos));
-                cargarGeneros();
+        window.editarGenero = async function(id) {
+            try {
+                const res = await fetch(`${API_BASE}/genero/${id}`);
+                if (!res.ok) throw new Error('No se pudo obtener el género');
+                const genero = await res.json();
+                mostrarFormulario(genero);
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
         };
 
-        window.logout = function() { localStorage.removeItem('loggedIn'); localStorage.removeItem('currentUser'); window.location.href='index.html'; };
+        window.eliminarGenero = async function(id) {
+            if (!confirm('¿Eliminar género?')) return;
+            try {
+                const res = await authFetch(`${API_BASE}/genero/${id}`, { method: 'DELETE' });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error);
+                }
+                alert('Género eliminado');
+                cargarGeneros();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        };
+
+        window.logout = function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        };
 
         cargarGeneros();
     </script>
