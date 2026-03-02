@@ -369,7 +369,7 @@
                 card.className = 'card';
                 card.innerHTML = `
                     <a href="detalle.html?id=${obra.obra_id}" class="card-image-link">
-                        <div class="card-image" style="background-image: url('${obra.foto_url || 'https://picsum.photos/300/200'}');"></div>
+                        <div class="card-image" style="background-image: url('${obra.foto}');"></div>
                     </a>
                     <div class="card-content">
                         <h3 class="card-title"><a href="detalle.html?id=${obra.obra_id}">${obra.nombre}</a></h3>

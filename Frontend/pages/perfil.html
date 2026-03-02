@@ -15,7 +15,9 @@
         button { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
         .btn-green { background: #27ae60; } .btn-blue { background: #3498db; } .btn-orange { background: #e67e22; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;}
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .small-note { font-size: 0.85rem; color: #666; margin-bottom: 10px; }
+        .error { color: #e74c3c; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -24,6 +26,13 @@
         <a href="index.html">Volver al inicio</a>
         
         <div id="userData"></div>
+
+        <!-- Sección para activar membresía (visible solo para usuarios tipo 'usuario') -->
+        <div id="activarMembresiaSection" class="section" style="display: none;">
+            <h3>Activar Membresía</h3>
+            <p>Conviértete en miembro por solo $10 y accede a beneficios exclusivos.</p>
+            <button class="btn-green" onclick="abrirModalMembresia()">Activar Membresía ($10)</button>
+        </div>
 
         <div class="section">
             <h3>Cambiar Contraseña</h3>
@@ -44,12 +53,14 @@
         </div>
     </div>
 
+    <!-- Modal genérico para todas las acciones -->
     <div id="miModal" class="modal">
         <div class="modal-content">
             <h3 id="modalTitle">Título Modal</h3>
             <div id="modalBody"></div>
             <button class="btn-green" id="btnAccionModal" style="margin-top: 15px;">Confirmar</button>
             <button style="background: #95a5a6;" onclick="cerrarModal()">Cancelar</button>
+            <p class="error" id="modalError"></p>
         </div>
     </div>
 
@@ -57,23 +68,39 @@
     <script>
         let codigoReal = "";
         let preguntasUsuario = []; // Las preguntas actuales del usuario
+        let todasLasPreguntas = []; // Todas las preguntas disponibles
 
         async function cargarPerfil() {
             const res = await authFetch(`${API_BASE}/usuarios/perfil`);
             const user = await res.json();
             if (res.ok) {
                 codigoReal = user.codigo_seguridad || "N/A";
+                let codigoHTML = '';
+                if (user.tipo === 'miembro' || user.tipo === 'administrador') {
+                    codigoHTML = `
+                        <div class="info-card">
+                            <strong>Código:</strong> 
+                            <div>
+                                <span id="txtCodigo" class="codigo-box">********</span>
+                                <button onclick="toggleCodigo()" style="width:auto; background:#34495e; padding:5px;">👁️</button>
+                            </div>
+                        </div>
+                    `;
+                }
                 document.getElementById('userData').innerHTML = `
                     <div class="info-card"><strong>Nombre:</strong> <span>${user.nombre}</span></div>
                     <div class="info-card"><strong>Email:</strong> <span>${user.email}</span></div>
-                    <div class="info-card">
-                        <strong>Código:</strong> 
-                        <div>
-                            <span id="txtCodigo" class="codigo-box">********</span>
-                            <button onclick="toggleCodigo()" style="width:auto; background:#34495e; padding:5px;">👁️</button>
-                        </div>
-                    </div>
+                    <div class="info-card"><strong>Tipo:</strong> <span>${user.tipo}</span></div>
+                    ${codigoHTML}
                 `;
+
+                // Mostrar u ocultar sección de activar membresía
+                const activarSection = document.getElementById('activarMembresiaSection');
+                if (user.tipo === 'usuario') {
+                    activarSection.style.display = 'block';
+                } else {
+                    activarSection.style.display = 'none';
+                }
             }
         }
 
@@ -97,9 +124,125 @@
             } else { alert("Error al cambiar contraseña"); }
         }
 
-        function cerrarModal() { document.getElementById('miModal').style.display = 'none'; }
+        function cerrarModal() { 
+            document.getElementById('miModal').style.display = 'none';
+            document.getElementById('modalError').innerText = '';
+        }
 
-        // --- LÓGICA REGENERAR CÓDIGO ---
+        // --- ACTIVAR MEMBRESÍA ---
+        async function abrirModalMembresia() {
+            // Cargar todas las preguntas
+            const res = await fetch(`${API_BASE}/preguntas-seguridad`);
+            todasLasPreguntas = await res.json();
+
+            document.getElementById('modalTitle').innerText = 'Activar Membresía';
+            let html = `
+                <h4>Datos de pago</h4>
+                <div class="form-group">
+                    <label>Número de tarjeta</label>
+                    <input type="text" id="tarjeta_numero" placeholder="0000 0000 0000 0000" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre en la tarjeta</label>
+                    <input type="text" id="tarjeta_nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de expiración (MM/AA)</label>
+                    <input type="text" id="tarjeta_expiracion" placeholder="MM/AA" required>
+                </div>
+                <h4>Preguntas de seguridad</h4>
+                <p class="small-note">Selecciona 3 preguntas diferentes. Las necesitarás para recuperar tu cuenta.</p>
+            `;
+            for (let i = 1; i <= 3; i++) {
+                html += `
+                    <div class="form-group">
+                        <label>Pregunta ${i}</label>
+                        <select id="pregunta${i}" class="p-select" required>
+                            <option value="">-- Selecciona --</option>
+                            ${todasLasPreguntas.map(p => `<option value="${p.pregunta_id}">${p.pregunta_texto}</option>`).join('')}
+                        </select>
+                        <input type="text" id="respuesta${i}" placeholder="Tu respuesta" required>
+                    </div>
+                `;
+            }
+            document.getElementById('modalBody').innerHTML = html;
+            
+            // Añadir evento para validar que las preguntas sean únicas
+            document.querySelectorAll('.p-select').forEach(select => {
+                select.addEventListener('change', validarUnicas);
+            });
+
+            const btn = document.getElementById('btnAccionModal');
+            btn.innerText = 'Pagar y Activar';
+            btn.onclick = ejecutarActivacionMembresia;
+            document.getElementById('miModal').style.display = 'flex';
+        }
+
+        function validarUnicas() {
+            const selects = Array.from(document.querySelectorAll('.p-select'));
+            const values = selects.map(s => s.value).filter(v => v !== "");
+            const hasDuplicates = new Set(values).size !== values.length;
+            if (hasDuplicates) {
+                document.getElementById('modalError').innerText = 'No puedes repetir la misma pregunta.';
+            } else {
+                document.getElementById('modalError').innerText = '';
+            }
+        }
+
+        async function ejecutarActivacionMembresia() {
+            const errorMsg = document.getElementById('modalError');
+            errorMsg.innerText = '';
+
+            // Validar que las preguntas sean distintas
+            const selects = Array.from(document.querySelectorAll('.p-select'));
+            const values = selects.map(s => s.value);
+            if (new Set(values).size !== 3 || values.includes("")) {
+                errorMsg.innerText = 'Debes seleccionar 3 preguntas diferentes.';
+                return;
+            }
+
+            // Datos de tarjeta
+            const membresiaData = {
+                tarjeta_numero: document.getElementById('tarjeta_numero').value,
+                tarjeta_nombre: document.getElementById('tarjeta_nombre').value,
+                tarjeta_expiracion: document.getElementById('tarjeta_expiracion').value
+            };
+
+            try {
+                // 1. Pagar membresía
+                const resPago = await authFetch(`${API_BASE}/usuarios/membresia`, {
+                    method: 'POST',
+                    body: JSON.stringify(membresiaData)
+                });
+                const dataPago = await resPago.json();
+                if (!resPago.ok) throw new Error(dataPago.error);
+
+                // 2. Guardar respuestas
+                const respuestas = [];
+                for (let i = 1; i <= 3; i++) {
+                    respuestas.push({
+                        pregunta_id: document.getElementById(`pregunta${i}`).value,
+                        respuesta: document.getElementById(`respuesta${i}`).value
+                    });
+                }
+                const resSeg = await authFetch(`${API_BASE}/usuarios/seguridad`, {
+                    method: 'POST',
+                    body: JSON.stringify({ respuestas })
+                });
+                if (!resSeg.ok) {
+                    const errSeg = await resSeg.json();
+                    throw new Error(errSeg.error);
+                }
+
+                alert(`¡Membresía activada! Tu código de seguridad es: ${dataPago.codigo_seguridad}. Guárdalo bien.`);
+                cerrarModal();
+                cargarPerfil(); // Actualizar la vista
+            } catch (err) {
+                errorMsg.innerText = err.message;
+            }
+        }
+
+        // --- REGENERAR CÓDIGO --- (sin cambios, pero asegurar que usa preguntasUsuario)
         async function abrirModalRegenerar() {
             const res = await authFetch(`${API_BASE}/usuarios/mis-preguntas`);
             preguntasUsuario = await res.json();
@@ -136,11 +279,10 @@
             } else { alert(data.error); }
         }
 
-        // --- LÓGICA CAMBIAR PREGUNTAS ---
+        // --- CAMBIAR PREGUNTAS --- (sin cambios)
         async function abrirModalPreguntas() {
-            // Traer TODAS las preguntas de la BD para elegir
             const res = await fetch(`${API_BASE}/preguntas-seguridad`);
-            const todasLasPreguntas = await res.json();
+            todasLasPreguntas = await res.json();
 
             document.getElementById('modalTitle').innerText = 'Cambiar Preguntas';
             let html = `<label><strong>Contraseña Actual:</strong></label>
