@@ -240,16 +240,29 @@
         }
 
         function render(obra) {
+            // Mapeo de posibles valores numéricos de estado a texto
+            const mapaEstados = {
+                1: 'Disponible',
+                2: 'Reservado',
+                3: 'Vendido'
+            };
+            // Obtener el estado como texto: si es número se mapea, si ya es string se usa, si no, 'Desconocido'
+            const estadoTexto = mapaEstados[obra.estado] || obra.estado || 'Desconocido';
+
             const main = document.getElementById('detailMain');
             const user = getUser();
-            const puedeComprar = (obra.estado === 'Disponible') && user && (user.tipo === 'miembro' || user.tipo === 'administrador');
+
+            // Determinar si el usuario puede comprar
+            const puedeComprar = (estadoTexto === 'Disponible') && user && (user.tipo === 'miembro' || user.tipo === 'administrador');
+
+            // Construir botón de compra según el estado y el tipo de usuario
             const botonCompra = puedeComprar 
                 ? `<button class="btn-comprar" onclick="window.location.href='confirmar-compra.html?id=${obra.obra_id}'">Comprar</button>`
-                : (obra.estado !== 'Disponible' 
+                : (estadoTexto !== 'Disponible' 
                     ? `<button class="btn-comprar" disabled>No disponible</button>`
                     : `<button class="btn-comprar" onclick="alert('Debes ser miembro para comprar'); window.location.href='login.html';">Iniciar sesión como miembro</button>`);
 
-            // Mapa de nombres legibles para características
+            // Mapa de nombres legibles para características (igual que tenías)
             const nombresLegibles = {
                 // Pintura
                 soporte_nombre: 'Soporte',
@@ -287,17 +300,14 @@
                 ancho: 'Ancho (cm)'
             };
 
-            // Construir características según género, filtrando y traduciendo
+            // Construir características específicas del género
             let featuresHTML = '';
             if (obra.detalles && Object.keys(obra.detalles).length > 0) {
-                // Excluir claves internas que no queremos mostrar
                 const excluir = ['obra_id', 'soporte_id', 'tipo_id', 'impresion_id', 'camara_id', 'tecnica_id', 'coccion_id', 'arcilla_id', 'modelado_id', 'esmaltado_id', 'pieza_id', 'metal_predominante_id'];
-                
-                // Filtrar y mapear
                 const items = Object.entries(obra.detalles)
                     .filter(([key, value]) => !excluir.includes(key) && value && value.toString().trim() !== '')
                     .map(([key, value]) => {
-                        // Formatear arrays (estilos, tematicas, materiales, tecnicas, otros_metales)
+                        // Formatear arrays
                         if (Array.isArray(value)) {
                             value = value.join(', ');
                         }
@@ -323,16 +333,17 @@
                 }
             }
 
-            // Determinar clase de estado
+            // Clase CSS para el estado (usando estadoTexto)
             const estadoClase = {
                 'Disponible': 'status-disponible',
                 'Vendido': 'status-vendido',
                 'Reservado': 'status-reservado'
-            }[obra.estado] || '';
+            }[estadoTexto] || '';
 
+            // URL de la imagen
             const imagenUrl = `${API_BASE}/obras/${obra.obra_id}/foto`;
 
-            // Construir metadatos comunes (fecha creación, dimensiones si existen)
+            // Metadatos comunes (fecha y dimensiones)
             const metaItems = [];
             if (obra.fecha_creacion) metaItems.push({ label: 'Fecha creación', value: obra.fecha_creacion.split('T')[0] });
             if (obra.alto && obra.ancho) metaItems.push({ label: 'Dimensiones', value: `${obra.alto} x ${obra.ancho} cm` });
@@ -350,12 +361,16 @@
                 </div>
             ` : '';
 
+            // Precio formateado
+            const precioFormateado = Number(obra.precio_venta).toLocaleString();
+
+            // Renderizar HTML completo
             main.innerHTML = `
                 <div class="detail-container">
                     <div class="detail-image">
                         <img src="${imagenUrl}" 
-                             alt="${obra.nombre}" 
-                             onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Sin+imagen';">
+                            alt="${obra.nombre}" 
+                            onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Sin+imagen';">
                     </div>
                     <div class="detail-info">
                         <h2>${obra.nombre}</h2>
@@ -363,8 +378,8 @@
                         <span class="detail-genre">${obra.genero_nombre}</span>
                         <p class="detail-description">${obra.descripcion || ''}</p>
                         ${metaHTML}
-                        <div class="detail-price">$${Number(obra.precio_venta).toLocaleString()}</div>
-                        <div class="detail-status ${estadoClase}">${obra.estado}</div>
+                        <div class="detail-price">$${precioFormateado}</div>
+                        <div class="detail-status ${estadoClase}">${estadoTexto}</div>
                         ${featuresHTML}
                         ${botonCompra}
                     </div>

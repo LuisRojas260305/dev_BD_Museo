@@ -7,10 +7,7 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
         body { background:#ecf0f1; }
         header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
-        .Titulo {
-            text-decoration: none;
-            color: white;
-        }
+        .Titulo { text-decoration: none; color: white; }
         .logo h1 { font-size:1.5rem; }
         .user-info { display:flex; align-items:center; gap:1rem; }
         .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
@@ -67,135 +64,163 @@
     </div>
     <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
+    <script src="../js/auth.js"></script>
     <script>
-        // Verificar admin
+        // Constante global definida en auth.js
+        const API_BASE = window.API_BASE || 'http://localhost:3000/api';
+
+        // Verificar que el usuario sea administrador
         (function() {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-            if (currentUser.role !== 'admin') { alert('Acceso no autorizado'); window.location.href='index.html'; }
-            document.getElementById('userEmail').innerText = currentUser.email;
+            const user = getUser();
+            if (!user || user.tipo !== 'administrador') {
+                alert('Acceso no autorizado');
+                window.location.href = 'index.html';
+            }
+            document.getElementById('userEmail').innerText = user.email;
         })();
 
-        let obras = JSON.parse(localStorage.getItem('obras') || '[]');
-        let compradores = JSON.parse(localStorage.getItem('compradores') || '[]');
-        let facturas = JSON.parse(localStorage.getItem('facturas') || '[]');
-
+        let obrasReservadas = [];
+        let compradores = [];
         let obraSeleccionada = null;
 
-        document.getElementById('buscarForm').addEventListener('submit', function(e) {
+        // Cargar obras reservadas al iniciar (para validar el ID ingresado)
+        async function cargarObrasReservadas() {
+            try {
+                const res = await fetch(`${API_BASE}/obras?estado=Reservado`);
+                if (!res.ok) throw new Error('Error al cargar obras');
+                obrasReservadas = await res.json();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('No se pudieron cargar las obras reservadas');
+            }
+        }
+
+        // Cargar compradores (usuarios) para el select
+        async function cargarCompradores() {
+            try {
+                const res = await authFetch(`${API_BASE}/usuarios`);
+                if (!res.ok) throw new Error('Error al cargar usuarios');
+                compradores = await res.json();
+                // Filtrar solo los que pueden comprar? En principio todos, pero podrías filtrar por tipo 'miembro' si aplica
+                // Por ahora mostramos todos
+                const select = document.getElementById('comprador');
+                select.innerHTML = '';
+                compradores.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c.usuario_id;
+                    option.textContent = `${c.nombre} (${c.email})`;
+                    select.appendChild(option);
+                });
+                if (compradores.length > 0) {
+                    select.value = compradores[0].usuario_id;
+                    document.getElementById('direccionEnvio').value = compradores[0].direccion || '';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('No se pudieron cargar los compradores');
+            }
+        }
+
+        // Evento al buscar obra
+        document.getElementById('buscarForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const id = parseInt(document.getElementById('obraId').value);
-            obraSeleccionada = obras.find(o => o.id === id && o.status === 'Reservada');
+            obraSeleccionada = obrasReservadas.find(o => o.obra_id === id);
             if (!obraSeleccionada) {
                 alert('No se encontró una obra reservada con ese ID.');
                 document.getElementById('obraInfo').classList.add('hidden');
                 return;
             }
-            // Mostrar datos
-            document.getElementById('obraDetalle').innerText = `${obraSeleccionada.nombre} - ${obraSeleccionada.artista} - Precio: $${obraSeleccionada.precio}`;
-            document.getElementById('precioObra').innerText = obraSeleccionada.precio;
-            document.getElementById('iva').innerText = (obraSeleccionada.precio * 0.16).toFixed(2);
-            document.getElementById('totalConIva').innerText = (obraSeleccionada.precio * 1.16).toFixed(2);
+
+            // Mostrar datos de la obra
+            document.getElementById('obraDetalle').innerText = `${obraSeleccionada.nombre} - ${obraSeleccionada.artista_nombre || 'Artista desconocido'} - Precio: $${obraSeleccionada.precio_venta}`;
+            document.getElementById('precioObra').innerText = obraSeleccionada.precio_venta;
+            const iva = obraSeleccionada.precio_venta * 0.16;
+            const total = obraSeleccionada.precio_venta + iva;
+            document.getElementById('iva').innerText = iva.toFixed(2);
+            document.getElementById('totalConIva').innerText = total.toFixed(2);
             document.getElementById('obraInfo').classList.remove('hidden');
 
-            // Cargar compradores en select
+            // Actualizar dirección cuando cambia comprador
             const selectComprador = document.getElementById('comprador');
-            selectComprador.innerHTML = '';
-            compradores.forEach(c => {
-                const option = document.createElement('option');
-                option.value = c.id;
-                option.textContent = `${c.nombre} (${c.email})`;
-                selectComprador.appendChild(option);
-            });
-
-            // Actualizar dirección cuando se selecciona comprador
             selectComprador.addEventListener('change', function() {
                 const compradorId = parseInt(this.value);
-                const comprador = compradores.find(c => c.id === compradorId);
-                document.getElementById('direccionEnvio').value = comprador ? comprador.direccion : '';
+                const comprador = compradores.find(c => c.usuario_id === compradorId);
+                document.getElementById('direccionEnvio').value = comprador ? comprador.direccion || '' : '';
             });
-            // Disparar cambio para cargar primera dirección
-            if (compradores.length > 0) {
-                selectComprador.value = compradores[0].id;
-                document.getElementById('direccionEnvio').value = compradores[0].direccion;
-            }
         });
 
-        document.getElementById('facturaForm').addEventListener('submit', function(e) {
+        // Evento al emitir factura
+        document.getElementById('facturaForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             if (!obraSeleccionada) return;
 
             const compradorId = parseInt(document.getElementById('comprador').value);
-            const comprador = compradores.find(c => c.id === compradorId);
-            if (!comprador) return;
+            const comprador = compradores.find(c => c.usuario_id === compradorId);
+            if (!comprador) {
+                alert('Seleccione un comprador válido');
+                return;
+            }
 
             const porcentaje = parseFloat(document.getElementById('porcentajeGanancia').value);
-            const precio = obraSeleccionada.precio;
+            const precio = obraSeleccionada.precio_venta;
             const iva = precio * 0.16;
             const total = precio + iva;
             const gananciaMuseo = precio * (porcentaje / 100);
 
-            // Crear factura
-            const factura = {
-                id: Date.now(),
-                obraId: obraSeleccionada.id,
-                obraNombre: obraSeleccionada.nombre,
-                compradorId: comprador.id,
-                compradorNombre: comprador.nombre,
-                precioObra: precio,
+            // Datos para enviar al backend
+            const facturaData = {
+                obra_id: obraSeleccionada.obra_id,
+                comprador_id: compradorId,
+                porcentaje_ganancia: porcentaje,
+                direccion_envio: comprador.direccion || '',
+                precio_venta: precio,
                 iva: iva,
                 total: total,
-                porcentajeGanancia: porcentaje,
-                gananciaMuseo: gananciaMuseo,
-                fecha: new Date().toISOString(),
-                direccionEnvio: comprador.direccion
+                ganancia_museo: gananciaMuseo
             };
-            facturas.push(factura);
-            localStorage.setItem('facturas', JSON.stringify(facturas));
 
-            // Cambiar estado de obra a Vendida
-            obraSeleccionada.status = 'Vendida';
-            localStorage.setItem('obras', JSON.stringify(obras));
+            try {
+                const res = await authFetch(`${API_BASE}/ventas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(facturaData)
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Error al emitir factura');
+                }
+                const factura = await res.json(); // Suponiendo que devuelve la factura creada
 
-            // Mostrar resultado
-            document.getElementById('resultadoFactura').innerHTML = `
-                <h3>Factura emitida</h3>
-                <p><strong>Código:</strong> ${factura.id}</p>
-                <p><strong>Obra:</strong> ${factura.obraNombre}</p>
-                <p><strong>Comprador:</strong> ${factura.compradorNombre}</p>
-                <p><strong>Fecha:</strong> ${new Date(factura.fecha).toLocaleDateString()}</p>
-                <p><strong>Total con IVA:</strong> $${factura.total.toFixed(2)}</p>
-                <p><strong>Ganancia museo:</strong> $${factura.gananciaMuseo.toFixed(2)} (${factura.porcentajeGanancia}%)</p>
-            `;
-            document.getElementById('resultadoFactura').classList.remove('hidden');
-            document.getElementById('obraInfo').classList.add('hidden');
+                // Mostrar resultado
+                document.getElementById('resultadoFactura').innerHTML = `
+                    <h3>Factura emitida</h3>
+                    <p><strong>Código:</strong> ${factura.venta_id || factura.id}</p>
+                    <p><strong>Obra:</strong> ${obraSeleccionada.nombre}</p>
+                    <p><strong>Comprador:</strong> ${comprador.nombre}</p>
+                    <p><strong>Fecha:</strong> ${new Date(factura.fecha || Date.now()).toLocaleDateString()}</p>
+                    <p><strong>Total con IVA:</strong> $${factura.total ? factura.total.toFixed(2) : total.toFixed(2)}</p>
+                    <p><strong>Ganancia museo:</strong> $${factura.ganancia_museo ? factura.ganancia_museo.toFixed(2) : gananciaMuseo.toFixed(2)} (${porcentaje}%)</p>
+                `;
+                document.getElementById('resultadoFactura').classList.remove('hidden');
+                document.getElementById('obraInfo').classList.add('hidden');
+
+                // Opcional: actualizar la lista de obras reservadas (quitando la vendida)
+                obrasReservadas = obrasReservadas.filter(o => o.obra_id !== obraSeleccionada.obra_id);
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
         });
 
-        window.logout = function() { localStorage.removeItem('loggedIn'); localStorage.removeItem('currentUser'); window.location.href='index.html'; };
+        // Inicializar
+        Promise.all([cargarObrasReservadas(), cargarCompradores()]).catch(console.error);
 
-        /*// Obtener todas las ventas (solo admin) con filtro opcional por estado
-        const getVentas = async (req, res) => {
-            try {
-                const { estado } = req.query;
-                let query = `
-                    SELECT v.*, o.nombre as obra_nombre, o.precio_venta, a.nombre as artista_nombre,
-                        u.email as comprador_email, u.nombre as comprador_nombre
-                    FROM Venta v
-                    JOIN Obra o ON v.obra_id = o.obra_id
-                    JOIN Artista a ON o.artista_id = a.artista_id
-                    JOIN Usuario u ON v.comprador_id = u.usuario_id
-                `;
-                const params = [];
-                if (estado) {
-                    query += ' WHERE v.estado = ?';
-                    params.push(estado);
-                }
-                const [rows] = await pool.query(query, params);
-                res.json(rows);
-            } catch (error) {
-                res.status(500).json({ error: error.message });
-            }
+        window.logout = function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
         };
-        */
     </script>
 </body>
 </html>

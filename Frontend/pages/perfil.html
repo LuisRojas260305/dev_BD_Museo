@@ -78,6 +78,9 @@
             const res = await authFetch(`${API_BASE}/usuarios/perfil`);
             const user = await res.json();
             if (res.ok) {
+                // 👇 Guardar el usuario actualizado en localStorage
+                localStorage.setItem('user', JSON.stringify(user));
+
                 codigoReal = user.codigo_seguridad || "N/A";
                 let codigoHTML = '';
                 if (user.tipo === 'miembro' || user.tipo === 'administrador') {
@@ -98,13 +101,8 @@
                     ${codigoHTML}
                 `;
 
-                // Mostrar u ocultar sección de activar membresía
                 const activarSection = document.getElementById('activarMembresiaSection');
-                if (user.tipo === 'usuario') {
-                    activarSection.style.display = 'block';
-                } else {
-                    activarSection.style.display = 'none';
-                }
+                activarSection.style.display = user.tipo === 'usuario' ? 'block' : 'none';
             }
         }
 
