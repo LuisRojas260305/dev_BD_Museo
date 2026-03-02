@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Admin - Artistas</title>
     <style>
-        /* (Estilos similares a gestion-obras) */
+        /* Estilos igual que antes, añadir algunos para vista previa de imagen */
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
         body { background:#ecf0f1; }
         header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
@@ -29,6 +29,9 @@
             color: whitesmoke;
         }
         footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+        .foto-preview { max-width:100px; max-height:100px; margin-top:0.5rem; border:1px solid #ccc; border-radius:4px; }
+        .generos-checkboxes { max-height:200px; overflow-y:auto; border:1px solid #ccc; padding:0.5rem; border-radius:4px; }
+        .generos-checkboxes div { margin-bottom:0.3rem; }
     </style>
 </head>
 <body>
@@ -41,39 +44,42 @@
         <button class="btn btn-success" onclick="mostrarFormulario()">Nuevo Artista</button>
         <div id="formContainer" class="form-container hidden">
             <h3 id="formTitle">Nuevo Artista</h3>
-            <form id="artistaForm">
-                <input type="hidden" id="artistaId">
+            <form id="artistaForm" enctype="multipart/form-data">
+                <input type="hidden" id="artistaId" name="artistaId">
                 <div class="form-group">
                     <label for="nombre">Nombre</label>
-                    <input type="text" id="nombre" required>
+                    <input type="text" id="nombre" name="nombre" required>
                 </div>
                 <div class="form-group">
                     <label for="apellido">Apellido</label>
-                    <input type="text" id="apellido">
+                    <input type="text" id="apellido" name="apellido">
                 </div>
                 <div class="form-group">
                     <label for="nacionalidad_id">Nacionalidad</label>
-                    <select id="nacionalidad_id" required></select>
+                    <select id="nacionalidad_id" name="nacionalidad_id" required></select>
                 </div>
                 <div class="form-group">
                     <label for="fecha_nacimiento">Fecha de Nacimiento</label>
-                    <input type="date" id="fecha_nacimiento">
+                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento">
                 </div>
                 <div class="form-group">
                     <label for="biografia">Biografía</label>
-                    <textarea id="biografia" rows="4"></textarea>
+                    <textarea id="biografia" name="biografia" rows="4"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="foto_url">URL de la Foto</label>
-                    <input type="url" id="foto_url">
+                    <label for="foto">Foto del Artista</label>
+                    <input type="file" id="foto" name="foto" accept="image/*">
+                    <div id="fotoPreviewContainer">
+                        <img id="fotoPreview" class="foto-preview" src="#" alt="Vista previa" style="display:none;">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="porcentaje_ganancia">% Ganancia</label>
-                    <input type="number" id="porcentaje_ganancia" step="0.1" min="0" max="100" value="5">
+                    <input type="number" id="porcentaje_ganancia" name="porcentaje_ganancia" step="0.1" min="0" max="100" value="5">
                 </div>
                 <div class="form-group">
-                    <label for="generos">Géneros (IDs separados por coma)</label>
-                    <input type="text" id="generos">
+                    <label>Géneros</label>
+                    <div id="generosCheckboxes" class="generos-checkboxes"></div>
                 </div>
                 <button type="submit" class="btn btn-success">Guardar</button>
                 <button type="button" class="btn btn-danger" onclick="cancelarFormulario()">Cancelar</button>
@@ -81,7 +87,17 @@
         </div>
         <div id="artistasList">
             <table>
-                <thead><tr><th>ID</th><th>Nombre</th><th>Nacionalidad</th><th>Géneros</th><th>% Ganancia</th><th>Acciones</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Foto</th>
+                        <th>Nombre</th>
+                        <th>Nacionalidad</th>
+                        <th>Géneros</th>
+                        <th>% Ganancia</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
                 <tbody id="tablaArtistas"></tbody>
             </table>
         </div>
@@ -91,6 +107,7 @@
     <script src="../js/auth.js"></script>
     <script>
         let nacionalidades = [];
+        let generos = [];
         let editId = null;
 
         (function() {
@@ -115,18 +132,38 @@
             });
         }
 
+        async function cargarGeneros() {
+            const res = await fetch(`${API_BASE}/genero`);
+            generos = await res.json();
+            const container = document.getElementById('generosCheckboxes');
+            container.innerHTML = '';
+            generos.forEach(g => {
+                const div = document.createElement('div');
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = g.genero_id;
+                cb.id = `gen_${g.genero_id}`;
+                const label = document.createElement('label');
+                label.htmlFor = `gen_${g.genero_id}`;
+                label.textContent = g.nombre;
+                div.appendChild(cb);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
         async function cargarArtistas() {
             const res = await fetch(`${API_BASE}/artistas`);
             const artistas = await res.json();
             const tbody = document.getElementById('tablaArtistas');
             tbody.innerHTML = '';
             for (const a of artistas) {
-                // Obtener nacionalidad
                 const n = nacionalidades.find(n => n.nacionalidad_id === a.nacionalidad_id);
                 const nacion = n ? n.nombre : '';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${a.artista_id}</td>
+                    <td><img src="${API_BASE}/artistas/${a.artista_id}/foto" alt="foto" style="width:50px; height:50px; object-fit:cover;" onerror="this.style.display='none'"></td>
                     <td>${a.nombre} ${a.apellido || ''}</td>
                     <td>${nacion}</td>
                     <td>${a.generos || ''}</td>
@@ -145,15 +182,40 @@
                 const res = await fetch(`${API_BASE}/artistas/${id}`);
                 const artista = await res.json();
                 if (!res.ok) throw new Error(artista.error);
+                
                 document.getElementById('artistaId').value = artista.artista_id;
                 document.getElementById('nombre').value = artista.nombre;
                 document.getElementById('apellido').value = artista.apellido || '';
                 document.getElementById('nacionalidad_id').value = artista.nacionalidad_id;
                 document.getElementById('fecha_nacimiento').value = artista.fecha_nacimiento ? artista.fecha_nacimiento.split('T')[0] : '';
                 document.getElementById('biografia').value = artista.biografia || '';
-                document.getElementById('foto_url').value = artista.foto_url || '';
                 document.getElementById('porcentaje_ganancia').value = artista.porcentaje_ganancia;
-                document.getElementById('generos').value = artista.generos || ''; // string separado por comas
+                
+                // Limpiar checkboxes
+                const checkboxes = document.querySelectorAll('#generosCheckboxes input[type=checkbox]');
+                checkboxes.forEach(cb => cb.checked = false);
+                if (artista.generos && Array.isArray(artista.generos)) {
+                    const ids = artista.generos.map(g => g.genero_id);
+                    checkboxes.forEach(cb => {
+                        if (ids.includes(parseInt(cb.value))) cb.checked = true;
+                    });
+                }
+
+                // Mostrar vista previa de la foto actual si existe
+                const fotoPreview = document.getElementById('fotoPreview');
+                const fotoUrl = `${API_BASE}/artistas/${id}/foto`;
+                // Comprobar si la foto existe (haciendo una petición HEAD)
+                fetch(fotoUrl, { method: 'HEAD' })
+                    .then(res => {
+                        if (res.ok) {
+                            fotoPreview.src = fotoUrl;
+                            fotoPreview.style.display = 'block';
+                        } else {
+                            fotoPreview.style.display = 'none';
+                        }
+                    })
+                    .catch(() => fotoPreview.style.display = 'none');
+
                 document.getElementById('formTitle').innerText = 'Editar Artista';
                 document.getElementById('formContainer').classList.remove('hidden');
                 editId = id;
@@ -180,16 +242,26 @@
 
         document.getElementById('artistaForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const data = {
-                nombre: document.getElementById('nombre').value,
-                apellido: document.getElementById('apellido').value || null,
-                nacionalidad_id: parseInt(document.getElementById('nacionalidad_id').value),
-                fecha_nacimiento: document.getElementById('fecha_nacimiento').value || null,
-                biografia: document.getElementById('biografia').value || null,
-                foto_url: document.getElementById('foto_url').value || null,
-                porcentaje_ganancia: parseFloat(document.getElementById('porcentaje_ganancia').value),
-                generos: document.getElementById('generos').value.split(',').map(g => parseInt(g.trim())).filter(Boolean)
-            };
+            
+            const formData = new FormData();
+            formData.append('nombre', document.getElementById('nombre').value);
+            formData.append('apellido', document.getElementById('apellido').value || '');
+            formData.append('nacionalidad_id', document.getElementById('nacionalidad_id').value);
+            formData.append('fecha_nacimiento', document.getElementById('fecha_nacimiento').value || '');
+            formData.append('biografia', document.getElementById('biografia').value || '');
+            formData.append('porcentaje_ganancia', document.getElementById('porcentaje_ganancia').value);
+            
+            const fotoInput = document.getElementById('foto');
+            if (fotoInput.files.length > 0) {
+                formData.append('foto', fotoInput.files[0]);
+            }
+            
+            const selectedGeneros = [];
+            document.querySelectorAll('#generosCheckboxes input[type=checkbox]:checked')
+                .forEach(cb => selectedGeneros.push(parseInt(cb.value)));
+            // Enviar géneros como array JSON (el backend espera un array)
+            formData.append('generos', JSON.stringify(selectedGeneros));
+
             try {
                 let url = `${API_BASE}/artistas`;
                 let method = 'POST';
@@ -197,7 +269,11 @@
                     url += `/${editId}`;
                     method = 'PUT';
                 }
-                const res = await authFetch(url, { method, body: JSON.stringify(data) });
+                const res = await authFetch(url, { 
+                    method, 
+                    body: formData 
+                    // No establecer Content-Type, el navegador lo pone con boundary
+                });
                 if (res.ok) {
                     alert('Artista guardado');
                     cancelarFormulario();
@@ -216,6 +292,10 @@
             document.getElementById('artistaForm').reset();
             document.getElementById('artistaId').value = '';
             document.getElementById('formTitle').innerText = 'Nuevo Artista';
+            document.getElementById('fotoPreview').style.display = 'none';
+            // Desmarcar checkboxes
+            document.querySelectorAll('#generosCheckboxes input[type=checkbox]')
+                .forEach(cb => cb.checked = false);
             editId = null;
         }
 
@@ -223,7 +303,24 @@
             document.getElementById('formContainer').classList.add('hidden');
         }
 
-        cargarNacionalidades().then(() => cargarArtistas());
+        // Vista previa de la imagen seleccionada
+        document.getElementById('foto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const fotoPreview = document.getElementById('fotoPreview');
+                    fotoPreview.src = event.target.result;
+                    fotoPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('fotoPreview').style.display = 'none';
+            }
+        });
+
+        // Inicializar: cargar nacionalidades y géneros en paralelo, luego artistas
+        Promise.all([cargarNacionalidades(), cargarGeneros()]).then(() => cargarArtistas());
     </script>
 </body>
 </html>

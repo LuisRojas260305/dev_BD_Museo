@@ -25,16 +25,14 @@ function logout() {
 
 async function authFetch(url, options = {}) {
     const token = getToken();
-    const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers,
-    };
+    let headers = { ...options.headers };
+    // Si es FormData, no establecer Content-Type (el navegador lo hace automáticamente)
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
-    const response = await fetch(url, {
-        ...options,
-        headers,
-    });
+    const response = await fetch(url, { ...options, headers });
     return response;
 }

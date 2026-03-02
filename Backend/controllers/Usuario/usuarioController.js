@@ -2,7 +2,7 @@ const { pool } = require('../../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Registro de nuevo usuario (tipo 'registrado')
+// Registro de nuevo usuario (tipo 'usuario')
 const registro = async (req, res) => {
   const connection = await pool.getConnection();
   try {
@@ -34,6 +34,46 @@ const registro = async (req, res) => {
 
     await connection.commit();
     res.status(201).json({ id: result.insertId, message: 'Usuario registrado correctamente' });
+  } catch (error) {
+    await connection.rollback();
+    res.status(500).json({ error: error.message });
+  } finally {
+    connection.release();
+  }
+};
+
+// Registro de nuevo usuario (tipo 'admin')
+const registroadmin = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const { email, password, nombre, apellido, comentario } = req.body;
+
+    // Validaciones básicas
+    if (!email || !password || !nombre) {
+      return res.status(400).json({ error: 'Email, password y nombre son obligatorios' });
+    }
+
+    // Verificar email único
+    const [exist] = await connection.query('SELECT usuario_id FROM Usuario WHERE email = ?', [email]);
+    if (exist.length > 0) {
+      return res.status(409).json({ error: 'El email ya está registrado' });
+    }
+
+    // Hashear password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Insertar usuario
+    const [result] = await connection.query(
+      `INSERT INTO Usuario (email, password, nombre, apellido, tipo, comentario) 
+      VALUES (?, ?, ?, ?, 'administrador', ?)`,
+      [email, hashedPassword, nombre, apellido || null, comentario || null]
+    );
+
+    await connection.commit();
+    res.status(201).json({ id: result.insertId, message: 'Administrador registrado correctamente' });
   } catch (error) {
     await connection.rollback();
     res.status(500).json({ error: error.message });
@@ -336,6 +376,7 @@ module.exports = {
   obtenerPreguntasUsuario,
   recuperarPasswordExterno,
   registro,
+  registroadmin,
   login,
   perfil,
   pagarMembresia,
