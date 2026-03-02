@@ -371,16 +371,20 @@
             }
 
             obras.forEach(obra => {
-                // Obtener nombre del artista (podría venir en la obra)
                 const artistaNombre = obra.artista_nombre || 'Desconocido';
                 const artistaId = obra.artista_id;
                 const generoNombre = obra.genero_nombre || '';
+                // Construir la URL de la imagen usando el ID de la obra
+                const imagenUrl = `${API_BASE}/obras/${obra.obra_id}/foto`;
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <a href="detalle.html?id=${obra.obra_id}" class="card-image-link">
-                        <div class="card-image" style="background-image: url('${obra.foto_url || 'https://picsum.photos/300/200'}');"></div>
+                        <img src="${imagenUrl}" 
+                            alt="${obra.nombre}" 
+                            onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Sin+imagen';"
+                            style="width:100%; height:200px; object-fit:cover;">
                     </a>
                     <div class="card-content">
                         <h3 class="card-title"><a href="detalle.html?id=${obra.obra_id}">${obra.nombre}</a></h3>

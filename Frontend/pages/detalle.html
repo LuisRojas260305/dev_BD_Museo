@@ -4,39 +4,198 @@
     <meta charset="UTF-8">
     <title>Detalle de Obra</title>
     <style>
-        /* mismos estilos que antes */
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
-        body { background:#f5f5f5; }
-        header { background:#2c3e50; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
-        .logo h1 { font-size:1.5rem; }
-        .auth-links a { color:white; text-decoration:none; margin-left:1rem; padding:0.5rem 1rem; border-radius:4px; }
-        .login-btn { background:#3498db; }
-        .logout-btn { background:#e67e22; }
-        .register-btn { background:#2ecc71; }
-        .back-link { margin:1rem 2rem; }
-        .back-link a { color:#3498db; text-decoration:none; }
-        .detail-container { max-width:1200px; margin:2rem auto; display:grid; grid-template-columns:1fr 1fr; gap:3rem; background:white; border-radius:12px; padding:2rem; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
-        .detail-image { height:400px; background:#ddd; background-size:cover; background-position:center; border-radius:8px; }
-        .detail-info h2 { font-size:2.2rem; color:#2c3e50; }
-        .detail-artist { font-size:1.3rem; }
-        .detail-artist a { color:#3498db; text-decoration:none; }
-        .detail-genre { display:inline-block; background:#ecf0f1; color:#7f8c8d; padding:0.3rem 1rem; border-radius:20px; margin:1rem 0; }
-        .detail-price { font-size:2rem; font-weight:bold; color:#27ae60; margin:1rem 0; }
-        .detail-status { font-size:1.1rem; margin:1rem 0; padding:0.5rem 1rem; background:#f1c40f; color:white; border-radius:4px; display:inline-block; }
-        .detail-features { background:#f9f9f9; padding:1.5rem; border-radius:8px; margin:1rem 0; }
-        .btn-comprar { background:#27ae60; color:white; border:none; padding:1rem 2rem; font-size:1.3rem; border-radius:8px; cursor:pointer; width:100%; }
-        .btn-comprar:hover { background:#2ecc71; }
-        .btn-comprar:disabled { background:#95a5a6; cursor:not-allowed; }
-        .Nav{
-            text-decoration: none;
-            color: whitesmoke;
+        /* Estilos mejorados */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Roboto, system-ui, sans-serif; }
+        body { background:#f8fafc; }
+        header { background:#1e293b; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo h1 { font-size:1.5rem; font-weight:400; }
+        .auth-links a { color:white; text-decoration:none; margin-left:1rem; padding:0.5rem 1rem; border-radius:30px; transition:all 0.2s; }
+        .login-btn { background:#3b82f6; }
+        .logout-btn { background:#f97316; }
+        .register-btn { background:#10b981; }
+        .auth-links a:hover { filter:brightness(1.1); transform:scale(1.05); }
+        .back-link { margin:1.5rem 2rem; }
+        .back-link a { color:#3b82f6; text-decoration:none; font-weight:500; display:inline-flex; align-items:center; gap:0.3rem; }
+        .back-link a:hover { text-decoration:underline; }
+        .detail-container {
+            max-width:1200px;
+            margin:2rem auto;
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:2.5rem;
+            background:white;
+            border-radius:24px;
+            padding:2rem;
+            box-shadow:0 20px 40px -15px rgba(0,0,0,0.15);
         }
-        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+        .detail-image {
+            height:450px;
+            border-radius:20px;
+            overflow:hidden;
+            background:#e2e8f0;
+            box-shadow:0 10px 20px -5px rgba(0,0,0,0.1);
+        }
+        .detail-image img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            transition:transform 0.5s;
+        }
+        .detail-image:hover img { transform:scale(1.02); }
+        .detail-info {
+            display:flex;
+            flex-direction:column;
+        }
+        .detail-info h2 {
+            font-size:2.5rem;
+            color:#0f172a;
+            line-height:1.2;
+            margin-bottom:0.5rem;
+        }
+        .detail-artist {
+            font-size:1.3rem;
+            color:#334155;
+            margin-bottom:0.5rem;
+        }
+        .detail-artist a {
+            color:#3b82f6;
+            text-decoration:none;
+            font-weight:600;
+        }
+        .detail-artist a:hover { text-decoration:underline; }
+        .detail-genre {
+            display:inline-block;
+            background:#f1f5f9;
+            color:#475569;
+            padding:0.3rem 1rem;
+            border-radius:30px;
+            font-size:0.9rem;
+            font-weight:500;
+            margin:0.5rem 0 1rem;
+            align-self:flex-start;
+        }
+        .detail-description {
+            font-size:1.1rem;
+            line-height:1.6;
+            color:#334155;
+            margin:1rem 0;
+        }
+        .meta-grid {
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:1rem;
+            background:#f8fafc;
+            padding:1rem;
+            border-radius:16px;
+            margin:1rem 0;
+        }
+        .meta-item {
+            display:flex;
+            flex-direction:column;
+        }
+        .meta-label {
+            font-size:0.9rem;
+            color:#64748b;
+            text-transform:uppercase;
+            letter-spacing:0.5px;
+        }
+        .meta-value {
+            font-size:1.2rem;
+            font-weight:600;
+            color:#0f172a;
+        }
+        .detail-price {
+            font-size:2.5rem;
+            font-weight:700;
+            color:#10b981;
+            margin:1rem 0;
+        }
+        .detail-status {
+            font-size:1rem;
+            padding:0.4rem 1.2rem;
+            border-radius:30px;
+            display:inline-block;
+            font-weight:600;
+            align-self:flex-start;
+        }
+        .status-disponible { background:#d1fae5; color:#065f46; }
+        .status-vendido { background:#fee2e2; color:#991b1b; }
+        .status-reservado { background:#fef3c7; color:#92400e; }
+        .detail-features {
+            background:#f1f5f9;
+            border-radius:20px;
+            padding:1.5rem;
+            margin:1.5rem 0;
+        }
+        .detail-features h3 {
+            font-size:1.4rem;
+            color:#0f172a;
+            margin-bottom:1rem;
+            display:flex;
+            align-items:center;
+            gap:0.5rem;
+        }
+        .feature-grid {
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+            gap:0.8rem;
+        }
+        .feature-item {
+            background:white;
+            border-radius:12px;
+            padding:0.8rem;
+            box-shadow:0 2px 5px rgba(0,0,0,0.03);
+        }
+        .feature-label {
+            font-size:0.8rem;
+            color:#64748b;
+            text-transform:uppercase;
+            letter-spacing:0.3px;
+        }
+        .feature-value {
+            font-size:1.1rem;
+            font-weight:600;
+            color:#0f172a;
+            word-break:break-word;
+        }
+        .btn-comprar {
+            background:#10b981;
+            color:white;
+            border:none;
+            padding:1rem 2rem;
+            font-size:1.3rem;
+            border-radius:40px;
+            cursor:pointer;
+            width:100%;
+            font-weight:600;
+            transition:all 0.2s;
+            box-shadow:0 10px 15px -5px rgba(16,185,129,0.4);
+            margin-top:auto;
+        }
+        .btn-comprar:hover:not(:disabled) { background:#059669; transform:scale(1.02); }
+        .btn-comprar:disabled { background:#94a3b8; box-shadow:none; cursor:not-allowed; }
+        .not-found {
+            text-align:center;
+            padding:4rem;
+            font-size:1.5rem;
+            color:#64748b;
+        }
+        footer {
+            background:#1e293b;
+            color:white;
+            text-align:center;
+            padding:1.5rem;
+            margin-top:3rem;
+        }
+        @media (max-width:768px) {
+            .detail-container { grid-template-columns:1fr; }
+            .meta-grid { grid-template-columns:1fr; }
+        }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo"><h1><a class="Nav" href="index.html">🎨 Museo de Arte Contemporáneo</a></h1></div>
+        <div class="logo"><h1><a class="Nav" href="index.html" style="text-decoration:none; color:white;">🎨 Museo de Arte Contemporáneo</a></h1></div>
         <div class="auth-links" id="authLinks"></div>
     </header>
 
@@ -90,29 +249,122 @@
                     ? `<button class="btn-comprar" disabled>No disponible</button>`
                     : `<button class="btn-comprar" onclick="alert('Debes ser miembro para comprar'); window.location.href='login.html';">Iniciar sesión como miembro</button>`);
 
-            // Construir características según género
+            // Mapa de nombres legibles para características
+            const nombresLegibles = {
+                // Pintura
+                soporte_nombre: 'Soporte',
+                estilos: 'Estilos',
+                tematicas: 'Temáticas',
+                // Escultura
+                tipo_nombre: 'Tipo',
+                peso: 'Peso (kg)',
+                profundidad: 'Profundidad (cm)',
+                materiales: 'Materiales',
+                tecnicas: 'Técnicas',
+                // Fotografía
+                tiraje: 'Tiraje',
+                obturacion: 'Obturación',
+                apertura: 'Apertura',
+                iso: 'ISO',
+                resolucion: 'Resolución',
+                fecha_captura: 'Fecha de captura',
+                impresion_nombre: 'Impresión',
+                camara_nombre: 'Cámara',
+                tecnica_fotografica_nombre: 'Técnica',
+                // Cerámica
+                diametro: 'Diámetro (cm)',
+                funcionalidad: 'Funcionalidad',
+                coccion_nombre: 'Cocción',
+                arcilla_nombre: 'Arcilla',
+                modelado_nombre: 'Modelado',
+                esmaltado_nombre: 'Esmaltado',
+                // Orfebrería
+                pieza_nombre: 'Pieza',
+                metal_predominante_nombre: 'Metal predominante',
+                otros_metales: 'Otros metales',
+                // comunes
+                alto: 'Alto (cm)',
+                ancho: 'Ancho (cm)'
+            };
+
+            // Construir características según género, filtrando y traduciendo
             let featuresHTML = '';
-            if (obra.detalles) {
-                featuresHTML = '<div class="detail-features"><h3>Características</h3><ul>';
-                for (let key in obra.detalles) {
-                    if (key !== 'obra_id' && key !== 'soporte_id' && key !== 'tipo_id' && obra.detalles[key]) {
-                        featuresHTML += `<li><strong>${key}:</strong> ${obra.detalles[key]}</li>`;
-                    }
+            if (obra.detalles && Object.keys(obra.detalles).length > 0) {
+                // Excluir claves internas que no queremos mostrar
+                const excluir = ['obra_id', 'soporte_id', 'tipo_id', 'impresion_id', 'camara_id', 'tecnica_id', 'coccion_id', 'arcilla_id', 'modelado_id', 'esmaltado_id', 'pieza_id', 'metal_predominante_id'];
+                
+                // Filtrar y mapear
+                const items = Object.entries(obra.detalles)
+                    .filter(([key, value]) => !excluir.includes(key) && value && value.toString().trim() !== '')
+                    .map(([key, value]) => {
+                        // Formatear arrays (estilos, tematicas, materiales, tecnicas, otros_metales)
+                        if (Array.isArray(value)) {
+                            value = value.join(', ');
+                        }
+                        // Traducir clave
+                        const label = nombresLegibles[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        return { label, value };
+                    });
+
+                if (items.length > 0) {
+                    featuresHTML = `
+                        <div class="detail-features">
+                            <h3>📋 Características</h3>
+                            <div class="feature-grid">
+                                ${items.map(item => `
+                                    <div class="feature-item">
+                                        <div class="feature-label">${item.label}</div>
+                                        <div class="feature-value">${item.value}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
-                featuresHTML += '</ul></div>';
             }
+
+            // Determinar clase de estado
+            const estadoClase = {
+                'Disponible': 'status-disponible',
+                'Vendido': 'status-vendido',
+                'Reservado': 'status-reservado'
+            }[obra.estado] || '';
+
+            const imagenUrl = `${API_BASE}/obras/${obra.obra_id}/foto`;
+
+            // Construir metadatos comunes (fecha creación, dimensiones si existen)
+            const metaItems = [];
+            if (obra.fecha_creacion) metaItems.push({ label: 'Fecha creación', value: obra.fecha_creacion.split('T')[0] });
+            if (obra.alto && obra.ancho) metaItems.push({ label: 'Dimensiones', value: `${obra.alto} x ${obra.ancho} cm` });
+            else if (obra.alto) metaItems.push({ label: 'Alto', value: `${obra.alto} cm` });
+            else if (obra.ancho) metaItems.push({ label: 'Ancho', value: `${obra.ancho} cm` });
+
+            const metaHTML = metaItems.length > 0 ? `
+                <div class="meta-grid">
+                    ${metaItems.map(m => `
+                        <div class="meta-item">
+                            <span class="meta-label">${m.label}</span>
+                            <span class="meta-value">${m.value}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
 
             main.innerHTML = `
                 <div class="detail-container">
-                    <div class="detail-image" style="background-image: url('${obra.foto_url || 'https://via.placeholder.com/600x400'}');"></div>
+                    <div class="detail-image">
+                        <img src="${imagenUrl}" 
+                             alt="${obra.nombre}" 
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Sin+imagen';">
+                    </div>
                     <div class="detail-info">
                         <h2>${obra.nombre}</h2>
                         <p class="detail-artist">Artista: <a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a></p>
                         <span class="detail-genre">${obra.genero_nombre}</span>
                         <p class="detail-description">${obra.descripcion || ''}</p>
-                        <p><strong>Fecha de creación:</strong> ${obra.fecha_creacion}</p>
-                        <div class="detail-price">$${obra.precio_venta}</div>
-                        <div class="detail-status">Estado: ${obra.estado}</div>
+                        ${metaHTML}
+                        <div class="detail-price">$${Number(obra.precio_venta).toLocaleString()}</div>
+                        <div class="detail-status ${estadoClase}">${obra.estado}</div>
                         ${featuresHTML}
                         ${botonCompra}
                     </div>

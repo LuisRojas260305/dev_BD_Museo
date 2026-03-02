@@ -78,10 +78,16 @@
             width: 200px;
             height: 200px;
             border-radius: 50%;
+            overflow: hidden;
             background-color: #ddd;
-            background-size: cover;
-            background-position: center;
         }
+        .artist-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+
         .artist-info h2 {
             font-size: 2.5rem;
             color: #2c3e50;
@@ -120,9 +126,13 @@
         }
         .obra-image {
             height: 150px;
+            overflow: hidden;
             background-color: #ccc;
-            background-size: cover;
-            background-position: center;
+        }
+        .obra-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .obra-info {
             padding: 1rem;
@@ -145,6 +155,11 @@
             font-size: 1.5rem;
             color: #777;
         }
+
+        .a-obras{
+            text-decoration: none;
+        }
+
         footer {
             background-color: #2c3e50;
             color: white;
@@ -194,12 +209,22 @@
         }
 
         function renderizar(artista, obras) {
+            // URL de la foto del artista usando su ID
+            const fotoArtistaUrl = `${API_BASE}/artistas/${artista.artista_id}/foto`;
+
             let obrasHTML = '';
             obras.forEach(obra => {
+                // URL de la foto de la obra usando su ID
+                const fotoObraUrl = `${API_BASE}/obras/${obra.obra_id}/foto`;
                 obrasHTML += `
                     <div class="obra-card">
-                        <a href="detalle.html?id=${obra.obra_id}">
-                            <div class="obra-image" style="background-image: url('${obra.foto_url || 'https://via.placeholder.com/200x150?text=Sin+imagen'}');"></div>
+                        <a class="a-obras"  href="detalle.html?id=${obra.obra_id}">
+                            <div class="obra-image">
+                                <img src="${fotoObraUrl}" 
+                                    alt="${obra.nombre}"
+                                    onerror="this.onerror=null; this.src='https://via.placeholder.com/200x150?text=Sin+imagen';"
+                                    style="width:100%; height:100%; object-fit:cover;">
+                            </div>
                             <div class="obra-info">
                                 <h4>${obra.nombre}</h4>
                                 <p>$${Number(obra.precio_venta).toLocaleString()}</p>
@@ -211,7 +236,12 @@
 
             document.getElementById('artistMain').innerHTML = `
                 <div class="artist-header">
-                    <div class="artist-photo" style="background-image: url('${artista.foto_url || 'https://via.placeholder.com/200'}');"></div>
+                    <div class="artist-photo">
+                        <img src="${fotoArtistaUrl}" 
+                            alt="${artista.nombre} ${artista.apellido || ''}"
+                            onerror="this.onerror=null; this.src='https://via.placeholder.com/200';"
+                            style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                    </div>
                     <div class="artist-info">
                         <h2>${artista.nombre} ${artista.apellido || ''}</h2>
                         <p><strong>Nacionalidad:</strong> ${artista.nacionalidad_nombre || 'Desconocida'}</p>
@@ -226,7 +256,6 @@
                 <div class="obras-grid">${obrasHTML || '<p>No hay obras de este artista.</p>'}</div>
             `;
         }
-
         cargarArtista();
     </script>
 </body>
