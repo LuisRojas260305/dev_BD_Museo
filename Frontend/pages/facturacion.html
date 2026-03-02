@@ -25,18 +25,20 @@
 </head>
 <body>
     <header>
-        <div class="logo"><h1><a class="Titulo" href="index.html">🎨 Admin - Facturación</a></h1></div>
+        <div class="logo"><h1><a class="Titulo" href="admin-dashboard.html">🎨 Admin - Facturación</a></h1></div>
         <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
     </header>
     <div class="container">
         <h2>Emitir Factura</h2>
-        <form id="buscarForm">
-            <div class="form-group">
-                <label for="obraId">ID de Obra Reservada</label>
-                <input type="number" id="obraId" placeholder="Ej: 1" required>
-            </div>
-            <button type="submit" class="btn">Buscar obra</button>
-        </form>
+        
+        <!-- Selector de obra reservada -->
+        <div class="form-group">
+            <label for="obraSelect">Seleccionar obra reservada</label>
+            <select id="obraSelect" required>
+                <option value="">-- Seleccione una obra --</option>
+            </select>
+        </div>
+
         <div id="obraInfo" class="hidden resultado">
             <h3>Datos de la obra</h3>
             <p id="obraDetalle"></p>
@@ -66,10 +68,8 @@
 
     <script src="../js/auth.js"></script>
     <script>
-        // Constante global definida en auth.js
-        const API_BASE = window.API_BASE || 'http://localhost:3000/api';
-
-        // Verificar que el usuario sea administrador
+        
+        // Verificar administrador
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
@@ -83,26 +83,32 @@
         let compradores = [];
         let obraSeleccionada = null;
 
-        // Cargar obras reservadas al iniciar (para validar el ID ingresado)
+        // Cargar obras reservadas y llenar el select
         async function cargarObrasReservadas() {
             try {
                 const res = await fetch(`${API_BASE}/obras?estado=Reservado`);
                 if (!res.ok) throw new Error('Error al cargar obras');
                 obrasReservadas = await res.json();
+                const select = document.getElementById('obraSelect');
+                select.innerHTML = '<option value="">-- Seleccione una obra --</option>';
+                obrasReservadas.forEach(o => {
+                    const option = document.createElement('option');
+                    option.value = o.obra_id;
+                    option.textContent = `${o.nombre} (ID: ${o.obra_id}) - $${o.precio_venta}`;
+                    select.appendChild(option);
+                });
             } catch (error) {
                 console.error('Error:', error);
                 alert('No se pudieron cargar las obras reservadas');
             }
         }
 
-        // Cargar compradores (usuarios) para el select
+        // Cargar compradores (usuarios)
         async function cargarCompradores() {
             try {
                 const res = await authFetch(`${API_BASE}/usuarios`);
                 if (!res.ok) throw new Error('Error al cargar usuarios');
                 compradores = await res.json();
-                // Filtrar solo los que pueden comprar? En principio todos, pero podrías filtrar por tipo 'miembro' si aplica
-                // Por ahora mostramos todos
                 const select = document.getElementById('comprador');
                 select.innerHTML = '';
                 compradores.forEach(c => {
@@ -121,16 +127,16 @@
             }
         }
 
-        // Evento al buscar obra
-        document.getElementById('buscarForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const id = parseInt(document.getElementById('obraId').value);
-            obraSeleccionada = obrasReservadas.find(o => o.obra_id === id);
-            if (!obraSeleccionada) {
-                alert('No se encontró una obra reservada con ese ID.');
+        // Evento al cambiar la obra seleccionada
+        document.getElementById('obraSelect').addEventListener('change', function(e) {
+            const obraId = parseInt(this.value);
+            if (!obraId) {
                 document.getElementById('obraInfo').classList.add('hidden');
+                obraSeleccionada = null;
                 return;
             }
+            obraSeleccionada = obrasReservadas.find(o => o.obra_id === obraId);
+            if (!obraSeleccionada) return;
 
             // Mostrar datos de la obra
             document.getElementById('obraDetalle').innerText = `${obraSeleccionada.nombre} - ${obraSeleccionada.artista_nombre || 'Artista desconocido'} - Precio: $${obraSeleccionada.precio_venta}`;
@@ -139,15 +145,27 @@
             const total = obraSeleccionada.precio_venta + iva;
             document.getElementById('iva').innerText = iva.toFixed(2);
             document.getElementById('totalConIva').innerText = total.toFixed(2);
-            document.getElementById('obraInfo').classList.remove('hidden');
+            
+            // Calcular ganancia inicial (con el porcentaje por defecto)
+            const porcentaje = parseFloat(document.getElementById('porcentajeGanancia').value);
+            document.getElementById('gananciaMuseo').innerText = (obraSeleccionada.precio_venta * (porcentaje / 100)).toFixed(2);
 
-            // Actualizar dirección cuando cambia comprador
-            const selectComprador = document.getElementById('comprador');
-            selectComprador.addEventListener('change', function() {
-                const compradorId = parseInt(this.value);
-                const comprador = compradores.find(c => c.usuario_id === compradorId);
-                document.getElementById('direccionEnvio').value = comprador ? comprador.direccion || '' : '';
-            });
+            document.getElementById('obraInfo').classList.remove('hidden');
+        });
+
+        // Actualizar ganancia cuando cambie el porcentaje
+        document.getElementById('porcentajeGanancia').addEventListener('input', function() {
+            if (!obraSeleccionada) return;
+            const porcentaje = parseFloat(this.value) || 0;
+            const ganancia = obraSeleccionada.precio_venta * (porcentaje / 100);
+            document.getElementById('gananciaMuseo').innerText = ganancia.toFixed(2);
+        });
+
+        // Actualizar dirección cuando cambia comprador
+        document.getElementById('comprador').addEventListener('change', function() {
+            const compradorId = parseInt(this.value);
+            const comprador = compradores.find(c => c.usuario_id === compradorId);
+            document.getElementById('direccionEnvio').value = comprador ? comprador.direccion || '' : '';
         });
 
         // Evento al emitir factura
@@ -168,7 +186,6 @@
             const total = precio + iva;
             const gananciaMuseo = precio * (porcentaje / 100);
 
-            // Datos para enviar al backend
             const facturaData = {
                 obra_id: obraSeleccionada.obra_id,
                 comprador_id: compradorId,
@@ -190,7 +207,7 @@
                     const err = await res.json();
                     throw new Error(err.error || 'Error al emitir factura');
                 }
-                const factura = await res.json(); // Suponiendo que devuelve la factura creada
+                const factura = await res.json();
 
                 // Mostrar resultado
                 document.getElementById('resultadoFactura').innerHTML = `
@@ -205,8 +222,12 @@
                 document.getElementById('resultadoFactura').classList.remove('hidden');
                 document.getElementById('obraInfo').classList.add('hidden');
 
-                // Opcional: actualizar la lista de obras reservadas (quitando la vendida)
+                // Remover la obra vendida del select
                 obrasReservadas = obrasReservadas.filter(o => o.obra_id !== obraSeleccionada.obra_id);
+                const selectObra = document.getElementById('obraSelect');
+                selectObra.querySelector(`option[value="${obraSeleccionada.obra_id}"]`).remove();
+                selectObra.value = '';
+                obraSeleccionada = null;
 
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -224,7 +245,6 @@
     </script>
 </body>
 </html>
-
 
 
 
