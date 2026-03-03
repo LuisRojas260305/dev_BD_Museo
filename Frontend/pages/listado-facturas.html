@@ -46,7 +46,7 @@
     <div class="container">
         <h2>Listado de Facturas</h2>
 
-        <!-- Filtros -->
+        <!-- Filtros (opcional, por ahora sin funcionalidad) -->
         <div class="filters">
             <div class="filter-group">
                 <label for="fechaInicio">Fecha desde</label>
@@ -93,8 +93,6 @@
 
     <script src="../js/auth.js"></script>
     <script>
-        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
-
         // Verificar administrador
         (function() {
             const user = getUser();
@@ -105,16 +103,10 @@
             document.getElementById('bienvenida').innerText = `Bienvenido, ${user.nombre}`;
         })();
 
-        // Cargar facturas al iniciar y al aplicar filtros
+        // Cargar facturas
         async function cargarFacturas() {
-            const fechaInicio = document.getElementById('fechaInicio').value;
-            const fechaFin = document.getElementById('fechaFin').value;
-
-            let url = `${API_BASE}/ventas`;
-            const params = new URLSearchParams();
-            if (fechaInicio) params.append('desde', fechaInicio);
-            if (fechaFin) params.append('hasta', fechaFin);
-            if (params.toString()) url += '?' + params.toString();
+            // Por ahora no usamos filtros de fecha, pero se pueden añadir después
+            const url = `${API_BASE}/ventas/facturas`;
 
             try {
                 const res = await authFetch(url);
@@ -136,46 +128,47 @@
 
             let html = '';
             facturas.forEach(f => {
-                const fecha = new Date(f.fecha).toLocaleDateString();
+                const fecha = new Date(f.fecha_emision).toLocaleDateString();
                 const total = Number(f.total).toFixed(2);
                 const ganancia = Number(f.ganancia_museo).toFixed(2);
                 html += `
                     <tr>
-                        <td>${f.venta_id || f.id}</td>
+                        <td>${f.factura_id}</td>
                         <td>${f.obra_nombre || 'N/A'}</td>
                         <td>${f.comprador_nombre || 'N/A'}</td>
                         <td>${fecha}</td>
                         <td>$${total}</td>
                         <td>$${ganancia}</td>
-                        <td><button class="btn btn-small" onclick="verDetalle(${f.venta_id || f.id})">Ver</button></td>
+                        <td><button class="btn btn-small" onclick="verDetalle(${f.factura_id})">Ver</button></td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
         }
 
-        // Ver detalle de factura (cargar datos adicionales si es necesario)
+        // Ver detalle de factura
         async function verDetalle(id) {
             try {
-                const res = await authFetch(`${API_BASE}/ventas/${id}`);
+                const res = await authFetch(`${API_BASE}/ventas/facturas/${id}`);
                 if (!res.ok) throw new Error('No se pudo obtener el detalle');
                 const factura = await res.json();
 
-                // Mostrar modal con los datos
                 const modalBody = document.getElementById('modalBody');
                 modalBody.innerHTML = `
-                    <p><strong>ID:</strong> ${factura.venta_id || factura.id}</p>
-                    <p><strong>Obra:</strong> ${factura.obra_nombre || 'N/A'}</p>
-                    <p><strong>Comprador:</strong> ${factura.comprador_nombre || 'N/A'} (${factura.comprador_email || 'Sin email'})</p>
-                    <p><strong>Dirección envío:</strong> ${factura.direccion_envio || 'N/A'}</p>
-                    <p><strong>Fecha:</strong> ${new Date(factura.fecha).toLocaleString()}</p>
-                    <p><strong>Precio obra:</strong> $${Number(factura.precio_venta).toFixed(2)}</p>
+                    <p><strong>Factura ID:</strong> ${factura.factura_id}</p>
+                    <p><strong>Venta ID:</strong> ${factura.venta_id}</p>
+                    <p><strong>Obra:</strong> ${factura.obra_nombre}</p>
+                    <p><strong>Artista:</strong> ${factura.artista_nombre}</p>
+                    <p><strong>Comprador:</strong> ${factura.comprador_nombre} (${factura.comprador_email})</p>
+                    <p><strong>Dirección envío:</strong> ${factura.direccion_envio}</p>
+                    <p><strong>Fecha emisión:</strong> ${new Date(factura.fecha_emision).toLocaleString()}</p>
+                    <p><strong>Precio obra:</strong> $${Number(factura.precio_obra).toFixed(2)}</p>
                     <p><strong>IVA (16%):</strong> $${Number(factura.iva).toFixed(2)}</p>
                     <p><strong>Total con IVA:</strong> $${Number(factura.total).toFixed(2)}</p>
                     <p><strong>% Ganancia museo:</strong> ${factura.porcentaje_ganancia}%</p>
                     <p><strong>Ganancia museo:</strong> $${Number(factura.ganancia_museo).toFixed(2)}</p>
                 `;
-                document.getElementById('modalTitulo').innerText = `Factura #${factura.venta_id || factura.id}`;
+                document.getElementById('modalTitulo').innerText = `Factura #${factura.factura_id}`;
                 document.getElementById('modalFactura').style.display = 'flex';
             } catch (error) {
                 alert('Error al cargar detalle: ' + error.message);
@@ -195,7 +188,7 @@
             window.location.href = 'index.html';
         };
 
-        // Cerrar modal si se hace clic fuera del contenido
+        // Cerrar modal si se hace clic fuera
         window.onclick = function(event) {
             const modal = document.getElementById('modalFactura');
             if (event.target === modal) {

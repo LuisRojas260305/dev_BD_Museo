@@ -8,4 +8,8 @@ router.put('/:id/concretar', verificarToken, verificarAdmin, ventaController.con
 router.put('/:id/cancelar', verificarToken, verificarAdmin, ventaController.cancelarVenta);
 router.get('/', verificarToken, verificarAdmin, ventaController.getVentas);
 
+// Rutas para facturas
+router.get('/facturas', verificarToken, verificarAdmin, ventaController.getFacturas);
+router.get('/facturas/:id', verificarToken, verificarAdmin, ventaController.getFacturaById);
+
 module.exports = router;

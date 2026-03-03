@@ -38,6 +38,15 @@
             <button class="btn-green" onclick="abrirModalMembresia()">Activar Membresía ($10)</button>
         </div>
 
+        <!-- Sección para administradores (visible solo para admins) -->
+        <div id="adminSection" class="section" style="display: none;">
+            <h3>Panel de Administración</h3>
+            <p>Accede al panel de control para gestionar el sistema.</p>
+            <a href="admin-dashboard.html" style="text-decoration: none;">
+                <button class="btn-blue" style="width: auto; padding: 10px 20px;">Ir al Dashboard</button>
+            </a>
+        </div>
+
         <div class="section">
             <h3>Cambiar Contraseña</h3>
             <input type="password" id="pass1" placeholder="Nueva Contraseña">
@@ -78,7 +87,7 @@
             const res = await authFetch(`${API_BASE}/usuarios/perfil`);
             const user = await res.json();
             if (res.ok) {
-                // 👇 Guardar el usuario actualizado en localStorage
+                // Guardar el usuario actualizado en localStorage
                 localStorage.setItem('user', JSON.stringify(user));
 
                 codigoReal = user.codigo_seguridad || "N/A";
@@ -101,8 +110,15 @@
                     ${codigoHTML}
                 `;
 
+                // Mostrar/ocultar sección de activar membresía
                 const activarSection = document.getElementById('activarMembresiaSection');
                 activarSection.style.display = user.tipo === 'usuario' ? 'block' : 'none';
+
+                // Mostrar/ocultar sección de administrador
+                const adminSection = document.getElementById('adminSection');
+                if (adminSection) {
+                    adminSection.style.display = user.tipo === 'administrador' ? 'block' : 'none';
+                }
             }
         }
 
@@ -244,7 +260,7 @@
             }
         }
 
-        // --- REGENERAR CÓDIGO --- (sin cambios, pero asegurar que usa preguntasUsuario)
+        // --- REGENERAR CÓDIGO ---
         async function abrirModalRegenerar() {
             const res = await authFetch(`${API_BASE}/usuarios/mis-preguntas`);
             preguntasUsuario = await res.json();
@@ -281,7 +297,7 @@
             } else { alert(data.error); }
         }
 
-        // --- CAMBIAR PREGUNTAS --- (sin cambios)
+        // --- CAMBIAR PREGUNTAS ---
         async function abrirModalPreguntas() {
             const res = await fetch(`${API_BASE}/preguntas-seguridad`);
             todasLasPreguntas = await res.json();

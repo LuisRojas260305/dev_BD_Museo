@@ -1,4 +1,4 @@
-const API_BASE = 'https://rjkt6pbm-3000.use2.devtunnels.ms/api';
+const API_BASE = 'http://localhost:3000/api';
 
 function setAuth(token, user) {
     localStorage.setItem('token', token);

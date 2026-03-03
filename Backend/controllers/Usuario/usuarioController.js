@@ -372,6 +372,90 @@ function convertirExpiracion(expString) {
     return ultimoDia.toISOString().split('T')[0];
 }
 
+// Obtener todos los usuarios (solo admin)
+const getAllUsuarios = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT u.usuario_id, u.email, u.nombre, u.apellido, u.tipo, u.fecha_registro, u.comentario,
+             m.codigo_seguridad
+      FROM Usuario u
+      LEFT JOIN Miembro m ON u.usuario_id = m.usuario_id
+      ORDER BY u.usuario_id
+    `);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Obtener un usuario por ID (admin)
+const getUsuarioById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query(`
+      SELECT u.usuario_id, u.email, u.nombre, u.apellido, u.tipo, u.fecha_registro, u.comentario,
+             m.tarjeta_numero, m.tarjeta_nombre, m.tarjeta_expiracion, m.codigo_seguridad
+      FROM Usuario u
+      LEFT JOIN Miembro m ON u.usuario_id = m.usuario_id
+      WHERE u.usuario_id = ?
+    `, [id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Actualizar usuario (admin) – no se actualiza la contraseña aquí
+const updateUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, apellido, email, tipo, comentario } = req.body;
+
+    // Verificar que el usuario existe
+    const [exist] = await pool.query('SELECT usuario_id FROM Usuario WHERE usuario_id = ?', [id]);
+    if (exist.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    // Verificar que el email no esté duplicado (si se cambia)
+    if (email) {
+      const [emailExist] = await pool.query('SELECT usuario_id FROM Usuario WHERE email = ? AND usuario_id != ?', [email, id]);
+      if (emailExist.length > 0) return res.status(409).json({ error: 'El email ya está en uso' });
+    }
+
+    await pool.query(
+      `UPDATE Usuario SET nombre = ?, apellido = ?, email = ?, tipo = ?, comentario = ? WHERE usuario_id = ?`,
+      [nombre, apellido || null, email, tipo, comentario || null, id]
+    );
+
+    // Si se cambia a administrador, asegurar que exista en tabla Administrador
+    if (tipo === 'administrador') {
+      await pool.query(
+        'INSERT IGNORE INTO Administrador (usuario_id) VALUES (?)',
+        [id]
+      );
+    } else {
+      // Si se quita admin, eliminar de tabla Administrador
+      await pool.query('DELETE FROM Administrador WHERE usuario_id = ?', [id]);
+    }
+
+    res.json({ message: 'Usuario actualizado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Eliminar usuario (admin)
+const deleteUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [result] = await pool.query('DELETE FROM Usuario WHERE usuario_id = ?', [id]);
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json({ message: 'Usuario eliminado' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   cambiarPasswordPerfil,
   obtenerMisPreguntas,
@@ -386,5 +470,9 @@ module.exports = {
   pagarMembresia,
   recuperarCodigo,
   guardarRespuestasSeguridad,
-  convertirExpiracion
+  convertirExpiracion,
+  getAllUsuarios,
+  getUsuarioById,
+  updateUsuario,
+  deleteUsuario,
 };

@@ -173,9 +173,55 @@ const getVentas = async (req, res) => {
     }
 };
 
+// Obtener todas las facturas (solo admin)
+const getFacturas = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT f.factura_id, f.venta_id, f.fecha_emision, f.precio_obra, f.iva,
+             f.porcentaje_ganancia, f.ganancia_museo, f.total, f.direccion_envio,
+             v.obra_id, o.nombre as obra_nombre, o.precio_venta,
+             u.usuario_id as comprador_id, u.nombre as comprador_nombre, u.email as comprador_email
+      FROM Factura f
+      JOIN Venta v ON f.venta_id = v.venta_id
+      JOIN Obra o ON v.obra_id = o.obra_id
+      JOIN Usuario u ON v.comprador_id = u.usuario_id
+      ORDER BY f.fecha_emision DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Obtener una factura por ID (solo admin)
+const getFacturaById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query(`
+      SELECT f.factura_id, f.venta_id, f.fecha_emision, f.precio_obra, f.iva,
+             f.porcentaje_ganancia, f.ganancia_museo, f.total, f.direccion_envio,
+             v.obra_id, o.nombre as obra_nombre, o.precio_venta,
+             u.usuario_id as comprador_id, u.nombre as comprador_nombre, u.email as comprador_email,
+             a.nombre as artista_nombre
+      FROM Factura f
+      JOIN Venta v ON f.venta_id = v.venta_id
+      JOIN Obra o ON v.obra_id = o.obra_id
+      JOIN Usuario u ON v.comprador_id = u.usuario_id
+      JOIN Artista a ON o.artista_id = a.artista_id
+      WHERE f.factura_id = ?
+    `, [id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Factura no encontrada' });
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   reservarObra,
   concretarVenta,
   cancelarVenta,
-  getVentas
+  getVentas,
+  getFacturas,
+  getFacturaById
 };

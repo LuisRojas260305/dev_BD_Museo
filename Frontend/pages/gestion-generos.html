@@ -26,7 +26,7 @@
         .form-container { background:white; padding:2rem; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:2rem; }
         .form-group { margin-bottom:1rem; }
         label { display:block; margin-bottom:0.3rem; font-weight:600; }
-        input { width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
+        input, textarea { width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
         .hidden { display:none; }
         footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
     </style>
@@ -48,16 +48,17 @@
                     <input type="text" id="nombre" required>
                 </div>
                 <div class="form-group">
-                    <label for="atributos">Atributos (separados por coma)</label>
-                    <input type="text" id="atributos" placeholder="Ej: tecnica,dimensiones,peso">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" rows="3"></textarea>
                 </div>
+                <!-- Podríamos añadir un campo de comentario si se desea -->
                 <button type="submit" class="btn btn-success">Guardar</button>
                 <button type="button" class="btn btn-danger" onclick="cancelarFormulario()">Cancelar</button>
             </form>
         </div>
         <div id="generosList">
             <table>
-                <thead><tr><th>ID</th><th>Nombre</th><th>Atributos</th><th>Acciones</th></tr></thead>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Acciones</th></tr></thead>
                 <tbody id="tablaGeneros"></tbody>
             </table>
         </div>
@@ -66,8 +67,6 @@
 
     <script src="../js/auth.js"></script>
     <script>
-        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
-
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
@@ -86,7 +85,7 @@
 
         async function cargarGeneros() {
             try {
-                const res = await fetch(`${API_BASE}/genero`); // público
+                const res = await fetch(`${API_BASE}/genero`);
                 if (!res.ok) throw new Error('Error al cargar géneros');
                 generos = await res.json();
                 renderGeneros();
@@ -103,7 +102,7 @@
                 tr.innerHTML = `
                     <td>${g.genero_id}</td>
                     <td>${g.nombre}</td>
-                    <td>${g.atributos || ''}</td>
+                    <td>${g.descripcion || ''}</td>
                     <td>
                         <button class="btn" onclick="editarGenero(${g.genero_id})">Editar</button>
                         <button class="btn btn-danger" onclick="eliminarGenero(${g.genero_id})">Eliminar</button>
@@ -119,7 +118,7 @@
                 formTitle.innerText = 'Editar Género';
                 document.getElementById('generoId').value = genero.genero_id;
                 document.getElementById('nombre').value = genero.nombre;
-                document.getElementById('atributos').value = genero.atributos || '';
+                document.getElementById('descripcion').value = genero.descripcion || '';
                 editId = genero.genero_id;
             } else {
                 formTitle.innerText = 'Nuevo Género';
@@ -137,7 +136,8 @@
             e.preventDefault();
             const generoData = {
                 nombre: document.getElementById('nombre').value,
-                atributos: document.getElementById('atributos').value
+                descripcion: document.getElementById('descripcion').value || null
+                // Si quisieras comentario, añádelo aquí
             };
 
             try {

@@ -288,9 +288,14 @@
             const user = getUser();
             const authLinksDiv = document.getElementById('authLinks');
             if (loggedIn) {
+                let adminLink = '';
+                if (user.tipo === 'administrador') {
+                    adminLink = '<a href="admin-dashboard.html" style="color: white; margin-left: 1rem;">Admin</a>';
+                }
                 authLinksDiv.innerHTML = `
                     <span style="color: white;">Bienvenido, ${user.nombre}</span>
                     <a href="perfil.html" style="color: white; margin-left: 1rem;">Mi perfil</a>
+                    ${adminLink}
                     <a class="logout-btn" onclick="logout()">Cerrar sesión</a>
                 `;
             } else {
