@@ -178,7 +178,8 @@
             tematica: []
         };
         let editId = null;
-        let catalogsLoaded = false; // Bandera para saber si ya se cargaron todos los catálogos
+        let catalogsLoaded = false;
+        let currentEstado = null; // Para guardar el estado al editar
 
         const generoPrefijo = {
             1: 'PIN', // Pintura
@@ -214,7 +215,6 @@
             if (catalogsLoaded) {
                 cargarCamposPorGenero();
             } else {
-                // Esperar a que los catálogos se carguen (se llamará desde Promise.all)
                 setTimeout(() => {
                     if (catalogsLoaded) cargarCamposPorGenero();
                 }, 100);
@@ -286,7 +286,6 @@
             const contenedor = document.getElementById('camposEspecificos');
             contenedor.innerHTML = '';
 
-            // Verificar que los catálogos necesarios existen
             if (!catalogsLoaded) {
                 contenedor.innerHTML = '<p>Cargando catálogos...</p>';
                 return;
@@ -314,7 +313,6 @@
                         </div>
                     `;
                     llenarSelect('soporte_id', catalogos.soporte, 'soporte_id', 'nombre');
-                    // Generar checkboxes para estilos
                     const estilosDiv = document.getElementById('estilosCheckbox');
                     catalogos.estilo.forEach(e => {
                         const div = document.createElement('div');
@@ -330,7 +328,6 @@
                         div.appendChild(label);
                         estilosDiv.appendChild(div);
                     });
-                    // Generar checkboxes para temáticas
                     const tematicasDiv = document.getElementById('tematicasCheckbox');
                     catalogos.tematica.forEach(t => {
                         const div = document.createElement('div');
@@ -376,7 +373,6 @@
                         </div>
                     `;
                     llenarSelect('tipo_id', catalogos.tipoEscultura, 'tipo_id', 'nombre');
-                    // Materiales
                     const materialesDiv = document.getElementById('materialesCheckbox');
                     catalogos.material.forEach(m => {
                         const div = document.createElement('div');
@@ -392,7 +388,6 @@
                         div.appendChild(label);
                         materialesDiv.appendChild(div);
                     });
-                    // Técnicas
                     const tecnicasDiv = document.getElementById('tecnicasCheckbox');
                     catalogos.tecnicaEscultura.forEach(t => {
                         const div = document.createElement('div');
@@ -532,7 +527,6 @@
                     `;
                     llenarSelect('pieza_id', catalogos.piezaOrfebreria, 'pieza_id', 'nombre');
                     llenarSelect('metal_predominante_id', catalogos.metales, 'metal_id', 'nombre');
-                    // Otros metales
                     const otrosDiv = document.getElementById('otrosMetalesCheckbox');
                     catalogos.metales.forEach(m => {
                         const div = document.createElement('div');
@@ -608,9 +602,75 @@
                 document.getElementById('alto').value = obra.alto;
                 document.getElementById('ancho').value = obra.ancho;
                 document.getElementById('descripcion').value = obra.descripcion || '';
+                currentEstado = obra.estado; // Guardar estado actual
 
                 // Cargar campos específicos según género
                 cargarCamposPorGenero();
+
+                // Llenar campos específicos después de que se hayan creado
+                setTimeout(() => {
+                    if (obra.genero_id == 1) {
+                        if (obra.soporte_id) document.getElementById('soporte_id').value = obra.soporte_id;
+                        if (obra.estilo_ids && Array.isArray(obra.estilo_ids)) {
+                            obra.estilo_ids.forEach(id => {
+                                const cb = document.getElementById(`estilo_${id}`);
+                                if (cb) cb.checked = true;
+                            });
+                        }
+                        if (obra.tematica_ids && Array.isArray(obra.tematica_ids)) {
+                            obra.tematica_ids.forEach(id => {
+                                const cb = document.getElementById(`tematica_${id}`);
+                                if (cb) cb.checked = true;
+                            });
+                        }
+                    } else if (obra.genero_id == 2) {
+                        if (obra.tipo_id) document.getElementById('tipo_id').value = obra.tipo_id;
+                        if (obra.peso) document.getElementById('peso').value = obra.peso;
+                        if (obra.profundidad) document.getElementById('profundidad').value = obra.profundidad;
+                        if (obra.material_ids && Array.isArray(obra.material_ids)) {
+                            obra.material_ids.forEach(id => {
+                                const cb = document.getElementById(`material_${id}`);
+                                if (cb) cb.checked = true;
+                            });
+                        }
+                        if (obra.tecnica_ids && Array.isArray(obra.tecnica_ids)) {
+                            obra.tecnica_ids.forEach(id => {
+                                const cb = document.getElementById(`tecnica_${id}`);
+                                if (cb) cb.checked = true;
+                            });
+                        }
+                    } else if (obra.genero_id == 3) {
+                        if (obra.tiraje) document.getElementById('tiraje').value = obra.tiraje;
+                        if (obra.obturacion) document.getElementById('obturacion').value = obra.obturacion;
+                        if (obra.apertura) document.getElementById('apertura').value = obra.apertura;
+                        if (obra.iso) document.getElementById('iso').value = obra.iso;
+                        if (obra.resolucion) document.getElementById('resolucion').value = obra.resolucion;
+                        if (obra.fecha_captura) document.getElementById('fecha_captura').value = obra.fecha_captura.split('T')[0];
+                        if (obra.impresion_id) document.getElementById('impresion_id').value = obra.impresion_id;
+                        if (obra.camara_id) document.getElementById('camara_id').value = obra.camara_id;
+                        if (obra.tecnica_id) document.getElementById('tecnica_id').value = obra.tecnica_id;
+                    } else if (obra.genero_id == 4) {
+                        if (obra.profundidad) document.getElementById('profundidad_ceramica').value = obra.profundidad;
+                        if (obra.diametro) document.getElementById('diametro').value = obra.diametro;
+                        if (obra.funcionalidad) document.getElementById('funcionalidad').value = obra.funcionalidad;
+                        if (obra.coccion_id) document.getElementById('coccion_id').value = obra.coccion_id;
+                        if (obra.arcilla_id) document.getElementById('arcilla_id').value = obra.arcilla_id;
+                        if (obra.modelado_id) document.getElementById('modelado_id').value = obra.modelado_id;
+                        if (obra.esmaltado_id) document.getElementById('esmaltado_id').value = obra.esmaltado_id;
+                    } else if (obra.genero_id == 5) {
+                        if (obra.profundidad) document.getElementById('profundidad_orfebreria').value = obra.profundidad;
+                        if (obra.diametro) document.getElementById('diametro_orfebreria').value = obra.diametro;
+                        if (obra.peso) document.getElementById('peso_orfebreria').value = obra.peso;
+                        if (obra.pieza_id) document.getElementById('pieza_id').value = obra.pieza_id;
+                        if (obra.metal_predominante_id) document.getElementById('metal_predominante_id').value = obra.metal_predominante_id;
+                        if (obra.otros_metal_ids && Array.isArray(obra.otros_metal_ids)) {
+                            obra.otros_metal_ids.forEach(id => {
+                                const cb = document.getElementById(`otroMetal_${id}`);
+                                if (cb) cb.checked = true;
+                            });
+                        }
+                    }
+                }, 100);
 
                 // Mostrar vista previa de la foto si existe
                 const fotoUrl = `${API_BASE}/obras/${id}/foto`;
@@ -661,7 +721,13 @@
             formData.append('alto', document.getElementById('alto').value);
             formData.append('ancho', document.getElementById('ancho').value);
             formData.append('descripcion', document.getElementById('descripcion').value || '');
-            formData.append('estado', 'Disponible');
+
+            // Estado según sea creación o edición
+            if (editId) {
+                formData.append('estado', currentEstado || 'Disponible');
+            } else {
+                formData.append('estado', 'Disponible');
+            }
 
             // Agregar imagen si se seleccionó
             const imagenFile = document.getElementById('imagenFile').files[0];
@@ -741,15 +807,13 @@
                 if (editId) {
                     url += `/${editId}`;
                     method = 'PUT';
-                    alert('La edición de obras no está disponible en esta versión');
-                    return;
                 }
                 const res = await authFetch(url, {
                     method,
                     body: formData
                 });
                 if (res.ok) {
-                    alert('Obra creada');
+                    alert(editId ? 'Obra actualizada' : 'Obra creada');
                     cancelarFormulario();
                     cargarObras();
                 } else {
@@ -767,11 +831,14 @@
             document.getElementById('previewContainer').innerHTML = '';
             document.getElementById('codigo_inventario').value = '';
             editId = null;
+            currentEstado = null;
             document.getElementById('formTitle').innerText = 'Nueva Obra';
         }
 
         function cancelarFormulario() {
             document.getElementById('formContainer').classList.add('hidden');
+            editId = null;
+            currentEstado = null;
         }
     </script>
 </body>

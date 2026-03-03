@@ -55,7 +55,8 @@
 
     <script src="../js/auth.js"></script>
     <script>
-        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
+        // Asegurar que API_BASE está definida (puede estar en auth.js)
+        
 
         // Verificar admin
         (function() {
@@ -70,15 +71,37 @@
         let compradores = [];
 
         async function cargarCompradores() {
-            try {
-                const res = await authFetch(`${API_BASE}/usuarios?tipo=miembro`); // Ajusta según tu backend
-                if (!res.ok) throw new Error('Error al cargar compradores');
-                compradores = await res.json();
-                renderCompradores();
-            } catch (error) {
-                console.error(error);
-                alert('No se pudieron cargar los compradores');
+            const posiblesUrls = [
+                `${API_BASE}/usuarios?tipo=miembro`, // primero la original
+                `${API_BASE}/usuarios`,
+                `${API_BASE}/miembros`,
+                `${API_BASE}/usuarios/miembros`
+            ];
+            for (let url of posiblesUrls) {
+                try {
+                    console.log('Intentando con:', url);
+                    const res = await authFetch(url);
+                    if (res.ok) {
+                        let usuarios = await res.json();
+                        // Si la respuesta es un array, lo usamos; si no, adaptamos
+                        if (!Array.isArray(usuarios)) {
+                            // Podría ser que devuelva un objeto con datos
+                            usuarios = usuarios.data || usuarios;
+                        }
+                        // Filtrar miembros si es necesario
+                        if (url.includes('?tipo=miembro')) {
+                            compradores = usuarios;
+                        } else {
+                            compradores = usuarios.filter(u => u.tipo === 'miembro');
+                        }
+                        renderCompradores();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Falló con', url, e);
+                }
             }
+            alert('No se pudo cargar los compradores. Verifica la URL del API y los endpoints disponibles.');
         }
 
         function renderCompradores() {
@@ -88,7 +111,7 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${c.usuario_id}</td>
-                    <td>${c.nombre}</td>
+                    <td>${c.nombre} ${c.apellido || ''}</td>
                     <td>${c.email}</td>
                     <td>${c.telefono || ''}</td>
                     <td>${c.tipo === 'miembro' ? 'Sí' : 'No'}</td>
@@ -108,7 +131,7 @@
                 const comprador = await res.json();
                 const info = `
                     <p><strong>ID:</strong> ${comprador.usuario_id}</p>
-                    <p><strong>Nombre:</strong> ${comprador.nombre}</p>
+                    <p><strong>Nombre:</strong> ${comprador.nombre} ${comprador.apellido || ''}</p>
                     <p><strong>Email:</strong> ${comprador.email}</p>
                     <p><strong>Teléfono:</strong> ${comprador.telefono || ''}</p>
                     <p><strong>Dirección:</strong> ${comprador.direccion || ''}</p>
