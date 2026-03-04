@@ -87,7 +87,7 @@
 </head>
 <body>
     <header>
-        <div class="logo"><h1><a class="Nav" href="admin-dashboard.html">🎨 Admin - Obras</a></h1></div>
+        <div class="logo"><h1><a class="Nav" href="../admin-dashboard.html">🎨 Admin - Obras</a></h1></div>
         <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
     </header>
     <div class="container">
@@ -157,7 +157,7 @@
     </div>
     <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
-    <script src="../js/auth.js"></script>
+    <script src="../../../js/auth.js"></script>
     <script>
         let artistas = [], generos = [], epocas = [];
         let catalogos = {
@@ -194,7 +194,7 @@
             
             if (!user || user.tipo !== 'administrador') {
                 alert('Acceso no autorizado');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
                 
             document.getElementById('userEmail').innerText = user.email;

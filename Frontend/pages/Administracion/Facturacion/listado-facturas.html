@@ -36,7 +36,7 @@
 </head>
 <body>
     <header>
-        <div class="logo"><h1><a class="Nav" href="admin-dashboard.html" style="text-decoration:none; color:white;">🎨 Admin - Facturas</a></h1></div>
+        <div class="logo"><h1><a class="Nav" href="../admin-dashboard.html" style="text-decoration:none; color:white;">🎨 Admin - Facturas</a></h1></div>
         <div class="user-info">
             <span id="bienvenida"></span>
             <a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a>
@@ -91,14 +91,14 @@
 
     <footer><p>&copy; 2025 Museo de Arte Contemporáneo</p></footer>
 
-    <script src="../js/auth.js"></script>
+    <script src="../../../js/auth.js"></script>
     <script>
         // Verificar administrador
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
                 alert('Acceso no autorizado');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
             document.getElementById('bienvenida').innerText = `Bienvenido, ${user.nombre}`;
         })();

@@ -29,7 +29,7 @@
 </head>
 <body>
     <header>
-        <div class="logo"><h1><a class="Titulo" href="admin-dashboard.html">🎨 Admin - Resumen Facturación</a></h1></div>
+        <div class="logo"><h1><a class="Titulo" href="../admin-dashboard.html">🎨 Admin - Resumen Facturación</a></h1></div>
         <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
     </header>
     <div class="container">
@@ -55,18 +55,23 @@
     </div>
     <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
-    <script src="../js/auth.js"></script>
+    <script src="../../../js/auth.js"></script>
     <script>
-        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
-
+        // Verificar administrador
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
                 alert('Acceso no autorizado');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
             document.getElementById('userEmail').innerText = user.email;
         })();
+
+        // Función para parsear fecha local
+        function parseFechaLocal(fechaStr) {
+            const [year, month, day] = fechaStr.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        }
 
         document.getElementById('periodoForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -78,13 +83,24 @@
                 return;
             }
 
-            const params = new URLSearchParams({ desde: fechaInicio, hasta: fechaFin });
+            // Convertir fechas para filtrado manual
+            const inicio = parseFechaLocal(fechaInicio);
+            const fin = parseFechaLocal(fechaFin);
+            fin.setHours(23, 59, 59, 999);
 
             try {
-                const res = await authFetch(`${API_BASE}/ventas?${params}`);
-                if (!res.ok) throw new Error('Error al obtener ventas');
-                const ventas = await res.json();
-                renderResumen(ventas);
+                // Usar el endpoint de facturas (solo ventas concretadas)
+                const res = await authFetch(`${API_BASE}/ventas/facturas`);
+                if (!res.ok) throw new Error('Error al obtener facturas');
+                const facturas = await res.json();
+
+                // Filtrar por fecha (asumiendo que el backend no lo hace)
+                const filtradas = facturas.filter(f => {
+                    const fechaEmision = new Date(f.fecha_emision);
+                    return fechaEmision >= inicio && fechaEmision <= fin;
+                });
+
+                renderResumen(filtradas);
             } catch (error) {
                 console.error(error);
                 document.getElementById('tablaResumen').innerHTML = `<tr><td colspan="6" style="color:#e74c3c;">Error: ${error.message}</td></tr>`;
@@ -92,30 +108,40 @@
             }
         });
 
-        function renderResumen(ventas) {
+        function renderResumen(facturas) {
             const tbody = document.getElementById('tablaResumen');
             tbody.innerHTML = '';
             let totalGanancia = 0, totalRecaudado = 0;
 
-            if (ventas.length === 0) {
+            if (!facturas || facturas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6">No hay facturas en el período</td></tr>';
                 document.getElementById('totales').innerHTML = '';
                 return;
             }
 
-            ventas.forEach(v => {
+            facturas.forEach(f => {
+                // Depuración: ver la estructura en consola
+                console.log('Factura:', f);
+
+                // Asegurar que los valores sean números
+                const precioObra = Number(f.precio_obra) || 0;
+                const porcentaje = f.porcentaje_ganancia !== undefined ? f.porcentaje_ganancia : 'N/A';
+                const ganancia = Number(f.ganancia_museo) || 0;
+                const total = Number(f.total) || 0;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${v.venta_id || v.id}</td>
-                    <td>${new Date(v.fecha).toLocaleDateString()}</td>
-                    <td>$${Number(v.precio_venta).toFixed(2)}</td>
-                    <td>${v.porcentaje_ganancia}%</td>
-                    <td>$${Number(v.ganancia_museo).toFixed(2)}</td>
-                    <td>$${Number(v.total).toFixed(2)}</td>
+                    <td>${f.factura_id || f.venta_id || 'N/A'}</td>
+                    <td>${new Date(f.fecha_emision).toLocaleDateString()}</td>
+                    <td>$${precioObra.toFixed(2)}</td>
+                    <td>${porcentaje}%</td>
+                    <td>$${ganancia.toFixed(2)}</td>
+                    <td>$${total.toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
-                totalGanancia += Number(v.ganancia_museo);
-                totalRecaudado += Number(v.total);
+
+                totalGanancia += ganancia;
+                totalRecaudado += total;
             });
 
             document.getElementById('totales').innerHTML = `
@@ -126,7 +152,7 @@
         window.logout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'index.html';
+            window.location.href = '../../index.html';
         };
     </script>
 </body>

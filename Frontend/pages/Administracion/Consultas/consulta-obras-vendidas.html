@@ -29,7 +29,7 @@
 </head>
 <body>
     <header>
-        <div class="logo"><h1><a class="Titulo" href="admin-dashboard.html">🎨 Admin - Obras Vendidas</a></h1></div>
+        <div class="logo"><h1><a class="Titulo" href="../admin-dashboard.html">🎨 Admin - Obras Vendidas</a></h1></div>
         <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
     </header>
     <div class="container">
@@ -54,17 +54,14 @@
     </div>
     <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
-    <script src="../js/auth.js"></script>
+    <script src="../../../js/auth.js"></script>
     <script>
-        // Si auth.js no define API_BASE, se usa un valor por defecto (ajusta según tu backend)
-        //const API_BASE = window.API_BASE || 'http://localhost:3000/api';
-
-        // Verificar que el usuario sea administrador
+        // Verificar administrador
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
                 alert('Acceso no autorizado');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
             document.getElementById('userEmail').innerText = user.email;
         })();
@@ -72,7 +69,7 @@
         // Función para formatear fecha (YYYY-MM-DD a objeto Date)
         function parseFechaLocal(fechaStr) {
             const [year, month, day] = fechaStr.split('-').map(Number);
-            return new Date(year, month - 1, day); // Mes en JS es 0-indexado
+            return new Date(year, month - 1, day);
         }
 
         // Evento del formulario
@@ -87,14 +84,10 @@
                 return;
             }
 
-            // Convertir a objetos Date para comparar (la API puede requerir formato ISO)
-            const inicio = parseFechaLocal(fechaInicio);
-            const fin = parseFechaLocal(fechaFin);
-            fin.setHours(23, 59, 59, 999); // incluir todo el día final
-
-            // Construir URL con parámetros de consulta
+            // Construir URL con filtros: estado=vendida + fechas (si el backend las soporta)
             const params = new URLSearchParams({
-                desde: fechaInicio,  // o inicio.toISOString().split('T')[0] si el backend espera YYYY-MM-DD
+                estado: 'vendida',          // <-- Solo ventas vendidas
+                desde: fechaInicio,
                 hasta: fechaFin
             });
 
@@ -106,14 +99,19 @@
                 }
                 const ventas = await response.json();
 
-                // Filtrar localmente si el backend no soporta filtrado por fecha
-                // Pero asumimos que el backend ya filtró. Si no, podemos filtrar aquí:
-                // const filtradas = ventas.filter(v => {
-                //     const fechaVenta = new Date(v.fecha);
-                //     return fechaVenta >= inicio && fechaVenta <= fin;
-                // });
+                // Si el backend no filtró por fechas, podemos filtrar manualmente:
+                const inicio = parseFechaLocal(fechaInicio);
+                const fin = parseFechaLocal(fechaFin);
+                fin.setHours(23, 59, 59, 999);
 
-                renderVentas(ventas); // Si el backend ya filtró, usamos ventas directamente
+                const filtradas = ventas.filter(v => {
+                    // Asegurar que solo se consideren las vendidas (por si acaso)
+                    if (v.estado !== 'vendida') return false;
+                    const fechaVenta = v.fecha_venta ? new Date(v.fecha_venta) : null;
+                    return fechaVenta && fechaVenta >= inicio && fechaVenta <= fin;
+                });
+
+                renderVentas(filtradas);
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('tablaVentas').innerHTML = `<tr><td colspan="6" style="color:#e74c3c;">Error: ${error.message}</td></tr>`;
@@ -130,22 +128,64 @@
             }
 
             ventas.forEach(v => {
-                // Ajusta los nombres de propiedades según lo que devuelva tu backend
-                // Ejemplo: v.venta_id, v.obra_nombre, v.comprador_nombre, v.fecha, v.precio_venta, v.total
+                // Depuración: mira la consola para ver la estructura real
+                console.log('Venta:', v);
+
+                // ID de la venta/factura
+                const id = v.venta_id || v.id || v.factura_id || 'N/A';
+
+                // Nombre de la obra
+                const obra = v.obra_nombre || v.nombre_obra || 'N/A';
+
+                // Nombre del comprador
+                const comprador = v.comprador_nombre || v.nombre_comprador || 'N/A';
+
+                // Fecha: usar fecha_venta (para vendidas)
+                let fechaStr = 'Fecha no disponible';
+                if (v.fecha_venta) {
+                    fechaStr = new Date(v.fecha_venta).toLocaleDateString();
+                } else if (v.fecha_emision) {
+                    fechaStr = new Date(v.fecha_emision).toLocaleDateString();
+                } else if (v.fecha) {
+                    fechaStr = new Date(v.fecha).toLocaleDateString();
+                }
+
+                // Precio de la obra (sin IVA) - en gestión de ventas es precio_venta
+                let precio = 0;
+                if (v.precio_venta !== undefined) {
+                    precio = Number(v.precio_venta);
+                } else if (v.precio_obra !== undefined) {
+                    precio = Number(v.precio_obra);
+                } else if (v.precio !== undefined) {
+                    precio = Number(v.precio);
+                }
+                const precioStr = isNaN(precio) ? 'N/A' : `$${precio.toFixed(2)}`;
+
+                // Total con IVA (asumimos 16% si no viene del backend)
+                let total = 0;
+                if (v.total !== undefined) {
+                    total = Number(v.total);
+                } else if (v.total_con_iva !== undefined) {
+                    total = Number(v.total_con_iva);
+                } else if (!isNaN(precio)) {
+                    total = precio * 1.16;  // 16% de IVA
+                }
+                const totalStr = isNaN(total) ? 'N/A' : `$${total.toFixed(2)}`;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${v.venta_id || v.id}</td>
-                    <td>${v.obra_nombre || 'N/A'}</td>
-                    <td>${v.comprador_nombre || 'N/A'}</td>
-                    <td>${new Date(v.fecha).toLocaleDateString()}</td>
-                    <td>$${Number(v.precio_venta || v.precioObra).toFixed(2)}</td>
-                    <td>$${Number(v.total).toFixed(2)}</td>
+                    <td>${id}</td>
+                    <td>${obra}</td>
+                    <td>${comprador}</td>
+                    <td>${fechaStr}</td>
+                    <td>${precioStr}</td>
+                    <td>${totalStr}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Función de logout (usada en el enlace)
+        // Función de logout
         window.logout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

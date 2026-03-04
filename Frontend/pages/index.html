@@ -290,18 +290,18 @@
             if (loggedIn) {
                 let adminLink = '';
                 if (user.tipo === 'administrador') {
-                    adminLink = '<a href="admin-dashboard.html" style="color: white; margin-left: 1rem;">Admin</a>';
+                    adminLink = '<a href="Administracion/admin-dashboard.html" style="color: white; margin-left: 1rem;">Admin</a>';
                 }
                 authLinksDiv.innerHTML = `
                     <span style="color: white;">Bienvenido, ${user.nombre}</span>
-                    <a href="perfil.html" style="color: white; margin-left: 1rem;">Mi perfil</a>
+                    <a href="Perfiles/perfil.html" style="color: white; margin-left: 1rem;">Mi perfil</a>
                     ${adminLink}
                     <a class="logout-btn" onclick="logout()">Cerrar sesión</a>
                 `;
             } else {
                 authLinksDiv.innerHTML = `
-                    <a class="login-btn" href="login.html">Iniciar sesión</a>
-                    <a class="register-btn" href="registro.html">Registrarse</a>
+                    <a class="login-btn" href="Principal/login.html">Iniciar sesión</a>
+                    <a class="register-btn" href="Principal/registro.html">Registrarse</a>
                 `;
             }
         }
@@ -385,15 +385,15 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <a href="detalle.html?id=${obra.obra_id}" class="card-image-link">
+                    <a href="Principal/detalle.html?id=${obra.obra_id}" class="card-image-link">
                         <img src="${imagenUrl}" 
                             alt="${obra.nombre}" 
                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Sin+imagen';"
                             style="width:100%; height:200px; object-fit:cover;">
                     </a>
                     <div class="card-content">
-                        <h3 class="card-title"><a href="detalle.html?id=${obra.obra_id}">${obra.nombre}</a></h3>
-                        <p class="card-artist">Artista: <a href="artista.html?id=${artistaId}">${artistaNombre}</a></p>
+                        <h3 class="card-title"><a href="Principal/detalle.html?id=${obra.obra_id}">${obra.nombre}</a></h3>
+                        <p class="card-artist">Artista: <a href="Principal/artista.html?id=${artistaId}">${artistaNombre}</a></p>
                         <span class="card-genre">${generoNombre}</span>
                         <div class="card-price">$${obra.precio_venta.toLocaleString()}</div>
                     </div>

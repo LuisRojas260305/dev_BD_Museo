@@ -38,7 +38,7 @@
 </head>
 <body>
     <header>
-        <div class="logo"><h1><a class="Titulo" href="admin-dashboard.html">🎨 Admin - Ventas</a></h1></div>
+        <div class="logo"><h1><a class="Titulo" href="../admin-dashboard.html">🎨 Admin - Ventas</a></h1></div>
         <div class="user-info"><span id="userEmail"></span><a href="#" class="logout-btn" onclick="logout()">Cerrar sesión</a></div>
     </header>
     <div class="container">
@@ -83,14 +83,14 @@
 
     <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
-    <script src="../js/auth.js"></script>
+    <script src="../../../js/auth.js"></script>
     <script>
         // Verificar admin
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
                 alert('Acceso no autorizado');
-                window.location.href = 'index.html';
+                window.location.href = '../../index.html';
             }
             document.getElementById('userEmail').innerText = user.email;
         })();
