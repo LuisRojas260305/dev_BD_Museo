@@ -67,7 +67,7 @@ CREATE TABLE Artista(
     biografia TEXT,
     fecha_nacimiento DATE,
     nacionalidad_id INT NOT NULL,
-    foto_url VARCHAR(255) NOT NULL DEFAULT 'Frontend/images',
+    foto MEDIUMBLOB NULL DEFAULT NULL,
     porcentaje_ganancia DECIMAL(10,2) NOT NULL DEFAULT 5,
     comentario VARCHAR(1000),
     FOREIGN KEY (nacionalidad_id) REFERENCES Nacionalidad(nacionalidad_id) 
@@ -105,7 +105,7 @@ CREATE TABLE Obra(
     ancho DECIMAL(10,2) NOT NULL DEFAULT 0,
     fecha_creacion DATE NOT NULL,
     estado ENUM('Disponible', 'Reservada', 'Vendida') NOT NULL,
-    foto_url VARCHAR(255) NOT NULL DEFAULT 'Frontend/images',
+    foto MEDIUMBLOB NULL DEFAULT NULL,
     descripcion TEXT,
     comentario VARCHAR(1000),
     FOREIGN KEY (artista_id) REFERENCES Artista(artista_id)
@@ -299,6 +299,9 @@ CREATE TABLE Ceramica(
 
     PRIMARY KEY (obra_id),
 
+    FOREIGN KEY (obra_id) REFERENCES Obra(obra_id)
+    ON DELETE CASCADE,
+    
     FOREIGN KEY (coccion_id) REFERENCES Coccion(coccion_id)
     ON DELETE RESTRICT,
 

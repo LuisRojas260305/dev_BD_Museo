@@ -21,47 +21,8 @@
             "comentario": "Alta temperatura"
         }
     ],
-    "artista": [
-        {
-            "artista_id": 1,
-            "nombre": "Pablo",
-            "apellido": "Picasso",
-            "biografia": "Pintor y escultor español",
-            "fecha_nacimiento": "1881-10-25",
-            "nacionalidad_id": 1,
-            "foto_url": "picasso.jpg",
-            "porcentaje_ganancia": 7.5,
-            "comentario": "Genio del arte"
-        },
-        {
-            "artista_id": 2,
-            "nombre": "Frida",
-            "apellido": "Kahlo",
-            "biografia": "Pintora mexicana",
-            "fecha_nacimiento": "1907-07-06",
-            "nacionalidad_id": 2,
-            "foto_url": "frida.jpg",
-            "porcentaje_ganancia": 8.0,
-            "comentario": "Arte surrealista"
-        }
-    ],
-    "artista_genero": [
-        {
-            "artista_id": 1,
-            "genero_id": 1,
-            "comentario": null
-        },
-        {
-            "artista_id": 1,
-            "genero_id": 2,
-            "comentario": null
-        },
-        {
-            "artista_id": 2,
-            "genero_id": 1,
-            "comentario": null
-        }
-    ],
+    "artista": [],
+    "artista_genero": [],
     "camara": [
         {
             "camara_id": 1,
@@ -131,28 +92,9 @@
             "comentario": ""
         }
     ],
-    "escultura": [
-        {
-            "obra_id": 2,
-            "peso": 500.0,
-            "profundidad": 120.0,
-            "tipo_id": 1
-        }
-    ],
-    "escultura_material": [
-        {
-            "obra_id": 2,
-            "material_id": 2,
-            "comentario": null
-        }
-    ],
-    "escultura_tecnica": [
-        {
-            "obra_id": 2,
-            "tecnica_id": 3,
-            "comentario": null
-        }
-    ],
+    "escultura": [],
+    "escultura_material": [],
+    "escultura_tecnica": [],
     "esmaltado": [
         {
             "esmaltado_id": 1,
@@ -288,15 +230,7 @@
             "comentario": "Metal rojizo"
         }
     ],
-    "miembro": [
-        {
-            "usuario_id": 2,
-            "tarjeta_numero": "4111111111111111",
-            "tarjeta_nombre": "Juan Pérez",
-            "tarjeta_expiracion": "2028-12-31",
-            "codigo_seguridad": "ABC123XYZ"
-        }
-    ],
+    "miembro": [],
     "modelado": [
         {
             "modelado_id": 1,
@@ -341,40 +275,7 @@
             "comentario": "Nacionalidad de EE.UU."
         }
     ],
-    "obra": [
-        {
-            "obra_id": 1,
-            "nombre": "Guernica",
-            "codigo_inventario": "INV001",
-            "artista_id": 1,
-            "genero_id": 1,
-            "epoca_id": 2,
-            "precio_venta": 1000000.0,
-            "alto": 349.3,
-            "ancho": 776.6,
-            "fecha_creacion": "1937-06-01",
-            "estado": "Disponible",
-            "foto_url": "guernica.jpg",
-            "descripcion": "Representación del bombardeo de Guernica",
-            "comentario": null
-        },
-        {
-            "obra_id": 2,
-            "nombre": "El Pensador",
-            "codigo_inventario": "INV002",
-            "artista_id": 1,
-            "genero_id": 2,
-            "epoca_id": 2,
-            "precio_venta": 500000.0,
-            "alto": 180.0,
-            "ancho": 140.0,
-            "fecha_creacion": "1904-01-01",
-            "estado": "Disponible",
-            "foto_url": "pensador.jpg",
-            "descripcion": "Escultura de bronce",
-            "comentario": null
-        }
-    ],
+    "obra": [],
     "orfebreria": [],
     "orfebreria_metales": [],
     "pieza_orfebreria": [
@@ -399,31 +300,9 @@
             "comentario": "Copa ceremonial"
         }
     ],
-    "pintura": [
-        {
-            "obra_id": 1,
-            "soporte_id": 1
-        }
-    ],
-    "pintura_estilo": [
-        {
-            "obra_id": 1,
-            "estilo_id": 1,
-            "comentario": null
-        },
-        {
-            "obra_id": 1,
-            "estilo_id": 2,
-            "comentario": null
-        }
-    ],
-    "pintura_tematica": [
-        {
-            "obra_id": 1,
-            "tematica_id": 3,
-            "comentario": null
-        }
-    ],
+    "pintura": [],
+    "pintura_estilo": [],
+    "pintura_tematica": [],
     "preguntaseguridad": [
         {
             "pregunta_id": 1,
@@ -446,23 +325,7 @@
             "comentario": ""
         }
     ],
-    "respuestaseguridad": [
-        {
-            "usuario_id": 2,
-            "pregunta_id": 1,
-            "respuesta": "Firulais"
-        },
-        {
-            "usuario_id": 2,
-            "pregunta_id": 2,
-            "respuesta": "Caracas"
-        },
-        {
-            "usuario_id": 2,
-            "pregunta_id": 3,
-            "respuesta": "Pasta"
-        }
-    ],
+    "respuestaseguridad": [],
     "soporte": [
         {
             "soporte_id": 1,
@@ -562,32 +425,12 @@
         {
             "usuario_id": 1,
             "email": "admin@museo.com",
-            "password": "$2b$10$Czvlb6VT54sBmsKEj7zArej8IQ58.XHTvAri2s7viwWZpXO.GLXvS",
+            "password": "$2b$10$tWaKVq/hdNKrCSIKBo2BnOQLjA7LEZrn9DWHYObewA8mae69YjDS",
             "nombre": "Admin",
             "apellido": "Principal",
             "tipo": "administrador",
-            "fecha_registro": "2026-03-01 17:05:36",
+            "fecha_registro": "2026-03-08 13:50:10",
             "comentario": "Administrador del sistema"
-        },
-        {
-            "usuario_id": 2,
-            "email": "miembro@museo.com",
-            "password": "$2b$10$2mE4X5yZ1q2r3s4t5u6v7w8x9y0z1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7",
-            "nombre": "Juan",
-            "apellido": "Pérez",
-            "tipo": "miembro",
-            "fecha_registro": "2026-03-01 17:05:38",
-            "comentario": "Miembro activo"
-        },
-        {
-            "usuario_id": 3,
-            "email": "user@museo.com",
-            "password": "$2b$10$8j9k0l1m2n3o4p5q6r7s8t9u0v1w2x3y4z5a6b7c8d9e0f1g2h3i4j5k6l7m8",
-            "nombre": "María",
-            "apellido": "Gómez",
-            "tipo": "usuario",
-            "fecha_registro": "2026-03-01 17:05:42",
-            "comentario": "Usuario registrado sin membresía"
         }
     ],
     "venta": []
