@@ -1,7 +1,8 @@
 const { pool } = require('../../config/database');
 const {
   insertPintura, insertEscultura, insertFotografia,
-  insertCeramica, insertOrfebreria
+  insertCeramica, insertOrfebreria, updatePintura, updateEscultura, updateFotografia,
+  updateCeramica, updateOrfebreria
 } = require('../../services/obraServices');
 
 // Obtener todas las obras (sin la foto)
@@ -251,10 +252,65 @@ const deleteObra = async (req, res) => {
   }
 };
 
+const updateObra = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { id } = req.params;
+    await connection.beginTransaction();
+
+    // Reutilizamos el parseo de arrays de createObra
+    const parseArrayField = (field) => {
+      if (field && typeof field === 'string') { try { return JSON.parse(field); } catch { return []; } }
+      return Array.isArray(field) ? field : [];
+    };
+
+    req.body.estilos = parseArrayField(req.body.estilos);
+    req.body.tematicas = parseArrayField(req.body.tematicas);
+    req.body.materiales = parseArrayField(req.body.materiales);
+    req.body.tecnicas = parseArrayField(req.body.tecnicas);
+    req.body.otros_metales = parseArrayField(req.body.otros_metales);
+
+    const { nombre, artista_id, genero_id, epoca_id, precio_venta, alto, ancho, fecha_creacion, estado, descripcion, comentario } = req.body;
+    const foto = req.file ? req.file.buffer : null;
+
+    // Actualizar datos generales de la Obra
+    let query = `UPDATE Obra SET nombre=?, artista_id=?, genero_id=?, epoca_id=?, precio_venta=?, alto=?, ancho=?, fecha_creacion=?, estado=?, descripcion=?, comentario=?`;
+    let params = [nombre, artista_id, genero_id, epoca_id, precio_venta, alto, ancho, fecha_creacion, estado, descripcion, comentario];
+
+    if (foto) {
+      query += `, foto=?`;
+      params.push(foto);
+    }
+    
+    query += ` WHERE obra_id=?`;
+    params.push(id);
+
+    await connection.query(query, params);
+
+    // Actualizar detalles específicos según el género
+    switch (parseInt(genero_id)) {
+      case 1: await updatePintura(connection, id, req.body); break;
+      case 2: await updateEscultura(connection, id, req.body); break;
+      case 3: await updateFotografia(connection, id, req.body); break;
+      case 4: await updateCeramica(connection, id, req.body); break;
+      case 5: await updateOrfebreria(connection, id, req.body); break;
+    }
+
+    await connection.commit();
+    res.json({ message: 'Obra actualizada exitosamente' });
+  } catch (error) {
+    await connection.rollback();
+    res.status(500).json({ error: error.message });
+  } finally {
+    connection.release();
+  }
+};
+
 module.exports = {
   getAllObras,
   getObraById,
   getObraFoto,
   createObra,
-  deleteObra
+  deleteObra,
+  updateObra
 };

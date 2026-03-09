@@ -11,7 +11,7 @@ router.get('/', obraController.getAllObras);
 router.get('/:id', obraController.getObraById);
 router.get('/:id/foto', obraController.getObraFoto);
 router.post('/', upload.single('foto'), obraController.createObra);
-// router.put('/:id', upload.single('foto'), obraController.updateObra); // No implementado
+router.put('/:id', upload.single('foto'), obraController.updateObra);
 router.delete('/:id', obraController.deleteObra);
 
 module.exports = router;
