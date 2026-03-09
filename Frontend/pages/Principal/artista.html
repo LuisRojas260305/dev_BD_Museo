@@ -221,13 +221,20 @@
             // URL de la foto del artista usando su ID
             const fotoArtistaUrl = `${API_BASE}/artistas/${artista.artista_id}/foto`;
 
+            // Función auxiliar para formatear la fecha ISO a YYYY-MM-DD
+            const formatearFecha = (fechaISO) => {
+                if (!fechaISO) return 'Desconocida';
+                // Extrae la parte antes de la 'T' (ej: 1475-03-06T04:27:44.000Z -> 1475-03-06)
+                return fechaISO.split('T')[0];
+            };
+
             let obrasHTML = '';
             obras.forEach(obra => {
                 // URL de la foto de la obra usando su ID
                 const fotoObraUrl = `${API_BASE}/obras/${obra.obra_id}/foto`;
                 obrasHTML += `
                     <div class="obra-card">
-                        <a class="a-obras"  href="detalle.html?id=${obra.obra_id}">
+                        <a class="a-obras" href="detalle.html?id=${obra.obra_id}">
                             <div class="obra-image">
                                 <img src="${fotoObraUrl}" 
                                     alt="${obra.nombre}"
@@ -254,7 +261,7 @@
                     <div class="artist-info">
                         <h2>${artista.nombre} ${artista.apellido || ''}</h2>
                         <p><strong>Nacionalidad:</strong> ${artista.nacionalidad_nombre || 'Desconocida'}</p>
-                        <p><strong>Fecha de nacimiento:</strong> ${artista.fecha_nacimiento || 'Desconocida'}</p>
+                        <p><strong>Fecha de nacimiento:</strong> ${formatearFecha(artista.fecha_nacimiento)}</p>
                     </div>
                 </div>
                 <div class="artist-bio">
