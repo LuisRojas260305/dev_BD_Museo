@@ -66,7 +66,6 @@
                     <li><a href="Gestion de datos/gestion-obras.html">Obras</a></li>
                     <li><a href="Gestion de datos/gestion-artistas.html">Artistas</a></li>
                     <li><a href="Gestion de datos/gestion-generos.html">Géneros</a></li>
-                    <li><a href="Gestion de datos/gestion-compradores.html">Compradores</a></li>
                     <li><a href="Gestion de datos/gestion-empleados.html">Empleados</a></li>
                 </ul>
             </div>
@@ -98,13 +97,11 @@
 
     <script src="../../js/auth.js"></script>
     <script>
-        
         const user = getUser();
         if (!user || user.tipo !== 'administrador') {
             alert('Acceso no autorizado');
             window.location.href = '../index.html';
         }
-            
         document.getElementById('bienvenida').innerText = `Bienvenido, ${user.nombre}`;
     </script>
 </body>
