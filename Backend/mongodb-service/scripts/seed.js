@@ -5,6 +5,7 @@ const Obra = require('../models/Obra');
 
 const artistas = [
   {
+    artista_id_original: 1,
     nombre: 'Pablo',
     apellido: 'Ruiz',
     biografia: 'Pintor y escultor español, cofundador del cubismo.',
@@ -14,6 +15,7 @@ const artistas = [
     generos_artisticos: ['Pintura', 'Escultura'],
   },
   {
+    artista_id_original: 2,
     nombre: 'Salvador',
     apellido: 'Dalí',
     biografia: 'Pintor surrealista español, conocido por sus obras oníricas.',
@@ -23,6 +25,7 @@ const artistas = [
     generos_artisticos: ['Pintura', 'Fotografía'],
   },
   {
+    artista_id_original: 3,
     nombre: 'Henry',
     apellido: 'Moore',
     biografia: 'Escultor británico conocido por sus grandes obras abstractas.',
@@ -171,16 +174,9 @@ async function seed() {
     artista_id: artistaMap[`${o.artista.nombre} ${o.artista.apellido}`],
   }));
 
-  const ObraModel = require('../models/Obra');
   for (const obra of obrasConRef) {
-    const discriminators = {
-      Pintura: 'Pintura',
-      Escultura: 'Escultura',
-      Orfebrería: 'Orfebrería',
-      Cerámica: 'Cerámica',
-      Fotografía: 'Fotografía',
-    };
-    await ObraModel.discriminator(discriminators[obra.genero]).create(obra);
+    const DiscModel = mongoose.model(obra.genero);
+    await DiscModel.create(obra);
   }
 
   console.log(`Obras creadas: ${obras.length}`);

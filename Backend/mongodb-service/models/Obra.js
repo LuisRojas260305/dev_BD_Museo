@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const obraSchema = new mongoose.Schema({
-  obra_id_original: { type: Number, index: true, unique: true },
-  codigo_inventario: { type: String, required: true, unique: true, trim: true },
+  obra_id_original: { type: Number },
+  codigo_inventario: { type: String, required: true, trim: true },
   nombre: { type: String, required: true, default: 'Sin Título', trim: true },
   artista_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Artista' },
   artista: {
@@ -39,8 +39,8 @@ const obraSchema = new mongoose.Schema({
 
 obraSchema.index({ genero: 1, precio_venta: 1 }, { background: true });
 obraSchema.index({ estado: 1, precio_venta: 1 }, { background: true });
-obraSchema.index({ codigo_inventario: 1 }, { background: true });
-obraSchema.index({ obra_id_original: 1 }, { unique: true, background: true });
+obraSchema.index({ codigo_inventario: 1 }, { unique: true, sparse: true, background: true });
+obraSchema.index({ obra_id_original: 1 }, { unique: true, sparse: true, background: true });
 obraSchema.index(
   { nombre: 'text', descripcion: 'text' },
   { weights: { nombre: 10, descripcion: 5 }, name: 'obra_text_index', background: true }

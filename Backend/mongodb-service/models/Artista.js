@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const artistaSchema = new mongoose.Schema({
-  artista_id_original: { type: Number, index: true, unique: true },
+  artista_id_original: { type: Number },
   nombre: { type: String, required: true, trim: true },
   apellido: { type: String, trim: true },
   biografia: { type: String },
@@ -22,5 +22,6 @@ artistaSchema.set('toObject', { virtuals: true });
 
 artistaSchema.index({ nombre: 1, apellido: 1 });
 artistaSchema.index({ nacionalidad: 1 });
+artistaSchema.index({ artista_id_original: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Artista', artistaSchema);

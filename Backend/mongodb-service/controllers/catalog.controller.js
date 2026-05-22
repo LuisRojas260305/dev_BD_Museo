@@ -1,3 +1,4 @@
+const Artista = require('../models/Artista');
 const Obra = require('../models/Obra');
 const fieldMapper = require('../utils/fieldMapper');
 
