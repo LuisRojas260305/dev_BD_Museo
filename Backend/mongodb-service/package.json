@@ -1,0 +1,23 @@
+{
+  "name": "mongodb-service",
+  "version": "1.0.0",
+  "description": "Servicio MongoDB para catálogo dinámico de obras",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.1",
+    "mysql2": "^3.22.3"
+  },
+  "overrides": {
+    "path-to-regexp": ">=8.4.0"
+  }
+}

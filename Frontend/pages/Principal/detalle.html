@@ -272,9 +272,27 @@
 
         async function cargarObra() {
             try {
-                const res = await fetch(`${API_BASE}/obras/${obraId}`);
-                if (!res.ok) throw new Error('No encontrada');
-                const obra = await res.json();
+                const baseURL = getCatalogBaseURL();
+                const usingMongo = baseURL !== API_BASE;
+                let obra;
+
+                if (usingMongo) {
+                    const res = await fetch(`${baseURL}/api/catalog/${obraId}`);
+                    if (!res.ok) throw new Error('No encontrada');
+                    const json = await res.json();
+                    obra = json.data;
+                    obra.obra_id = obra.obra_id || obra.obra_id_original || obra._id;
+                    obra.precio_venta = typeof obra.precio_venta === 'object'
+                        ? (Number(obra.precio_venta._serialized) || 0)
+                        : (obra.precio_venta || 0);
+                    obra.alto = typeof obra.alto === 'object' ? (Number(obra.alto._serialized) || 0) : (obra.alto || 0);
+                    obra.ancho = typeof obra.ancho === 'object' ? (Number(obra.ancho._serialized) || 0) : (obra.ancho || 0);
+                } else {
+                    const res = await fetch(`${baseURL}/obras/${obraId}`);
+                    if (!res.ok) throw new Error('No encontrada');
+                    obra = await res.json();
+                }
+
                 render(obra);
             } catch (error) {
                 document.getElementById('detailMain').innerHTML = '<div class="not-found">Obra no encontrada</div>';

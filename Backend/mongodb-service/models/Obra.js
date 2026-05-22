@@ -1,0 +1,106 @@
+const mongoose = require('mongoose');
+
+const obraSchema = new mongoose.Schema({
+  obra_id_original: { type: Number, index: true, unique: true },
+  codigo_inventario: { type: String, required: true, unique: true, trim: true },
+  nombre: { type: String, required: true, default: 'Sin Título', trim: true },
+  artista_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Artista' },
+  artista: {
+    nombre: { type: String },
+    apellido: { type: String },
+    nacionalidad: { type: String },
+  },
+  genero: {
+    type: String,
+    required: true,
+    enum: ['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía'],
+  },
+  epoca: {
+    nombre: { type: String },
+    ano_inicio: { type: Number },
+    ano_final: { type: Number },
+  },
+  precio_venta: { type: mongoose.Schema.Types.Decimal128, required: true },
+  alto: { type: mongoose.Schema.Types.Decimal128, default: 0 },
+  ancho: { type: mongoose.Schema.Types.Decimal128, default: 0 },
+  fecha_creacion: { type: Date },
+  estado: {
+    type: String,
+    enum: ['Disponible', 'Reservada', 'Vendida'],
+    default: 'Disponible',
+  },
+  fotos: [{ type: String }],
+  descripcion: { type: String },
+  comentario: { type: String },
+}, {
+  discriminatorKey: 'genero',
+  timestamps: true,
+});
+
+obraSchema.index({ genero: 1, precio_venta: 1 }, { background: true });
+obraSchema.index({ estado: 1, precio_venta: 1 }, { background: true });
+obraSchema.index({ codigo_inventario: 1 }, { background: true });
+obraSchema.index({ obra_id_original: 1 }, { unique: true, background: true });
+obraSchema.index(
+  { nombre: 'text', descripcion: 'text' },
+  { weights: { nombre: 10, descripcion: 5 }, name: 'obra_text_index', background: true }
+);
+
+const Obra = mongoose.model('Obra', obraSchema);
+
+Obra.discriminator('Pintura', new mongoose.Schema({
+  detalles: {
+    soporte: { type: String },
+    estilos: [{ type: String }],
+    tematicas: [{ type: String }],
+  },
+}));
+
+Obra.discriminator('Escultura', new mongoose.Schema({
+  detalles: {
+    peso: { type: mongoose.Schema.Types.Decimal128 },
+    profundidad: { type: mongoose.Schema.Types.Decimal128 },
+    tipo_escultura: { type: String },
+    materiales: [{ type: String }],
+    tecnicas: [{ type: String }],
+  },
+}));
+
+Obra.discriminator('Orfebrería', new mongoose.Schema({
+  detalles: {
+    profundidad: { type: mongoose.Schema.Types.Decimal128 },
+    diametro: { type: mongoose.Schema.Types.Decimal128 },
+    peso: { type: mongoose.Schema.Types.Decimal128 },
+    pieza: { type: String },
+    metal_predominante: { type: String },
+    metales: [{ type: String }],
+  },
+}));
+
+Obra.discriminator('Cerámica', new mongoose.Schema({
+  detalles: {
+    profundidad: { type: mongoose.Schema.Types.Decimal128 },
+    diametro: { type: mongoose.Schema.Types.Decimal128 },
+    funcionalidad: { type: String },
+    coccion: { type: String },
+    arcilla: { type: String },
+    modelado: { type: String },
+    esmaltado: { type: String },
+  },
+}));
+
+Obra.discriminator('Fotografía', new mongoose.Schema({
+  detalles: {
+    tiraje: { type: Number },
+    obturacion: { type: String },
+    apertura: { type: String },
+    iso: { type: Number },
+    resolucion: { type: String },
+    fecha_captura: { type: Date },
+    impresion: { type: String },
+    camara: { type: String },
+    tecnica_fotografica: { type: String },
+  },
+}));
+
+module.exports = Obra;
