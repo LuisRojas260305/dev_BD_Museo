@@ -1,6 +1,7 @@
 // Importacion de los modulos
 const mysql = require('mysql2/promise');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // Creacion de la pool de conexiones
 const pool = mysql.createPool({

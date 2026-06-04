@@ -80,7 +80,7 @@ Ninguno — actualización directa, `npm install` exitoso, `npm audit` 0 vulnera
 #### 4. Discriminators no compilan en seed
 **Error**: `MissingSchemaError: Schema hasn't been registered for model "Pintura"`.
 **Causa**: Los discriminators se definen en `Obra.js` pero seed.js usa `Obra.create()` sin que los modelos discriminados estén registrados.
-**Fix**: Usar `mongoose.model('Pintura', pinturaSchema)` explícitamente para registrar cada discriminador.
+**Fix**: Usar `mongoose.model(obra.genero)` para acceder al discriminador registrado dinámicamente. Mongoose registra automáticamente cada discriminador como modelo, accesible por su nombre de género: `mongoose.model('Pintura')`, `mongoose.model('Escultura')`, etc.
 
 ---
 
@@ -204,6 +204,17 @@ bash docs/smoke-test-sprint1.sh
 - Fotos siempre servidas desde MySQL (`/api/obras/:id/foto`, `/api/artistas/:id/foto`)
 - CRUD admin usa MySQL backend siempre
 - Login contra MySQL backend (`POST /api/usuarios/login`)
+
+---
+
+## Bugfixes Post-Auditoría (2026-06-04)
+
+| Bug | Archivos | Fix |
+|-----|----------|-----|
+| CRUD sin auth | shared/authMiddleware.js, 17 rutas, 4 migraciones | Auth unificado en shared/ |
+| dotenv path | app.js, database.js, server.js | path.resolve(__dirname) |
+| .env.example | .env.example | Actualizado con JWT_SECRET |
+| export.py password | export.py | os.getenv() sin hardcode |
 
 ---
 

@@ -9,3 +9,17 @@ npm-debug.log
 # Sistema operativo
 Thumbs.db
 .DS_Store
+
+# Contexto de sesiones (no trackear)
+CONTEXTO-SESION-*.md
+
+# Documentos de defensa (no trackear)
+docs/defensa-academica-mongodb.md
+docs/defensa-academica-mongodb.pdf
+docs/documento.pdf
+
+# Artifacts internos SDD (agente)
+openspec/
+
+# Exportación de BD
+museo_completo.json

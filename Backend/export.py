@@ -1,6 +1,7 @@
 import mysql.connector
 import json
 import decimal
+import os
 
 # Función para manejar tipos de datos que JSON estándar no reconoce (como Decimal)
 def custom_serializer(obj):
@@ -11,10 +12,10 @@ def custom_serializer(obj):
 try:
     # Configura tus credenciales aquí
     conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Lu30931891",
-        database="Museo"
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD", ""),
+        database=os.getenv("DB_NAME", "Museo")
     )
     cursor = conn.cursor(dictionary=True)
 

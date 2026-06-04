@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { uploadImage, upload } = require('../../controllers/Compra/uploadController');
-const { verificarToken, verificarAdmin } = require('../../middlewares/auth');
+const { verificarToken, verificarAdmin } = require('../../shared/authMiddleware');
 
 router.post('/', verificarToken, verificarAdmin, upload.single('imagen'), uploadImage);
 

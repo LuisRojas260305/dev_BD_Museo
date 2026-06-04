@@ -1,9 +1,11 @@
+// Módulo standalone — solo depende de jsonwebtoken (sin dependencia MySQL)
+// Reemplaza a middlewares/auth.js. Misma interfaz: verificarToken, verificarAdmin, verificarMiembro.
+// Puede copiarse a mongodb-service/middleware/authMiddleware.js sin cambios.
 const jwt = require('jsonwebtoken');
 
 const verificarToken = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'Acceso denegado' });
-
     try {
         const verified = jwt.verify(token, process.env.JWT_SECRET);
         req.usuario = verified;
@@ -14,16 +16,14 @@ const verificarToken = (req, res, next) => {
 };
 
 const verificarAdmin = (req, res, next) => {
-    if (req.usuario.tipo !== 'administrador') {
+    if (req.usuario.tipo !== 'administrador')
         return res.status(403).json({ error: 'Requiere permisos de administrador' });
-    }
     next();
 };
 
 const verificarMiembro = (req, res, next) => {
-    if (req.usuario.tipo !== 'miembro' && req.usuario.tipo !== 'administrador') {
+    if (req.usuario.tipo !== 'miembro' && req.usuario.tipo !== 'administrador')
         return res.status(403).json({ error: 'Requiere ser miembro' });
-    }
     next();
 };
 

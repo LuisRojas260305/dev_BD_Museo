@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const usuarioController = require('../../controllers/Usuario/usuarioController');
-const { verificarToken, verificarAdmin } = require('../../middlewares/auth');
+const { verificarToken, verificarAdmin } = require('../../shared/authMiddleware');
 
 // Rutas públicas
 router.post('/registro', usuarioController.registro);

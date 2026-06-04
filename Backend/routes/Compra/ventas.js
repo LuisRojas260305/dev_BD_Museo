@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ventaController = require('../../controllers/Compra/ventaController');
-const { verificarToken, verificarMiembro, verificarAdmin } = require('../../middlewares/auth');
+const { verificarToken, verificarMiembro, verificarAdmin } = require('../../shared/authMiddleware');
 
 router.post('/reservar', verificarToken, verificarMiembro, ventaController.reservarObra);
 router.put('/:id/concretar', verificarToken, verificarAdmin, ventaController.concretarVenta);
