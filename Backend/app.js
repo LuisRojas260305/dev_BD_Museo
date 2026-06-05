@@ -71,9 +71,12 @@ app.use('/api/genero', require('./routes/Obra/genero'));
 app.use('/api/usuarios', require('./routes/Usuario/usuarios'));
 app.use('/api/preguntas-seguridad', require('./routes/Usuario/preguntas'));
 
-// Obras
+// Obras — ruta legacy (MySQL, admin CRUD)
 app.use('/api/obras', require('./routes/Obra/obras'));
 app.use('/api/epoca', require('./routes/Obra/epoca'));
+
+// Catálogo público — proxy a mongodb-service (reemplaza a /api/obras para consultas)
+app.use('/api/catalogo', require('./routes/catalogo.routes'));
 
 // Ventas
 app.use('/api/ventas', require('./routes/Compra/ventas'));

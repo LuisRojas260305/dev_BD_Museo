@@ -9,7 +9,9 @@ const { addView } = require('../../shared/sslContext');
 const { logEvent } = require('../../shared/sslLogger');
 
 // Obtener todas las obras (sin la foto)
+// @deprecated Usar GET /api/catalogo en lugar de /api/obras
 const getAllObras = async (req, res) => {
+  res.setHeader('X-Deprecated', '/api/catalogo');
   try {
     let query = `
       SELECT 
@@ -50,7 +52,9 @@ const getAllObras = async (req, res) => {
 };
 
 // Obtener una obra por ID (sin la foto)
+// @deprecated Usar GET /api/catalogo/:id en lugar de /api/obras/:id
 const getObraById = async (req, res) => {
+  res.setHeader('X-Deprecated', '/api/catalogo/:id');
   try {
     const { id } = req.params;
     const [obra] = await pool.query(`
