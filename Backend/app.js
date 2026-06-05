@@ -23,57 +23,9 @@ app.use((req, res, next) => {
 // Aumentar límite para JSON (opcional, para otros endpoints)
 app.use(express.json({ limit: '10mb' }));
 
-// Rutas Tablas artistas
-{
-    app.use('/api/artistas', require('./routes/Artista/artistas'));
-    app.use('/api/nacionalidad', require('./routes/Artista/nacionalidad'));
-}
-
-// Rutas Tablas Ceramica
-{
-    app.use('/api/arcilla', require('./routes/Ceramica/arcilla'));
-    app.use('/api/coccion', require('./routes/Ceramica/coccion'));
-    app.use('/api/esmaltado', require('./routes/Ceramica/esmaltado'));
-    app.use('/api/modelado', require('./routes/Ceramica/modelado'));
-}
-
-// Rutas Tablas Escultura
-{
-    app.use('/api/tipo_escultura', require('./routes/Escultura/tipo_escultura'));
-    app.use('/api/material', require('./routes/Escultura/material'));
-    app.use('/api/tecnica_escultura', require('./routes/Escultura/tecnica_escultura'));
-}
-
-// Rutas Tablas Fotografia
-{
-    app.use('/api/impresion', require('./routes/Fotografia/impresion'));
-    app.use('/api/tecnica_fotografica', require('./routes/Fotografia/tecnica_fotografica'));
-    app.use('/api/camara', require('./routes/Fotografia/camara'));
-}
-
-// Rutas Tablas Pinturas
-{
-    app.use('/api/soporte', require('./routes/Pintura/soporte'));
-    app.use('/api/estilo', require('./routes/Pintura/estilo'));
-    app.use('/api/tematica', require('./routes/Pintura/tematica'));
-}
-
-// Rutas Tablas Orfebreria
-{
-    app.use('/api/pieza_orfebreria', require('./routes/Orfebreria/pieza_orfebreria'));
-    app.use('/api/metales', require('./routes/Orfebreria/metales'));
-}
-
-// Genero
-app.use('/api/genero', require('./routes/Obra/genero'));
-
 // Usuarios
 app.use('/api/usuarios', require('./routes/Usuario/usuarios'));
 app.use('/api/preguntas-seguridad', require('./routes/Usuario/preguntas'));
-
-// Obras — ruta legacy (MySQL, admin CRUD)
-app.use('/api/obras', require('./routes/Obra/obras'));
-app.use('/api/epoca', require('./routes/Obra/epoca'));
 
 // Catálogo público — proxy a mongodb-service (reemplaza a /api/obras para consultas)
 app.use('/api/catalogo', require('./routes/catalogo.routes'));

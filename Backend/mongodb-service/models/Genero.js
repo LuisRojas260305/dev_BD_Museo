@@ -6,6 +6,4 @@ const generoSchema = new mongoose.Schema({
   comentario: { type: String },
 }, { timestamps: true });
 
-generoSchema.index({ nombre: 1 }, { unique: true });
-
 module.exports = mongoose.model('Genero', generoSchema);
