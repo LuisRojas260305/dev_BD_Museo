@@ -3,7 +3,7 @@
 const router = require('express').Router();
 const catalogProxy = require('../services/catalogProxy');
 const sslMiddleware = require('../shared/sslMiddleware');
-const { opcionalAuth } = require('../shared/authMiddleware');
+const { opcionalAuth } = require('../shared/auth');
 const { addView } = require('../shared/sslContext');
 const { logEvent } = require('../shared/sslLogger');
 

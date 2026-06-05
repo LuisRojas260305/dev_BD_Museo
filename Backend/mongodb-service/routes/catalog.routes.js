@@ -7,7 +7,7 @@ const {
   healthCheck,
 } = require('../controllers/catalog.controller');
 const { validateCatalogQuery, validateSearchQuery } = require('../middleware/validation');
-const { opcionalAuth } = require('../middleware/authMiddleware');
+const { opcionalAuth } = require('../middleware/auth');
 
 // Auth opcional en GET — permite acceso público pero identifica al usuario si hay sesión
 router.get('/', opcionalAuth, validateCatalogQuery, getCatalog);

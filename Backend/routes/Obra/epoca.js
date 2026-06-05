@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const epocaController = require('../../controllers/Obra/epocaController');
-const { verificarToken, verificarAdmin } = require('../../shared/authMiddleware');
+const { verificarToken, verificarAdmin } = require('../../shared/auth');
 
 router.get('/', epocaController.getAll);
 router.post('/', verificarToken, verificarAdmin, epocaController.create);

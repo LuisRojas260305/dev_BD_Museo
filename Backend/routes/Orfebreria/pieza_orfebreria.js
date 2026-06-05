@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/Orfebreria/pieza_orfebreriaController');
-const { verificarToken, verificarAdmin } = require('../../shared/authMiddleware');
+const { verificarToken, verificarAdmin } = require('../../shared/auth');
 
 router.get('/', controller.getAll);
 router.post('/', verificarToken, verificarAdmin, controller.create);

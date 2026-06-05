@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const generoController = require('../../controllers/Obra/generoController');
-const { verificarToken, verificarAdmin } = require('../../shared/authMiddleware');
+const { verificarToken, verificarAdmin } = require('../../shared/auth');
 
 // Definir rutas
 router.get('/', generoController.getAllGeneros);

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/Escultura/tipo_esculturaController');
-const { verificarToken, verificarAdmin } = require('../../shared/authMiddleware');
+const { verificarToken, verificarAdmin } = require('../../shared/auth');
 
 router.get('/', controller.getAll);
 router.post('/', verificarToken, verificarAdmin, controller.create);
