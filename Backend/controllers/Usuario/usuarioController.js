@@ -1,6 +1,7 @@
 const { pool } = require('../../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { auditar } = require('../../services/auditoriaHelper');
 
 // Registro de nuevo usuario (tipo 'usuario')
 const registro = async (req, res) => {
@@ -81,12 +82,14 @@ const login = async (req, res) => {
 
     const [rows] = await pool.query('SELECT * FROM Usuario WHERE email = ?', [email]);
     if (rows.length === 0) {
+        auditar('login_fallido', email, 'warning', { motivo: 'usuario_no_encontrado' });
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
     const usuario = rows[0];
     const validPassword = await bcrypt.compare(password, usuario.password);
     if (!validPassword) {
+        auditar('login_fallido', email, 'warning', { motivo: 'password_incorrecto' });
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
@@ -96,6 +99,7 @@ const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
+        auditar('login_exitoso', usuario.email, 'info');
     res.json({ token, usuario: { id: usuario.usuario_id, email: usuario.email, nombre: usuario.nombre, tipo: usuario.tipo } });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -438,6 +442,15 @@ const updateUsuario = async (req, res) => {
       await pool.query('DELETE FROM Administrador WHERE usuario_id = ?', [id]);
     }
 
+        // Obtener el tipo anterior para el evento de auditoría
+        const [usuarioActual] = await pool.query('SELECT tipo FROM Usuario WHERE usuario_id = ?', [id]);
+        const tipoAnterior = usuarioActual.length > 0 ? usuarioActual[0].tipo : 'desconocido';
+        
+        auditar('cambio_rol', req.usuario.email, 'warning', {
+            usuario_afectado: id,
+            rol_anterior: tipoAnterior,
+            rol_nuevo: tipo
+        });
     res.json({ message: 'Usuario actualizado correctamente' });
   } catch (error) {
     res.status(500).json({ error: error.message });

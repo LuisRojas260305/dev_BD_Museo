@@ -1,4 +1,5 @@
 const { pool } = require('../../config/database');
+const { auditar } = require('../../services/auditoriaHelper');
 
 // Obtener todos los artistas (con géneros incluidos, sin la foto)
 const getAllArtistas = async (req, res) => {
@@ -117,6 +118,11 @@ const createArtista = async (req, res) => {
     }
 
     await connection.commit();
+        auditar('modificacion_artista', req.usuario?.email || 'sistema', 'info', {
+            accion: 'crear',
+            artista_id: artistaId,
+            nombre
+        });
     res.status(201).json({ id: artistaId, message: 'Artista creado' });
   } catch (error) {
     await connection.rollback();
@@ -184,6 +190,10 @@ const updateArtista = async (req, res) => {
     }
 
     await connection.commit();
+        auditar('modificacion_artista', req.usuario?.email || 'sistema', 'info', {
+            accion: 'editar',
+            artista_id: parseInt(id)
+        });
     res.json({ message: 'Artista actualizado' });
   } catch (error) {
     await connection.rollback();
@@ -201,6 +211,10 @@ const deleteArtista = async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Artista no encontrado' });
     }
+    auditar('modificacion_artista', req.usuario?.email || 'sistema', 'info', {
+        accion: 'eliminar',
+        artista_id: parseInt(id)
+    });
     res.json({ message: 'Artista eliminado' });
   } catch (error) {
     if (error.code === 'ER_ROW_IS_REFERENCED_2') {

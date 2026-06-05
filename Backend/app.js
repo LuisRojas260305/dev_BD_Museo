@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { testConnection } = require('./config/database');
+const { auditar } = require('./services/auditoriaHelper');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -90,6 +91,11 @@ app.use((err, req, res, next) => {
         return res.status(400).json({ error: 'El archivo excede el tamaño permitido (5 MB).' });
     }
     console.error(err.stack);
+    auditar('error_sistema', 'sistema', 'critical', {
+        endpoint: req.originalUrl || req.url,
+        metodo: req.method,
+        codigo_error: err.message?.substring(0, 200)
+    });
     res.status(500).json({ error: err.message });
 });
 

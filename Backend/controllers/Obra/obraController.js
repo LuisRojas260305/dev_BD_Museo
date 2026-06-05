@@ -4,6 +4,7 @@ const {
   insertCeramica, insertOrfebreria, updatePintura, updateEscultura, updateFotografia,
   updateCeramica, updateOrfebreria
 } = require('../../services/obraServices');
+const { auditar } = require('../../services/auditoriaHelper');
 
 // Obtener todas las obras (sin la foto)
 const getAllObras = async (req, res) => {
@@ -227,6 +228,11 @@ const createObra = async (req, res) => {
     }
 
     await connection.commit();
+        auditar('modificacion_obra', req.usuario?.email || 'sistema', 'info', {
+            accion: 'crear',
+            obra_id: obraId,
+            nombre: nombre || 'Sin Titulo'
+        });
     res.status(201).json({ id: obraId, message: 'Obra creada correctamente' });
   } catch (error) {
     await connection.rollback();
@@ -245,6 +251,10 @@ const deleteObra = async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Obra no encontrada' });
     }
+    auditar('modificacion_obra', req.usuario?.email || 'sistema', 'info', {
+        accion: 'eliminar',
+        obra_id: parseInt(id)
+    });
     res.json({ message: 'Obra eliminada' });
   } catch (error) {
     console.error('Error en deleteObra:', error);
@@ -297,6 +307,10 @@ const updateObra = async (req, res) => {
     }
 
     await connection.commit();
+        auditar('modificacion_obra', req.usuario?.email || 'sistema', 'info', {
+            accion: 'editar',
+            obra_id: parseInt(id)
+        });
     res.json({ message: 'Obra actualizada exitosamente' });
   } catch (error) {
     await connection.rollback();

@@ -1,4 +1,6 @@
 const { pool } = require('../../config/database');
+const crypto = require('crypto');
+const { auditar } = require('../../services/auditoriaHelper');
 
 // Reservar una obra (miembro)
 const reservarObra = async (req, res) => {
@@ -41,6 +43,12 @@ const reservarObra = async (req, res) => {
     );
 
     await connection.commit();
+        const solicitudId = require('crypto').randomUUID();
+        auditar('solicitud_compra', req.usuario.email, 'info', {
+            obra_id,
+            venta_id: venta.insertId,
+            solicitud_id: solicitudId
+        });
     res.json({ venta_id: venta.insertId, message: 'Obra reservada correctamente' });
   } catch (error) {
     await connection.rollback();
@@ -104,6 +112,12 @@ const concretarVenta = async (req, res) => {
     );
 
     await connection.commit();
+        auditar('compra_aceptada', req.usuario.email, 'info', {
+            venta_id: id,
+            admin_id,
+            obra_id: venta[0].obra_id,
+            total
+        });
     res.json({ message: 'Venta concretada y factura generada' });
   } catch (error) {
     await connection.rollback();
@@ -140,6 +154,11 @@ const cancelarVenta = async (req, res) => {
     );
 
     await connection.commit();
+        auditar('compra_rechazada', req.usuario.email, 'warning', {
+            venta_id: id,
+            obra_id: venta[0].obra_id,
+            motivo: 'Cancelada por administrador'
+        });
     res.json({ message: 'Reserva cancelada' });
   } catch (error) {
     await connection.rollback();
