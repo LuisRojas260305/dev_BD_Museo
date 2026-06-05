@@ -58,7 +58,11 @@ async function consultarEventos({ tipo_evento, desde, hasta, limite = 100 }) {
         if (resultados.length >= max) break;
     }
 
-    return resultados.slice(0, max).map(row => ({
+    let filtrados = tipo_evento
+        ? resultados.filter(row => row.tipo_evento === tipo_evento)
+        : resultados;
+
+    return filtrados.slice(0, max).map(row => ({
         id: row.id.toString(),
         timestamp: row.timestamp,
         mes: row.mes,
