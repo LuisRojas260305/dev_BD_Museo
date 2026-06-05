@@ -373,12 +373,15 @@ CREATE TABLE Membresia (
 
 CREATE TABLE Venta (
     venta_id INT PRIMARY KEY AUTO_INCREMENT,
-    obra_id INT NOT NULL,
+    obra_id VARCHAR(255) NOT NULL,
     comprador_id INT NOT NULL,        
+    obra_nombre VARCHAR(255) NOT NULL DEFAULT '',
+    artista_nombre VARCHAR(255) NOT NULL DEFAULT '',
+    precio_venta DECIMAL(10,2) NOT NULL DEFAULT 0,
+    porcentaje_ganancia DECIMAL(5,2) DEFAULT 5,
     fecha_reserva DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_venta DATETIME NULL,        
     estado ENUM('reservada', 'vendida', 'cancelada') NOT NULL,
-    FOREIGN KEY (obra_id) REFERENCES Obra(obra_id) ON DELETE RESTRICT,
     FOREIGN KEY (comprador_id) REFERENCES Miembro(usuario_id) ON DELETE RESTRICT
 );
 
@@ -386,6 +389,8 @@ CREATE TABLE Factura (
     factura_id INT PRIMARY KEY AUTO_INCREMENT,
     venta_id INT NOT NULL UNIQUE,
     admin_id INT NOT NULL,            
+    obra_nombre VARCHAR(255) NOT NULL DEFAULT '',
+    artista_nombre VARCHAR(255) NOT NULL DEFAULT '',
     fecha_emision DATETIME DEFAULT CURRENT_TIMESTAMP,
     precio_obra DECIMAL(10,2) NOT NULL,  
     iva DECIMAL(10,2) NOT NULL,          
@@ -395,4 +400,15 @@ CREATE TABLE Factura (
     direccion_envio TEXT NOT NULL,
     FOREIGN KEY (venta_id) REFERENCES Venta(venta_id) ON DELETE RESTRICT,
     FOREIGN KEY (admin_id) REFERENCES Administrador(usuario_id) ON DELETE RESTRICT
+);
+
+-- Tabla Multimedia para almacenar fotos binarias (reemplaza campos MEDIUMBLOB en Obra/Artista)
+CREATE TABLE Multimedia (
+    multimedia_id INT PRIMARY KEY AUTO_INCREMENT,
+    entidad_tipo VARCHAR(50) NOT NULL,
+    entidad_id VARCHAR(255) DEFAULT NULL,
+    archivo MEDIUMBLOB NOT NULL,
+    tipo_mime VARCHAR(100) NOT NULL DEFAULT 'image/jpeg',
+    fecha_subida DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_entidad (entidad_tipo, entidad_id)
 );

@@ -81,23 +81,33 @@
         }
 
         async function cargarObra() {
-            const res = await fetch(`${API_BASE}/obras/${obraId}`);
+            const res = await fetch(`${API_BASE}/catalogo/${obraId}`);
             if (!res.ok) {
                 document.getElementById('container').innerHTML = '<h2>Obra no encontrada</h2>';
                 return;
             }
-            const obra = await res.json();
+            const data = await res.json();
+            // El catálogo proxy devuelve { success, data }
+            const obra = data.data || data;
             render(obra);
         }
 
         function render(obra) {
+            // Obtener nombre del artista desde el objeto embebido de MongoDB
+            const artistaNombre = obra.artista?.nombre_completo
+                || (obra.artista?.nombre
+                    ? obra.artista.nombre + (obra.artista?.apellido ? ' ' + obra.artista.apellido : '')
+                    : 'Desconocido');
+            // El precio puede venir como Decimal128 de MongoDB
+            const precio = obra.precio_venta?.$numberDecimal || obra.precio_venta;
+
             const container = document.getElementById('container');
             container.innerHTML = `
                 <h2>Confirmar Compra</h2>
                 <div class="obra-resumen">
                     <p><strong>Obra:</strong> ${obra.nombre}</p>
-                    <p><strong>Artista:</strong> ${obra.artista_nombre}</p>
-                    <p><strong>Precio:</strong> $${obra.precio_venta}</p>
+                    <p><strong>Artista:</strong> ${artistaNombre}</p>
+                    <p><strong>Precio:</strong> $${precio}</p>
                     <p><strong>Estado actual:</strong> ${obra.estado}</p>
                 </div>
                 <form id="confirmForm">

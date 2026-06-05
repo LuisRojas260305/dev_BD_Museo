@@ -56,3 +56,10 @@
 - [ ] 7.1 Crear `Backend/cassandra-service/test-smoke.sh` — curl tests para health, POST evento, GET eventos, GET reportes
 - [ ] 7.2 Ejecutar smoke test y verificar todos los endpoints
 - [ ] 7.3 Commit final: `git add -A && git commit -m "feat: Sprint 2 - Cassandra auditoría service"`
+
+## Phase 8: Refactor Venta/Compra para MongoDB + Eventos Cassandra
+
+- [x] TASK-17: Refactor `ventaController.js` — validar/actualizar obra desde MongoDB, columnas denormalizadas, sin JOINs a Obra/Artista
+- [x] TASK-18: Refactor `reportesController.js` — eliminar JOINs a Obra/Artista, usar columnas denormalizadas
+- [x] TASK-19: Refactor `confirmar-compra.html` — cambiar endpoint a `/api/catalogo/:id`, adaptar field mapping para MongoDB
+- [x] TASK-20: Agregar eventos Cassandra `reserva_creada` y `reserva_cancelada`, enriquecer `compra_aceptada`

@@ -1,6 +1,10 @@
 const { pool } = require('../../config/database');
 const crypto = require('crypto');
+const axios = require('axios');
 const { auditar } = require('../../services/auditoriaHelper');
+
+const CATALOG_URL = process.env.CATALOG_URL || 'http://localhost:3001/api/catalog';
+const INTERNAL_KEY = process.env.INTERNAL_API_KEY || 'museo_internal_key_2026';
 
 // Reservar una obra (miembro)
 const reservarObra = async (req, res) => {
@@ -20,35 +24,48 @@ const reservarObra = async (req, res) => {
       return res.status(401).json({ error: 'Código de seguridad inválido' });
     }
 
-    // Verificar que la obra existe y está disponible
-    const [obra] = await connection.query(
-      'SELECT estado FROM Obra WHERE obra_id = ?',
-      [obra_id]
-    );
-    if (obra.length === 0) return res.status(404).json({ error: 'Obra no encontrada' });
-    if (obra[0].estado !== 'Disponible') {
+    // Verificar obra desde MongoDB vía catálogo
+    const catRes = await axios.get(`${CATALOG_URL}/${obra_id}`, {
+      headers: { 'x-internal-key': INTERNAL_KEY },
+      timeout: 5000
+    });
+    const obra = catRes.data?.data;
+    if (!obra || obra.estado !== 'Disponible') {
       return res.status(409).json({ error: 'La obra no está disponible' });
     }
 
-    // Cambiar estado a Reservada
-    await connection.query(
-      'UPDATE Obra SET estado = "Reservada" WHERE obra_id = ?',
-      [obra_id]
+    // Actualizar estado en MongoDB
+    await axios.put(`${CATALOG_URL}/${obra_id}`,
+      { estado: 'Reservada' },
+      { headers: { 'x-internal-key': INTERNAL_KEY }, timeout: 5000 }
     );
 
-    // Crear venta
+    // Extraer datos del artista y precio
+    const artistaNombre = obra.artista?.nombre_completo
+      || (obra.artista?.nombre ? `${obra.artista.nombre}${obra.artista?.apellido ? ' ' + obra.artista.apellido : ''}` : 'Desconocido');
+    const precioVenta = parseFloat(obra.precio_venta?.$numberDecimal || obra.precio_venta || 0);
+    const porcentajeGanancia = parseFloat(obra.artista?.porcentaje_ganancia?.$numberDecimal || obra.artista?.porcentaje_ganancia || 5);
+
+    // Crear venta con columnas denormalizadas
     const [venta] = await connection.query(
-      `INSERT INTO Venta (obra_id, comprador_id, estado) VALUES (?, ?, 'reservada')`,
-      [obra_id, comprador_id]
+      `INSERT INTO Venta (obra_id, comprador_id, obra_nombre, artista_nombre, precio_venta, porcentaje_ganancia, estado)
+       VALUES (?, ?, ?, ?, ?, ?, 'reservada')`,
+      [obra_id, comprador_id, obra.nombre, artistaNombre, precioVenta, porcentajeGanancia]
     );
 
     await connection.commit();
-        const solicitudId = require('crypto').randomUUID();
-        auditar('solicitud_compra', req.usuario.email, 'info', {
-            obra_id,
-            venta_id: venta.insertId,
-            solicitud_id: solicitudId
-        });
+    const solicitudId = require('crypto').randomUUID();
+    auditar('solicitud_compra', req.usuario.email, 'info', {
+      obra_id,
+      venta_id: venta.insertId,
+      solicitud_id: solicitudId
+    });
+    auditar('reserva_creada', req.usuario.email, 'info', {
+      obra_id,
+      venta_id: venta.insertId,
+      obra_nombre: obra.nombre,
+      comprador_id
+    });
     res.json({ venta_id: venta.insertId, message: 'Obra reservada correctamente' });
   } catch (error) {
     await connection.rollback();
@@ -68,7 +85,7 @@ const concretarVenta = async (req, res) => {
     const { direccion_envio } = req.body;
     const admin_id = req.usuario.usuario_id;
 
-    // Obtener la venta
+    // Obtener la venta (con datos denormalizados — sin JOIN a Obra/Artista)
     const [venta] = await connection.query(
       'SELECT * FROM Venta WHERE venta_id = ?',
       [id]
@@ -78,15 +95,9 @@ const concretarVenta = async (req, res) => {
       return res.status(409).json({ error: 'La venta no está en estado reservada' });
     }
 
-    // Obtener obra y artista
-    const [obra] = await connection.query(
-      'SELECT o.*, a.porcentaje_ganancia FROM Obra o JOIN Artista a ON o.artista_id = a.artista_id WHERE o.obra_id = ?',
-      [venta[0].obra_id]
-    );
-    if (obra.length === 0) throw new Error('Obra no encontrada');
-
-    const precio = obra[0].precio_venta;
-    const porcentaje = obra[0].porcentaje_ganancia;
+    // Usar datos denormalizados de Venta
+    const precio = parseFloat(venta[0].precio_venta);
+    const porcentaje = parseFloat(venta[0].porcentaje_ganancia || 5);
     const iva = precio * 0.16; // Suponiendo IVA 16%
     const ganancia_museo = precio * (porcentaje / 100);
     const total = precio + iva;
@@ -97,27 +108,23 @@ const concretarVenta = async (req, res) => {
       [id]
     );
 
-    // Actualizar obra a Vendida
-    await connection.query(
-      'UPDATE Obra SET estado = "Vendida" WHERE obra_id = ?',
-      [venta[0].obra_id]
-    );
-
-    // Crear factura
-    await connection.query(
+    // Crear factura con datos denormalizados (obra_nombre, artista_nombre)
+    const [factura] = await connection.query(
       `INSERT INTO Factura 
-       (venta_id, admin_id, precio_obra, iva, porcentaje_ganancia, ganancia_museo, total, direccion_envio)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, admin_id, precio, iva, porcentaje, ganancia_museo, total, direccion_envio]
+       (venta_id, admin_id, obra_nombre, artista_nombre, precio_obra, iva, porcentaje_ganancia, ganancia_museo, total, direccion_envio)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, admin_id, venta[0].obra_nombre, venta[0].artista_nombre, precio, iva, porcentaje, ganancia_museo, total, direccion_envio]
     );
 
     await connection.commit();
-        auditar('compra_aceptada', req.usuario.email, 'info', {
-            venta_id: id,
-            admin_id,
-            obra_id: venta[0].obra_id,
-            total
-        });
+    auditar('compra_aceptada', req.usuario.email, 'info', {
+      venta_id: id,
+      admin_id,
+      obra_id: venta[0].obra_id,
+      obra_nombre: venta[0].obra_nombre,
+      total,
+      factura_id: factura.insertId
+    });
     res.json({ message: 'Venta concretada y factura generada' });
   } catch (error) {
     await connection.rollback();
@@ -127,7 +134,7 @@ const concretarVenta = async (req, res) => {
   }
 };
 
-// Cancelar reserva (admin o el propio miembro? lo dejamos solo admin)
+// Cancelar reserva (admin)
 const cancelarVenta = async (req, res) => {
   const connection = await pool.getConnection();
   try {
@@ -141,10 +148,10 @@ const cancelarVenta = async (req, res) => {
       return res.status(409).json({ error: 'Solo se pueden cancelar reservas' });
     }
 
-    // Cambiar estado de obra a Disponible
-    await connection.query(
-      'UPDATE Obra SET estado = "Disponible" WHERE obra_id = ?',
-      [venta[0].obra_id]
+    // Actualizar estado en MongoDB
+    await axios.put(`${CATALOG_URL}/${venta[0].obra_id}`,
+      { estado: 'Disponible' },
+      { headers: { 'x-internal-key': INTERNAL_KEY }, timeout: 5000 }
     );
 
     // Actualizar venta a cancelada
@@ -154,11 +161,16 @@ const cancelarVenta = async (req, res) => {
     );
 
     await connection.commit();
-        auditar('compra_rechazada', req.usuario.email, 'warning', {
-            venta_id: id,
-            obra_id: venta[0].obra_id,
-            motivo: 'Cancelada por administrador'
-        });
+    auditar('compra_rechazada', req.usuario.email, 'warning', {
+      venta_id: id,
+      obra_id: venta[0].obra_id,
+      motivo: 'Cancelada por administrador'
+    });
+    auditar('reserva_cancelada', req.usuario.email, 'warning', {
+      venta_id: id,
+      obra_id: venta[0].obra_id,
+      motivo: 'Cancelada por administrador'
+    });
     res.json({ message: 'Reserva cancelada' });
   } catch (error) {
     await connection.rollback();
@@ -168,16 +180,13 @@ const cancelarVenta = async (req, res) => {
   }
 };
 
-// En ventaController.js
+// Listar ventas (admin) — usa columnas denormalizadas, sin JOIN a Obra/Artista
 const getVentas = async (req, res) => {
     try {
         const { estado } = req.query;
         let query = `
-            SELECT v.*, o.nombre as obra_nombre, o.precio_venta, a.nombre as artista_nombre,
-                   u.email as comprador_email, u.nombre as comprador_nombre
+            SELECT v.*, u.email as comprador_email, u.nombre as comprador_nombre
             FROM Venta v
-            JOIN Obra o ON v.obra_id = o.obra_id
-            JOIN Artista a ON o.artista_id = a.artista_id
             JOIN Usuario u ON v.comprador_id = u.usuario_id
         `;
         const params = [];
@@ -192,17 +201,14 @@ const getVentas = async (req, res) => {
     }
 };
 
-// Obtener todas las facturas (solo admin)
+// Obtener todas las facturas (solo admin) — usa columnas denormalizadas
 const getFacturas = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT f.factura_id, f.venta_id, f.fecha_emision, f.precio_obra, f.iva,
-             f.porcentaje_ganancia, f.ganancia_museo, f.total, f.direccion_envio,
-             v.obra_id, o.nombre as obra_nombre, o.precio_venta,
-             u.usuario_id as comprador_id, u.nombre as comprador_nombre, u.email as comprador_email
+      SELECT f.*, v.obra_id, v.comprador_id,
+             u.nombre as comprador_nombre, u.email as comprador_email
       FROM Factura f
       JOIN Venta v ON f.venta_id = v.venta_id
-      JOIN Obra o ON v.obra_id = o.obra_id
       JOIN Usuario u ON v.comprador_id = u.usuario_id
       ORDER BY f.fecha_emision DESC
     `);
@@ -217,16 +223,11 @@ const getFacturaById = async (req, res) => {
   try {
     const { id } = req.params;
     const [rows] = await pool.query(`
-      SELECT f.factura_id, f.venta_id, f.fecha_emision, f.precio_obra, f.iva,
-             f.porcentaje_ganancia, f.ganancia_museo, f.total, f.direccion_envio,
-             v.obra_id, o.nombre as obra_nombre, o.precio_venta,
-             u.usuario_id as comprador_id, u.nombre as comprador_nombre, u.email as comprador_email,
-             a.nombre as artista_nombre
+      SELECT f.*, v.obra_id, v.comprador_id,
+             u.nombre as comprador_nombre, u.email as comprador_email
       FROM Factura f
       JOIN Venta v ON f.venta_id = v.venta_id
-      JOIN Obra o ON v.obra_id = o.obra_id
       JOIN Usuario u ON v.comprador_id = u.usuario_id
-      JOIN Artista a ON o.artista_id = a.artista_id
       WHERE f.factura_id = ?
     `, [id]);
     if (rows.length === 0) return res.status(404).json({ error: 'Factura no encontrada' });
