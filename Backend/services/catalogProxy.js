@@ -66,4 +66,23 @@ const deleteObra = async (id) => {
     return response.data;
 };
 
-module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext, getArtists, getArtistById, createObra, updateObra, deleteObra };
+// ---------------------------------------------------------------------------
+// CRUD de Artistas (admin)
+// ---------------------------------------------------------------------------
+
+const createArtist = async (artistData) => {
+    const response = await client.post('/artists', artistData);
+    return response.data;
+};
+
+const updateArtist = async (id, artistData) => {
+    const response = await client.put(`/artists/${id}`, artistData);
+    return response.data;
+};
+
+const deleteArtist = async (id) => {
+    const response = await client.delete(`/artists/${id}`);
+    return response.data;
+};
+
+module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext, getArtists, getArtistById, createObra, updateObra, deleteObra, createArtist, updateArtist, deleteArtist };

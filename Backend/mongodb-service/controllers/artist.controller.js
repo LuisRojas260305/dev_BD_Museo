@@ -27,4 +27,34 @@ const getArtistById = async (req, res, next) => {
   }
 };
 
-module.exports = { getArtists, getArtistById };
+const createArtist = async (req, res, next) => {
+  try {
+    const artista = await Artista.create(req.body);
+    res.status(201).json({ success: true, data: artista });
+  } catch (err) {
+    if (err.code === 11000) return res.status(409).json({ success: false, error: 'Artista duplicado' });
+    next(err);
+  }
+};
+
+const updateArtist = async (req, res, next) => {
+  try {
+    const artista = await Artista.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!artista) return res.status(404).json({ success: false, error: 'Artista no encontrado' });
+    res.json({ success: true, data: artista });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteArtist = async (req, res, next) => {
+  try {
+    const artista = await Artista.findByIdAndDelete(req.params.id);
+    if (!artista) return res.status(404).json({ success: false, error: 'Artista no encontrado' });
+    res.json({ success: true, message: 'Artista eliminado' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getArtists, getArtistById, createArtist, updateArtist, deleteArtist };

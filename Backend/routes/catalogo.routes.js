@@ -188,4 +188,53 @@ router.delete('/obras/:id', verificarToken, verificarAdmin, async (req, res, nex
     }
 });
 
+// ---------------------------------------------------------------------------
+// CRUD Artistas (admin)
+// ---------------------------------------------------------------------------
+
+// POST /api/catalogo/artistas — Crear artista (con foto opcional)
+router.post('/artistas', verificarToken, verificarAdmin, upload.single('foto'), async (req, res) => {
+    try {
+        let fotoUrl = null;
+        if (req.file) {
+            const multimediaId = await multimediaHelper.saveFoto('artista', null, req.file.buffer, req.file.mimetype);
+            fotoUrl = `/api/multimedia/${multimediaId}`;
+        }
+
+        const artistData = { ...req.body };
+        if (fotoUrl) artistData.fotos = [fotoUrl];
+
+        const artista = await catalogProxy.createArtist(artistData);
+        res.status(201).json(artista);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// PUT /api/catalogo/artistas/:id — Actualizar artista (foto opcional)
+router.put('/artistas/:id', verificarToken, verificarAdmin, upload.single('foto'), async (req, res) => {
+    try {
+        const artistData = { ...req.body };
+        if (req.file) {
+            const multimediaId = await multimediaHelper.saveFoto('artista', null, req.file.buffer, req.file.mimetype);
+            artistData.fotos = [`/api/multimedia/${multimediaId}`];
+        }
+
+        const artista = await catalogProxy.updateArtist(req.params.id, artistData);
+        res.json(artista);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// DELETE /api/catalogo/artistas/:id — Eliminar artista
+router.delete('/artistas/:id', verificarToken, verificarAdmin, async (req, res) => {
+    try {
+        const artista = await catalogProxy.deleteArtist(req.params.id);
+        res.json(artista);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
