@@ -10,6 +10,7 @@ const {
   deleteObra,
 } = require('../controllers/catalog.controller');
 const { getArtists, getArtistById } = require('../controllers/artist.controller');
+const { getGeneros, getGeneroById, createGenero, updateGenero, deleteGenero } = require('../controllers/genero.controller');
 const { validateCatalogQuery, validateSearchQuery } = require('../middleware/validation');
 const { opcionalAuth, verificarToken, verificarAdmin } = require('../middleware/auth');
 
@@ -22,6 +23,13 @@ router.get('/ssl/contexto', createSslContext); // Inicializa contexto SSL (sin a
 // Artistas — antes de :id para evitar que "artistas" sea capturado como parámetro
 router.get('/artists', opcionalAuth, getArtists);
 router.get('/artists/:id', opcionalAuth, getArtistById);
+
+// Géneros — antes de :id para evitar que "generos" sea capturado como parámetro
+router.get('/generos', opcionalAuth, getGeneros);
+router.get('/generos/:id', opcionalAuth, getGeneroById);
+router.post('/generos', verificarToken, verificarAdmin, createGenero);
+router.put('/generos/:id', verificarToken, verificarAdmin, updateGenero);
+router.delete('/generos/:id', verificarToken, verificarAdmin, deleteGenero);
 
 // CRUD de obras (admin) — requieren autenticación plena
 // El proxy (monolito) envía x-internal-key + ya validó JWT y admin

@@ -67,6 +67,35 @@ const deleteObra = async (id) => {
 };
 
 // ---------------------------------------------------------------------------
+// CRUD de Géneros (admin)
+// ---------------------------------------------------------------------------
+
+const getGeneros = async (params = {}) => {
+  const response = await client.get('/generos', { params });
+  return response.data;
+};
+
+const getGeneroById = async (id) => {
+  const response = await client.get(`/generos/${id}`);
+  return response.data;
+};
+
+const createGenero = async (data) => {
+  const response = await client.post('/generos', data);
+  return response.data;
+};
+
+const updateGenero = async (id, data) => {
+  const response = await client.put(`/generos/${id}`, data);
+  return response.data;
+};
+
+const deleteGenero = async (id) => {
+  const response = await client.delete(`/generos/${id}`);
+  return response.data;
+};
+
+// ---------------------------------------------------------------------------
 // CRUD de Artistas (admin)
 // ---------------------------------------------------------------------------
 
@@ -85,4 +114,4 @@ const deleteArtist = async (id) => {
     return response.data;
 };
 
-module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext, getArtists, getArtistById, createObra, updateObra, deleteObra, createArtist, updateArtist, deleteArtist };
+module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext, getArtists, getArtistById, createObra, updateObra, deleteObra, createArtist, updateArtist, deleteArtist, getGeneros, getGeneroById, createGenero, updateGenero, deleteGenero };

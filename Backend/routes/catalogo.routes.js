@@ -88,7 +88,75 @@ router.get('/artistas', async (req, res, next) => {
     }
 });
 
-// GET /api/catalogo/:id — Obtener obra por ID
+// ---------------------------------------------------------------------------
+// CRUD Géneros (admin) — sin multer (no hay fotos)
+// ---------------------------------------------------------------------------
+
+// GET /api/catalogo/generos — Listar géneros (público)
+router.get('/generos', async (req, res, next) => {
+  try {
+    const data = await catalogProxy.getGeneros(req.query);
+    res.json(data);
+  } catch (err) {
+    if (err.code === 'ECONNREFUSED' || err.code === 'ECONNABORTED') {
+      return res.status(503).json({
+        success: false,
+        error: 'Catálogo no disponible',
+        details: 'El servicio de catálogo (MongoDB) no está disponible',
+      });
+    }
+    next(err);
+  }
+});
+
+// GET /api/catalogo/generos/:id — Obtener género por ID (público)
+router.get('/generos/:id', async (req, res, next) => {
+  try {
+    const data = await catalogProxy.getGeneroById(req.params.id);
+    res.json(data);
+  } catch (err) {
+    if (err.code === 'ECONNREFUSED' || err.code === 'ECONNABORTED') {
+      return res.status(503).json({
+        success: false,
+        error: 'Catálogo no disponible',
+        details: 'El servicio de catálogo (MongoDB) no está disponible',
+      });
+    }
+    next(err);
+  }
+});
+
+// POST /api/catalogo/generos — Crear género (admin)
+router.post('/generos', verificarToken, verificarAdmin, async (req, res, next) => {
+  try {
+    const data = await catalogProxy.createGenero(req.body);
+    res.status(201).json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /api/catalogo/generos/:id — Actualizar género (admin)
+router.put('/generos/:id', verificarToken, verificarAdmin, async (req, res, next) => {
+  try {
+    const data = await catalogProxy.updateGenero(req.params.id, req.body);
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/catalogo/generos/:id — Eliminar género (admin)
+router.delete('/generos/:id', verificarToken, verificarAdmin, async (req, res, next) => {
+  try {
+    const data = await catalogProxy.deleteGenero(req.params.id);
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/catalogo/:id — Obtener obra por ID (debe ir AL FINAL para no capturar rutas específicas)
 router.get('/:id', async (req, res, next) => {
     try {
         const data = await catalogProxy.getCatalogById(req.params.id, req.query);
