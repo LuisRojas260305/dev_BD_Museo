@@ -5,6 +5,8 @@ const {
   updateCeramica, updateOrfebreria
 } = require('../../services/obraServices');
 const { auditar } = require('../../services/auditoriaHelper');
+const { addView } = require('../../shared/sslContext');
+const { logEvent } = require('../../shared/sslLogger');
 
 // Obtener todas las obras (sin la foto)
 const getAllObras = async (req, res) => {
@@ -63,6 +65,16 @@ const getObraById = async (req, res) => {
     if (obra.length === 0) return res.status(404).json({ error: 'Obra no encontrada' });
 
     const result = obra[0];
+
+    // SSL — registrar vista de obra
+    const sslId = req.headers['x-ssl-id'] || req.ssl?.ssl_id;
+    if (sslId) {
+      const ctxActualizado = addView(sslId, id, 'detalle');
+      if (ctxActualizado) {
+        logEvent(sslId, 'vista-obra', { obra_id: id, titulo: result.nombre });
+      }
+    }
+
     // Eliminar el campo foto para no enviar el BLOB en esta respuesta
     delete result.foto;
 

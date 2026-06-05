@@ -1,6 +1,8 @@
 const Artista = require('../models/Artista');
 const Obra = require('../models/Obra');
 const fieldMapper = require('../utils/fieldMapper');
+const { createContext, addView } = require('../../shared/sslContext');
+const { logEvent } = require('../../shared/sslLogger');
 
 const getCatalog = async (req, res, next) => {
   try {
@@ -66,6 +68,15 @@ const getCatalogById = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'Obra no encontrada' });
     }
 
+    // SSL — registrar vista de obra
+    const sslId = req.headers['x-ssl-id'] || req.ssl?.ssl_id;
+    if (sslId) {
+      const ctxActualizado = addView(sslId, id, 'detalle');
+      if (ctxActualizado) {
+        logEvent(sslId, 'vista-obra', { obra_id: id, titulo: obra.titulo });
+      }
+    }
+
     res.json({ success: true, data: fieldMapper(obra.toObject()) });
   } catch (err) {
     next(err);
@@ -103,6 +114,12 @@ const searchCatalog = async (req, res, next) => {
   }
 };
 
+const createSslContext = (req, res) => {
+    const ctx = createContext();
+    logEvent(ctx.ssl_id, 'contexto-creado', { endpoint: '/ssl/contexto' });
+    res.json({ success: true, data: { ssl_id: ctx.ssl_id, creado_en: ctx.creado_en, ttl: ctx.ttl } });
+};
+
 const healthCheck = (req, res) => {
   const { getConnectionStatus } = require('../config/db');
   const state = getConnectionStatus();
@@ -115,4 +132,4 @@ const healthCheck = (req, res) => {
   }
 };
 
-module.exports = { getCatalog, getCatalogById, searchCatalog, healthCheck };
+module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext, healthCheck };

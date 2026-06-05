@@ -6,6 +6,10 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5 MB
 });
 const obraController = require('../../controllers/Obra/obraController');
+const sslMiddleware = require('../../shared/sslMiddleware');
+
+// SSL middleware para tracking de contexto de navegación
+router.use(sslMiddleware);
 
 router.get('/', obraController.getAllObras);
 router.get('/:id', obraController.getObraById);
