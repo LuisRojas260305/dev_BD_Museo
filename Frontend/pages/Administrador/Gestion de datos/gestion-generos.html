@@ -106,9 +106,10 @@
 
         async function cargarGeneros() {
             try {
-                const res = await fetch(`${API_BASE}/genero`);
+                const res = await fetch(`${API_BASE}/catalogo/generos`);
                 if (!res.ok) throw new Error('Error al cargar géneros');
-                generos = await res.json();
+                const result = await res.json();
+                generos = result.data;
                 renderGeneros();
             } catch (error) {
                 console.error(error);
@@ -121,12 +122,12 @@
             generos.forEach(g => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${g.genero_id}</td>
+                    <td>${g._id}</td>
                     <td>${g.nombre}</td>
                     <td>${g.descripcion || ''}</td>
                     <td>
-                        <button class="btn" onclick="editarGenero(${g.genero_id})">Editar</button>
-                        <button class="btn btn-danger" onclick="eliminarGenero(${g.genero_id})">Eliminar</button>
+                        <button class="btn" onclick='editarGenero("${g._id}")'>Editar</button>
+                        <button class="btn btn-danger" onclick='eliminarGenero("${g._id}")'>Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -137,10 +138,10 @@
             formContainer.classList.remove('hidden');
             if (genero) {
                 formTitle.innerText = 'Editar Género';
-                document.getElementById('generoId').value = genero.genero_id;
+                document.getElementById('generoId').value = genero._id;
                 document.getElementById('nombre').value = genero.nombre;
                 document.getElementById('descripcion').value = genero.descripcion || '';
-                editId = genero.genero_id;
+                editId = genero._id;
             } else {
                 formTitle.innerText = 'Nuevo Género';
                 generoForm.reset();
@@ -162,7 +163,7 @@
             };
 
             try {
-                let url = `${API_BASE}/genero`;
+                let url = `${API_BASE}/catalogo/generos`;
                 let method = 'POST';
                 if (editId) {
                     url += `/${editId}`;
@@ -187,7 +188,7 @@
 
         window.editarGenero = async function(id) {
             try {
-                const res = await fetch(`${API_BASE}/genero/${id}`);
+                const res = await fetch(`${API_BASE}/catalogo/generos/${id}`);
                 if (!res.ok) throw new Error('No se pudo obtener el género');
                 const genero = await res.json();
                 mostrarFormulario(genero);
@@ -199,7 +200,7 @@
         window.eliminarGenero = async function(id) {
             if (!confirm('¿Eliminar género?')) return;
             try {
-                const res = await authFetch(`${API_BASE}/genero/${id}`, { method: 'DELETE' });
+                const res = await authFetch(`${API_BASE}/catalogo/generos/${id}`, { method: 'DELETE' });
                 if (!res.ok) {
                     const err = await res.json();
                     throw new Error(err.error);

@@ -314,12 +314,13 @@
         // Cargar géneros para el filtro
         async function cargarGeneros() {
             try {
-                const response = await fetch(`${API_BASE}/genero`);
-                generos = await response.json();
+                const response = await fetch(`${API_BASE}/catalogo/generos`);
+                const result = await response.json();
+                generos = result.data || [];
                 const select = document.getElementById('genre');
                 generos.forEach(g => {
                     const option = document.createElement('option');
-                    option.value = g.genero_id;
+                    option.value = g.nombre;
                     option.textContent = g.nombre;
                     select.appendChild(option);
                 });
@@ -357,8 +358,7 @@
             // Usar SOLO MongoDB via proxy — sin fallback MySQL
             const params = new URLSearchParams();
             if (generoId) {
-                const map = { 1: 'Pintura', 2: 'Escultura', 3: 'Orfebrería', 4: 'Cerámica', 5: 'Fotografía' };
-                params.append('genero', map[generoId] || generoId);
+                params.append('genero', generoId);
             }
             if (artistaId) {
                 params.append('artista_id', artistaId);
