@@ -23,7 +23,7 @@ const verificarToken = (req, res, next) => {
 };
 
 const verificarAdmin = (req, res, next) => {
-    if (req.usuario.tipo !== 'administrador')
+    if (req.usuario.tipo !== 'administrador' && req.usuario.tipo !== 'sistema')
         return res.status(403).json({ error: 'Requiere permisos de administrador' });
     next();
 };

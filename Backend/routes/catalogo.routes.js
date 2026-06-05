@@ -1,11 +1,19 @@
 // /api/catalogo — Proxy a mongodb-service
 // Reemplaza a /api/obras para consulta pública de catálogo.
 const router = require('express').Router();
+const multer = require('multer');
 const catalogProxy = require('../services/catalogProxy');
+const multimediaHelper = require('../services/multimediaHelper');
 const sslMiddleware = require('../shared/sslMiddleware');
-const { opcionalAuth } = require('../shared/auth');
+const { opcionalAuth, verificarToken, verificarAdmin } = require('../shared/auth');
 const { addView } = require('../shared/sslContext');
 const { logEvent } = require('../shared/sslLogger');
+
+// Multer — upload de fotos en memoria (máx 5 MB)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 // SSL + auth opcional en todas las rutas de catálogo
 router.use(sslMiddleware);
@@ -63,6 +71,23 @@ router.get('/ssl/contexto', async (req, res, next) => {
     }
 });
 
+// GET /api/catalogo/artistas — Listar artistas (proxy a MongoDB)
+router.get('/artistas', async (req, res, next) => {
+    try {
+        const data = await catalogProxy.getArtists(req.query);
+        res.json(data);
+    } catch (err) {
+        if (err.code === 'ECONNREFUSED' || err.code === 'ECONNABORTED') {
+            return res.status(503).json({
+                success: false,
+                error: 'Catálogo no disponible',
+                details: 'El servicio de catálogo (MongoDB) no está disponible'
+            });
+        }
+        next(err);
+    }
+});
+
 // GET /api/catalogo/:id — Obtener obra por ID
 router.get('/:id', async (req, res, next) => {
     try {
@@ -86,6 +111,79 @@ router.get('/:id', async (req, res, next) => {
                 details: 'El servicio de catálogo (MongoDB) no está disponible'
             });
         }
+        next(err);
+    }
+});
+
+// ---------------------------------------------------------------------------
+// CRUD de Obras (admin) — requieren autenticación JWT + admin
+// ---------------------------------------------------------------------------
+
+// POST /api/catalogo/obras — Crear obra (con foto opcional)
+router.post('/obras', verificarToken, verificarAdmin, upload.single('foto'), async (req, res, next) => {
+    try {
+        let fotoUrl = null;
+
+        // Si hay foto, guardarla en MySQL Multimedia y obtener URL
+        if (req.file) {
+            const multimediaId = await multimediaHelper.saveFoto(
+                'obra',
+                null, // entidad_id se actualiza después de crear la obra si se necesita
+                req.file.buffer,
+                req.file.mimetype
+            );
+            fotoUrl = `/api/multimedia/${multimediaId}`;
+        }
+
+        // Armar datos de obra (sin la foto binaria, solo referencia)
+        const obraData = { ...req.body };
+        if (fotoUrl) {
+            obraData.fotos = [fotoUrl];
+        }
+
+        const obra = await catalogProxy.createObra(obraData);
+        res.status(201).json(obra);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// PUT /api/catalogo/obras/:id — Actualizar obra (foto opcional)
+router.put('/obras/:id', verificarToken, verificarAdmin, upload.single('foto'), async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        let fotoUrl = null;
+
+        // Si hay foto nueva, guardarla y generar URL
+        if (req.file) {
+            const multimediaId = await multimediaHelper.saveFoto(
+                'obra',
+                id,
+                req.file.buffer,
+                req.file.mimetype
+            );
+            fotoUrl = `/api/multimedia/${multimediaId}`;
+        }
+
+        const obraData = { ...req.body };
+        if (fotoUrl) {
+            obraData.fotos = [fotoUrl];
+        }
+
+        const obra = await catalogProxy.updateObra(id, obraData);
+        res.json(obra);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// DELETE /api/catalogo/obras/:id — Eliminar obra
+router.delete('/obras/:id', verificarToken, verificarAdmin, async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const obra = await catalogProxy.deleteObra(id);
+        res.json(obra);
+    } catch (err) {
         next(err);
     }
 });

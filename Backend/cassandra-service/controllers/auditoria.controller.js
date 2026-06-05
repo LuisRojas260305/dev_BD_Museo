@@ -35,12 +35,12 @@ async function createEvent(req, res, next) {
 
 async function getEvents(req, res, next) {
     try {
-        const { tipo, desde, hasta, limite } = req.query;
-        if (!tipo) return res.status(400).json({ error: "El parámetro 'tipo' es obligatorio" });
+    const { tipo, tipo_evento, desde, hasta, limite } = req.query;
+    const tipoEvento = tipo || tipo_evento || null;
 
-        const eventos = await eventosModel.consultarEventos({
-            tipo_evento: tipo, desde, hasta, limite: parseInt(limite) || 100
-        });
+    const eventos = await eventosModel.consultarEventos({
+        tipo_evento: tipoEvento, desde, hasta, limite: parseInt(limite) || 100
+    });
         res.json(eventos);
     } catch (err) {
         next(err);

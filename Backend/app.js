@@ -78,14 +78,25 @@ app.use('/api/epoca', require('./routes/Obra/epoca'));
 // Catálogo público — proxy a mongodb-service (reemplaza a /api/obras para consultas)
 app.use('/api/catalogo', require('./routes/catalogo.routes'));
 
+// Multimedia — servir fotos desde MySQL
+app.use('/api/multimedia', require('./routes/multimedia.routes'));
+
+// Eventos — proxy a cassandra-service
+app.use('/api/eventos', require('./routes/eventos.routes'));
+
 // Ventas
 app.use('/api/ventas', require('./routes/Compra/ventas'));
 app.use('/api/upload', require('./routes/Compra/upload'));
 app.use('/api/reportes', require('./routes/Compra/reportes'));
 
+// Frontend estático — servir las páginas desde el mismo backend
+const frontendPath = path.resolve(__dirname, '../Frontend/pages');
+app.use(express.static(frontendPath));
+app.use('/js', express.static(path.resolve(__dirname, '../Frontend/js')));
+
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.send('El servidor funciona');
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // Manejador de errores (para capturar errores de Multer, etc.)

@@ -13,6 +13,9 @@ const getCatalog = async (req, res, next) => {
     const match = {};
     if (req.query.genero) match.genero = req.query.genero;
     if (req.query.estado) match.estado = req.query.estado;
+    if (req.query.artista_id) {
+      match.artista_id = new (require('mongoose').Types.ObjectId)(req.query.artista_id);
+    }
     if (req.query.precio_min || req.query.precio_max) {
       match.precio_venta = {};
       if (req.query.precio_min) match.precio_venta.$gte = parseFloat(req.query.precio_min);
@@ -132,4 +135,121 @@ const healthCheck = (req, res) => {
   }
 };
 
-module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext, healthCheck };
+// ---------------------------------------------------------------------------
+// CRUD de Obras (admin)
+// ---------------------------------------------------------------------------
+
+const VALID_GENEROS = ['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía'];
+
+/**
+ * Valida que el género sea uno de los válidos.
+ */
+function validateGenero(genero) {
+    if (!genero) return 'El campo genero es requerido';
+    if (!VALID_GENEROS.includes(genero)) {
+        return `Género inválido. Valores: ${VALID_GENEROS.join(', ')}`;
+    }
+    return null;
+}
+
+/**
+ * POST /api/catalog — Crear una obra
+ * Recibe JSON con datos de obra (sin foto binaria).
+ */
+const createObra = async (req, res, next) => {
+    try {
+        const { genero, ...obraData } = req.body;
+
+        // Validar género
+        const errorGenero = validateGenero(genero);
+        if (errorGenero) {
+            return res.status(400).json({ success: false, error: errorGenero });
+        }
+
+        // Validar campos comunes requeridos por el schema de Mongoose
+        if (!obraData.codigo_inventario) {
+            return res.status(400).json({
+                success: false,
+                error: 'El campo codigo_inventario es requerido',
+            });
+        }
+        if (obraData.precio_venta === undefined || obraData.precio_venta === null) {
+            return res.status(400).json({
+                success: false,
+                error: 'El campo precio_venta es requerido',
+            });
+        }
+
+        // Si viene artista_id como string, convertirlo a ObjectId
+        if (obraData.artista_id && typeof obraData.artista_id === 'string') {
+            obraData.artista_id = new (require('mongoose').Types.ObjectId)(obraData.artista_id);
+        }
+
+        // Crear la obra — Mongoose usa el discriminatorKey 'genero' para
+        // elegir automáticamente el discriminator correcto (Pintura, Escultura, etc.)
+        const obra = await Obra.create({ genero, ...obraData });
+
+        res.status(201).json({ success: true, data: fieldMapper(obra.toObject()) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+/**
+ * PUT /api/catalog/:id — Actualizar una obra existente
+ * Recibe JSON con campos a actualizar (merge parcial).
+ */
+const updateObra = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        // Validar género si se cambia
+        if (updateData.genero) {
+            const errorGenero = validateGenero(updateData.genero);
+            if (errorGenero) {
+                return res.status(400).json({ success: false, error: errorGenero });
+            }
+        }
+
+        // Convertir artista_id si viene como string
+        if (updateData.artista_id && typeof updateData.artista_id === 'string') {
+            updateData.artista_id = new (require('mongoose').Types.ObjectId)(updateData.artista_id);
+        }
+
+        const obra = await Obra.findByIdAndUpdate(id, updateData, {
+            new: true,
+            runValidators: true,
+            context: 'query',
+        });
+
+        if (!obra) {
+            return res.status(404).json({ success: false, error: 'Obra no encontrada' });
+        }
+
+        res.json({ success: true, data: fieldMapper(obra.toObject()) });
+    } catch (err) {
+        next(err);
+    }
+};
+
+/**
+ * DELETE /api/catalog/:id — Eliminar una obra
+ */
+const deleteObra = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const obra = await Obra.findByIdAndDelete(id);
+
+        if (!obra) {
+            return res.status(404).json({ success: false, error: 'Obra no encontrada' });
+        }
+
+        res.json({ success: true, message: 'Obra eliminada correctamente' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext, healthCheck, createObra, updateObra, deleteObra };

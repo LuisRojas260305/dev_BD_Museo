@@ -23,7 +23,9 @@ const verificarToken = (req, res, next) => {
 };
 
 const verificarAdmin = (req, res, next) => {
-    if (req.usuario.tipo !== 'administrador')
+    // El tipo 'sistema' corresponde a requests internos (proxy con x-internal-key)
+    // que ya validaron JWT + admin en el monolito.
+    if (req.usuario.tipo !== 'administrador' && req.usuario.tipo !== 'sistema')
         return res.status(403).json({ error: 'Requiere permisos de administrador' });
     next();
 };

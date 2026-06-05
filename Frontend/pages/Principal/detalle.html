@@ -271,27 +271,23 @@
         }
 
         async function cargarObra() {
+            let obra;
             try {
-                const baseURL = getCatalogBaseURL();
-                const usingMongo = baseURL !== API_BASE;
-                let obra;
-
-                if (usingMongo) {
-                    const res = await fetch(`${baseURL}/api/catalog/${obraId}`);
-                    if (!res.ok) throw new Error('No encontrada');
-                    const json = await res.json();
-                    obra = json.data;
-                    obra.obra_id = obra.obra_id || obra.obra_id_original || obra._id;
-                    obra.precio_venta = typeof obra.precio_venta === 'object'
-                        ? (Number(obra.precio_venta._serialized) || 0)
-                        : (obra.precio_venta || 0);
-                    obra.alto = typeof obra.alto === 'object' ? (Number(obra.alto._serialized) || 0) : (obra.alto || 0);
-                    obra.ancho = typeof obra.ancho === 'object' ? (Number(obra.ancho._serialized) || 0) : (obra.ancho || 0);
-                } else {
-                    const res = await fetch(`${baseURL}/obras/${obraId}`);
-                    if (!res.ok) throw new Error('No encontrada');
-                    obra = await res.json();
-                }
+                // Usar SOLO MongoDB via proxy — sin fallback MySQL
+                const res = await fetch(`${API_BASE}/catalogo/${obraId}`);
+                if (!res.ok) throw new Error('No encontrada');
+                const json = await res.json();
+                obra = json.data;
+                obra.obra_id = obra.obra_id || obra.obra_id_original || obra._id;
+                obra.precio_venta = typeof obra.precio_venta === 'object'
+                    ? (Number(obra.precio_venta._serialized) || 0)
+                    : (obra.precio_venta || 0);
+                obra.alto = typeof obra.alto === 'object'
+                    ? (Number(obra.alto._serialized) || 0)
+                    : (obra.alto || 0);
+                obra.ancho = typeof obra.ancho === 'object'
+                    ? (Number(obra.ancho._serialized) || 0)
+                    : (obra.ancho || 0);
 
                 render(obra);
             } catch (error) {
@@ -400,7 +396,7 @@
                 'Reservado': 'status-reservado'
             }[estadoTexto] || '';
 
-            // URL de la imagen
+            // URL de la imagen — las fotos siguen servidas por Express (por ahora)
             const imagenUrl = `${API_BASE}/obras/${obra.obra_id}/foto`;
 
             // Metadatos comunes (fecha y dimensiones)

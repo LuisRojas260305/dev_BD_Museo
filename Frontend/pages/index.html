@@ -331,13 +331,14 @@
         // Cargar artistas para el filtro
         async function cargarArtistas() {
             try {
-                const response = await fetch(`${API_BASE}/artistas`);
-                const data = await response.json();
-                artistas = data; // asumiendo que devuelve array con artista_id y nombre
+                // Usar MongoDB via proxy — sin MySQL
+                const response = await fetch(`${API_BASE}/catalogo/artistas?sort=nombre`);
+                const json = await response.json();
+                artistas = json.data || [];
                 const select = document.getElementById('artist');
                 artistas.forEach(a => {
                     const option = document.createElement('option');
-                    option.value = a.artista_id;
+                    option.value = a.artista_id_original || a._id;
                     option.textContent = a.nombre + (a.apellido ? ' ' + a.apellido : '');
                     select.appendChild(option);
                 });
@@ -351,40 +352,29 @@
             const artistaId = document.getElementById('artist').value;
             const ordenar = document.getElementById('sortByPrice').checked;
 
-            const baseURL = getCatalogBaseURL();
-            const usingMongo = baseURL !== API_BASE;
+            let obras = [];
 
-            let url;
+            // Usar SOLO MongoDB via proxy — sin fallback MySQL
             const params = new URLSearchParams();
-
-            if (usingMongo) {
-                url = `${baseURL}/api/catalog?`;
-                if (generoId) {
-                    const map = { 1: 'Pintura', 2: 'Escultura', 3: 'Orfebrería', 4: 'Cerámica', 5: 'Fotografía' };
-                    params.append('genero', map[generoId] || generoId);
-                }
-                if (ordenar) params.append('orden', 'precio');
-            } else {
-                url = `${baseURL}/obras?`;
-                if (generoId) params.append('genero_id', generoId);
-                if (artistaId) params.append('artista_id', artistaId);
-                if (ordenar) params.append('orden', 'precio');
+            if (generoId) {
+                const map = { 1: 'Pintura', 2: 'Escultura', 3: 'Orfebrería', 4: 'Cerámica', 5: 'Fotografía' };
+                params.append('genero', map[generoId] || generoId);
             }
-
-            url += params.toString();
-
+            if (artistaId) {
+                params.append('artista_id', artistaId);
+            }
+            if (ordenar) params.append('orden', 'precio');
             try {
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (usingMongo) {
-                    renderObras(data.data || []);
-                } else {
-                    renderObras(data);
+                const res = await fetch(`${API_BASE}/catalogo?${params}`);
+                const data = await res.json();
+                if (data.data && data.data.length > 0) {
+                    obras = data.data;
                 }
             } catch (error) {
-                console.error('Error cargando obras:', error);
+                console.error('Error cargando obras desde catálogo:', error);
             }
+
+            renderObras(obras);
         }
 
         function renderObras(obras) {
@@ -398,11 +388,11 @@
 
             obras.forEach(obra => {
                 const artistaNombre = obra.artista_nombre || obra.artista?.nombre + ' ' + (obra.artista?.apellido || '') || 'Desconocido';
-                const artistaId = obra.artista_id || obra.artista_id_original;
+                const artistaId = obra.artista_id?.$oid || obra.artista_id?._id || obra.artista_id_original;
                 const generoNombre = obra.genero_nombre || obra.genero || '';
                 const obraId = obra.obra_id || obra.obra_id_original || obra._id;
                 const precio = typeof obra.precio_venta === 'object' ? (Number(obra.precio_venta._serialized) || 0) : (obra.precio_venta || 0);
-                const imagenUrl = `${API_BASE}/obras/${obra.obra_id_original || obra.obra_id}/foto`;
+                const imagenUrl = `${API_BASE}/obras/${obraId}/foto`;
 
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -424,11 +414,9 @@
             });
         }
 
-        // Inicialización
+        // Inicialización — todo via proxy MongoDB
         updateAuthButtons();
-        isMongoDBAvailable().then(() => {
-            cargarGeneros().then(() => cargarArtistas()).then(() => cargarObras());
-        });
+        cargarGeneros().then(() => cargarArtistas()).then(() => cargarObras());
 
         document.getElementById('applyFilters').addEventListener('click', cargarObras);
     </script>

@@ -155,8 +155,10 @@
             const data = await response.json();
             if (response.ok) {
                 setAuth(data.token, data.usuario);
-                if (data.usuario.tipo === 'Administracion') {
-                    window.location.href = '../Administracion/admin-dashboard.html';
+                if (data.usuario.tipo === 'administrador') {
+                    window.location.href = '../Administrador/admin-dashboard.html';
+                } else if (data.usuario.tipo === 'miembro') {
+                    window.location.href = '../Perfiles/perfil.html';
                 } else {
                     window.location.href = '../index.html';
                 }

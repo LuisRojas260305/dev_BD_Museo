@@ -36,4 +36,34 @@ const createSslContext = async () => {
     return response.data;
 };
 
-module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext };
+// Artistas — proxy a mongodb-service
+const getArtists = async (params = {}) => {
+    const response = await client.get('/artists', { params });
+    return response.data;
+};
+
+const getArtistById = async (id, params = {}) => {
+    const response = await client.get(`/artists/${id}`, { params });
+    return response.data;
+};
+
+// ---------------------------------------------------------------------------
+// CRUD de Obras (admin)
+// ---------------------------------------------------------------------------
+
+const createObra = async (obraData) => {
+    const response = await client.post('/', obraData);
+    return response.data;
+};
+
+const updateObra = async (id, obraData) => {
+    const response = await client.put(`/${id}`, obraData);
+    return response.data;
+};
+
+const deleteObra = async (id) => {
+    const response = await client.delete(`/${id}`);
+    return response.data;
+};
+
+module.exports = { getCatalog, getCatalogById, searchCatalog, createSslContext, getArtists, getArtistById, createObra, updateObra, deleteObra };
