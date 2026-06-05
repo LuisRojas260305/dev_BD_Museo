@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const CASSANDRA_URL = process.env.CASSANDRA_URL || 'http://localhost:3002/api/auditoria';
-const INTERNAL_KEY = process.env.CASSANDRA_INTERNAL_KEY || 'museo_internal_key_2026';
+const INTERNAL_KEY = process.env.INTERNAL_API_KEY || 'museo_internal_key_2026';
 
 async function auditar(tipo_evento, usuario, severidad, metadata = {}) {
     try {
