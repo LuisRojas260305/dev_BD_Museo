@@ -162,7 +162,9 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
-       
+        // Resumen de Membresías — Consulta de miembros registrados por período.
+        // API: /usuarios (GET con desde, hasta, tipo=miembro).
+        // auth.js (getUser, authFetch para autenticación).
 
         (function() {
             const user = getUser();
@@ -173,6 +175,10 @@
             document.getElementById('userEmail').innerText = user.email;
         })();
 
+        /**
+         * Maneja el envío del formulario: consulta miembros registrados en el período.
+         * GET /usuarios?desde={}&hasta={}&tipo=miembro
+         */
         document.getElementById('periodoForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const fechaInicio = document.getElementById('fechaInicio').value;
@@ -201,6 +207,10 @@
             }
         });
 
+        /**
+         * Renderiza la tabla de miembros registrados y el total al pie.
+         * @param {Array} miembros - Lista de objetos usuario con tipo "miembro".
+         */
         function renderMembresias(miembros) {
             const tbody = document.getElementById('tablaMembresias');
             tbody.innerHTML = '';
@@ -227,6 +237,9 @@
             `;
         }
 
+        /**
+         * Cierra la sesión del usuario eliminando token y redirigiendo al inicio.
+         */
         window.logout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

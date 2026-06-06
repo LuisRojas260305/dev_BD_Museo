@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Admin - Usuarios</title>
     <style>
-        /* mismos estilos */
+
        * {
             margin: 0;
             padding: 0;
@@ -103,6 +103,10 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
+        // Gestión de Usuarios (Empleados) — CRUD de usuarios y cambio de roles.
+        // API: /usuarios (GET, POST, PUT, DELETE).
+        // auth.js (getUser, authFetch para autenticación).
+
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
@@ -119,6 +123,10 @@
         const formTitle = document.getElementById('formTitle');
         let editId = null;
 
+        /**
+         * Obtiene la lista de usuarios desde la API y renderiza la tabla.
+         * GET /usuarios → actualiza #tablaUsuarios.
+         */
         async function cargarUsuarios() {
             try {
                 const res = await authFetch(`${API_BASE}/usuarios`);
@@ -131,6 +139,10 @@
             }
         }
 
+        /**
+         * Renderiza el array global `usuarios` en la tabla del DOM.
+         * Incluye botones para editar, cambiar rol y eliminar.
+         */
         function renderUsuarios() {
             tbody.innerHTML = '';
             usuarios.forEach(u => {
@@ -153,6 +165,10 @@
             });
         }
 
+        /**
+         * Muestra el formulario en modo creación o edición.
+         * @param {Object|null} usuario - Si se provee, rellena los campos para edición.
+         */
         function mostrarFormulario(usuario = null) {
             formContainer.classList.remove('hidden');
             if (usuario) {
@@ -172,10 +188,17 @@
             }
         }
 
+        /**
+         * Oculta el formulario de usuario.
+         */
         function cancelarFormulario() {
             formContainer.classList.add('hidden');
         }
 
+        /**
+         * Maneja el envío del formulario de usuario (creación o edición).
+         * POST /usuarios — PUT /usuarios/{id}
+         */
         usuarioForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const usuarioData = {
@@ -210,6 +233,11 @@
             }
         });
 
+        /**
+         * Obtiene los datos de un usuario por ID y abre el formulario en modo edición.
+         * @param {number} id - ID del usuario a editar.
+         * GET /usuarios/{id}
+         */
         window.editarUsuario = async function(id) {
             try {
                 const res = await authFetch(`${API_BASE}/usuarios/${id}`);
@@ -221,6 +249,13 @@
             }
         };
 
+        /**
+         * Cambia el rol de un usuario (administrador ↔ usuario).
+         * Obtiene los datos actuales y reenvía solo los campos necesarios con el nuevo rol.
+         * @param {number} id - ID del usuario.
+         * @param {string} nuevoTipo - "administrador" o "usuario".
+         * PUT /usuarios/{id}
+         */
         window.cambiarRol = async function(id, nuevoTipo) {
             if (!confirm(`¿Cambiar rol del usuario a ${nuevoTipo}?`)) return;
 
@@ -253,6 +288,11 @@
             }
         };
 
+        /**
+         * Elimina un usuario tras confirmación.
+         * @param {number} id - ID del usuario a eliminar.
+         * DELETE /usuarios/{id}
+         */
         window.eliminarUsuario = async function(id) {
             if (!confirm('¿Eliminar usuario?')) return;
             try {
@@ -268,10 +308,13 @@
             }
         };
 
+        /**
+         * Cierra la sesión del usuario eliminando token y redirigiendo al inicio.
+         */
         window.logout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'index.html';
+            window.location.href = '/';
         };
 
         cargarUsuarios();

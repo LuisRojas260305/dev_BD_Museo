@@ -114,7 +114,10 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
-        // Verificar administrador
+        // Listado de Facturas — Visualización de facturas emitidas con filtros por fecha.
+        // API: /ventas/facturas (GET), /ventas/facturas/{id} (GET detalle).
+        // auth.js (getUser, authFetch para autenticación).
+
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
@@ -124,9 +127,12 @@
             document.getElementById('bienvenida').innerText = `Bienvenido, ${user.nombre}`;
         })();
 
-        // Cargar facturas
+        /**
+         * Obtiene la lista de facturas desde la API y las renderiza en la tabla.
+         * GET /ventas/facturas
+         */
         async function cargarFacturas() {
-            // Por ahora no usamos filtros de fecha, pero se pueden añadir después
+            // Por ahora no se envían filtros de fecha; el backend filtra internamente.
             const url = `${API_BASE}/ventas/facturas`;
 
             try {
@@ -140,6 +146,10 @@
             }
         }
 
+        /**
+         * Renderiza el array de facturas en la tabla del DOM.
+         * @param {Array} facturas - Lista de objetos factura.
+         */
         function renderFacturas(facturas) {
             const tbody = document.getElementById('facturasBody');
             if (!facturas || facturas.length === 0) {
@@ -167,7 +177,11 @@
             tbody.innerHTML = html;
         }
 
-        // Ver detalle de factura
+        /**
+         * Obtiene el detalle completo de una factura y lo muestra en un modal.
+         * @param {number} id - ID de la factura.
+         * GET /ventas/facturas/{id}
+         */
         async function verDetalle(id) {
             try {
                 const res = await authFetch(`${API_BASE}/ventas/facturas/${id}`);
@@ -196,20 +210,26 @@
             }
         }
 
+        /**
+         * Cierra el modal de detalle de factura.
+         */
         function cerrarModal() {
             document.getElementById('modalFactura').style.display = 'none';
         }
 
-        // Cargar facturas al iniciar
+        // Cargar facturas al iniciar la página.
         cargarFacturas();
 
+        /**
+         * Cierra la sesión del usuario eliminando token y redirigiendo al inicio.
+         */
         window.logout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'index.html';
+            window.location.href = '/';
         };
 
-        // Cerrar modal si se hace clic fuera
+        // Cerrar modal si se hace clic fuera del contenido.
         window.onclick = function(event) {
             const modal = document.getElementById('modalFactura');
             if (event.target === modal) {

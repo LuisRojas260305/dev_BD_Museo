@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Confirmar Compra</title>
     <style>
-        /* mismos estilos */
+        /* Estilos reutilizados de otras páginas del sistema */
         * {
             margin: 0;
             padding: 0;
@@ -63,41 +63,70 @@
     </header>
 
     <div class="container" id="container">
-        <!-- Se llenará con JS -->
     </div>
 
     <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de confirmación de compra / reserva de una obra.
+         * Verifica que el usuario sea miembro o administrador, muestra
+         * el resumen de la obra y permite confirmar la reserva con un
+         * código de seguridad.
+         *
+         * APIs utilizadas:
+         * - GET /api/catalogo/{id}
+         * - POST /api/ventas/reservar (autenticada)
+         */
         const urlParams = new URLSearchParams(window.location.search);
         const obraId = urlParams.get('id');
 
-        // Verificar que el usuario es miembro
+        // Verificar que el usuario es miembro o administrador
         const user = getUser();
         if (!user || (user.tipo !== 'miembro' && user.tipo !== 'administrador')) {
             alert('Debes ser miembro para comprar');
             window.location.href = 'login.html';
         }
 
+        /**
+         * Carga los datos de la obra desde el catálogo y los renderiza.
+         * @async
+         */
         async function cargarObra() {
-            const res = await fetch(`${API_BASE}/obras/${obraId}`);
+            const res = await fetch(`${API_BASE}/catalogo/${obraId}`);
             if (!res.ok) {
                 document.getElementById('container').innerHTML = '<h2>Obra no encontrada</h2>';
                 return;
             }
-            const obra = await res.json();
+            const data = await res.json();
+            // El catálogo proxy devuelve { success, data }
+            const obra = data.data || data;
             render(obra);
         }
 
+        /**
+         * Renderiza el resumen de la obra y el formulario de confirmación
+         * con campo para el código de seguridad.
+         *
+         * @param {Object} obra - Datos de la obra (nombre, artista, precio, estado).
+         */
         function render(obra) {
+            // Obtener nombre del artista desde el objeto embebido de MongoDB
+            const artistaNombre = obra.artista?.nombre_completo
+                || (obra.artista?.nombre
+                    ? obra.artista.nombre + (obra.artista?.apellido ? ' ' + obra.artista.apellido : '')
+                    : 'Desconocido');
+            // El precio puede venir como Decimal128 de MongoDB
+            const precio = obra.precio_venta?.$numberDecimal || obra.precio_venta;
+
             const container = document.getElementById('container');
             container.innerHTML = `
                 <h2>Confirmar Compra</h2>
                 <div class="obra-resumen">
                     <p><strong>Obra:</strong> ${obra.nombre}</p>
-                    <p><strong>Artista:</strong> ${obra.artista_nombre}</p>
-                    <p><strong>Precio:</strong> $${obra.precio_venta}</p>
+                    <p><strong>Artista:</strong> ${artistaNombre}</p>
+                    <p><strong>Precio:</strong> $${precio}</p>
                     <p><strong>Estado actual:</strong> ${obra.estado}</p>
                 </div>
                 <form id="confirmForm">
@@ -112,6 +141,12 @@
             document.getElementById('confirmForm').addEventListener('submit', reservar);
         }
 
+        /**
+         * Envía la solicitud de reserva al servidor con el código de seguridad.
+         * Muestra el resultado (éxito o error) al usuario.
+         * @async
+         * @param {Event} e - Evento de submit del formulario.
+         */
         async function reservar(e) {
             e.preventDefault();
             const codigo = document.getElementById('codigo').value.trim();

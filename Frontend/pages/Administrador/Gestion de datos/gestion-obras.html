@@ -136,8 +136,8 @@
                     <select id="genero_id" required onchange="onGeneroChange()"></select>
                 </div>
                 <div class="form-group">
-                    <label for="epoca_id">Época</label>
-                    <select id="epoca_id" required></select>
+                    <label for="epoca_nombre">Época</label>
+                    <input type="text" id="epoca_nombre" required placeholder="Ej: Renacimiento, Barroco">
                 </div>
                 <div class="form-group">
                     <label for="precio_venta">Precio de Venta</label>
@@ -180,34 +180,20 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
-        let artistas = [], generos = [], epocas = [];
-        let catalogos = {
-            soporte: [],
-            tipoEscultura: [],
-            material: [],
-            tecnicaEscultura: [],
-            impresion: [],
-            camara: [],
-            tecnicaFotografica: [],
-            coccion: [],
-            arcilla: [],
-            modelado: [],
-            esmaltado: [],
-            piezaOrfebreria: [],
-            metales: [],
-            estilo: [],
-            tematica: []
-        };
+        // Gestión de Obras — CRUD completo de obras artísticas con campos dinámicos según género.
+        // API: /catalogo (GET), /catalogo/obras (POST, PUT, DELETE), /catalogo/artistas (GET),
+        //      /catalogo/generos (GET), /catalogo/{id} (GET para editar).
+        // auth.js (getUser, authFetch para autenticación).
+        let artistas = [], generos = [];
         let editId = null;
-        let catalogsLoaded = false;
         let currentEstado = null; // Para guardar el estado al editar
 
         const generoPrefijo = {
-            1: 'PIN', // Pintura
-            2: 'ESC', // Escultura
-            3: 'FOT', // Fotografía
-            4: 'CER', // Cerámica
-            5: 'ORF'  // Orfebrería
+            'Pintura': 'PIN',
+            'Escultura': 'ESC',
+            'Fotografía': 'FOT',
+            'Cerámica': 'CER',
+            'Orfebrería': 'ORF'
         };
 
         (function() {
@@ -221,51 +207,59 @@
             document.getElementById('userEmail').innerText = user.email;
         })();
 
-        function generarCodigoInventario(generoId) {
-            if (!generoId || !generoPrefijo[generoId]) return '';
-            const prefijo = generoPrefijo[generoId];
+        /**
+         * Genera un código de inventario basado en el género y un número aleatorio.
+         * @param {string} genero - Nombre del género (Pintura, Escultura, etc.).
+         * @returns {string} Código en formato PREFIJO-XXXXX (ej. PIN-01234).
+         */
+        function generarCodigoInventario(genero) {
+            if (!genero || !generoPrefijo[genero]) return '';
+            const prefijo = generoPrefijo[genero];
             const numero = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
             return `${prefijo}-${numero}`;
         }
 
+        /**
+         * Se dispara al cambiar el género: genera código de inventario (solo en creación)
+         * y actualiza los campos específicos según el género seleccionado.
+         */
         function onGeneroChange() {
-            const generoId = document.getElementById('genero_id').value;
-            if (generoId && !editId) {
-                document.getElementById('codigo_inventario').value = generarCodigoInventario(generoId);
+            const genero = document.getElementById('genero_id').value;
+            if (genero && !editId) {
+                document.getElementById('codigo_inventario').value = generarCodigoInventario(genero);
             }
-            if (catalogsLoaded) {
-                cargarCamposPorGenero();
-            } else {
-                setTimeout(() => {
-                    if (catalogsLoaded) cargarCamposPorGenero();
-                }, 100);
-            }
+            cargarCamposPorGenero();
         }
 
+        /**
+         * Obtiene la lista de artistas desde la API y llena el select correspondiente.
+         * GET /catalogo/artistas
+         */
         async function cargarArtistas() {
-            const res = await fetch(`${API_BASE}/artistas`);
-            artistas = await res.json();
-            llenarSelect('artista_id', artistas, 'artista_id', a => `${a.nombre} ${a.apellido || ''}`.trim());
+            const res = await fetch(`${API_BASE}/catalogo/artistas`);
+            const result = await res.json();
+            artistas = result.data || [];
+            llenarSelect('artista_id', artistas, '_id', a => `${a.nombre} ${a.apellido || ''}`.trim());
         }
 
+        /**
+         * Obtiene la lista de géneros desde la API y llena el select correspondiente.
+         * GET /catalogo/generos
+         */
         async function cargarGeneros() {
-            const res = await fetch(`${API_BASE}/genero`);
-            generos = await res.json();
-            llenarSelect('genero_id', generos, 'genero_id', 'nombre');
+            const res = await fetch(`${API_BASE}/catalogo/generos`);
+            const result = await res.json();
+            generos = result.data || [];
+            llenarSelect('genero_id', generos, 'nombre', 'nombre');
         }
 
-        async function cargarEpocas() {
-            const res = await fetch(`${API_BASE}/epoca`);
-            epocas = await res.json();
-            llenarSelect('epoca_id', epocas, 'epoca_id', 'nombre');
-        }
-
-        async function cargarCatalogo(url, key) {
-            const res = await fetch(`${API_BASE}/${url}`);
-            const data = await res.json();
-            catalogos[key] = data;
-        }
-
+        /**
+         * Llena un elemento <select> con opciones a partir de un array de items.
+         * @param {string} id - ID del elemento select.
+         * @param {Array} items - Array de objetos para poblar las opciones.
+         * @param {string} valueKey - Propiedad del objeto a usar como value.
+         * @param {string|Function} textKey - Propiedad o función para obtener el texto visible.
+         */
         function llenarSelect(id, items, valueKey, textKey) {
             const select = document.getElementById(id);
             select.innerHTML = '<option value="">Seleccione</option>';
@@ -277,159 +271,69 @@
             });
         }
 
-        // Precarga de todos los catálogos
+        // Inicializar: cargar artistas y géneros, luego la tabla de obras.
         Promise.all([
             cargarArtistas(),
-            cargarGeneros(),
-            cargarEpocas(),
-            cargarCatalogo('soporte', 'soporte'),
-            cargarCatalogo('tipo_escultura', 'tipoEscultura'),
-            cargarCatalogo('material', 'material'),
-            cargarCatalogo('tecnica_escultura', 'tecnicaEscultura'),
-            cargarCatalogo('impresion', 'impresion'),
-            cargarCatalogo('camara', 'camara'),
-            cargarCatalogo('tecnica_fotografica', 'tecnicaFotografica'),
-            cargarCatalogo('coccion', 'coccion'),
-            cargarCatalogo('arcilla', 'arcilla'),
-            cargarCatalogo('modelado', 'modelado'),
-            cargarCatalogo('esmaltado', 'esmaltado'),
-            cargarCatalogo('pieza_orfebreria', 'piezaOrfebreria'),
-            cargarCatalogo('metales', 'metales'),
-            cargarCatalogo('estilo', 'estilo'),
-            cargarCatalogo('tematica', 'tematica')
+            cargarGeneros()
         ]).then(() => {
-            catalogsLoaded = true;
             cargarObras();
         });
 
+        /**
+         * Renderiza los campos dinámicos del formulario según el género seleccionado.
+         * Muestra campos específicos para Pintura, Escultura, Fotografía, Cerámica u Orfebrería.
+         */
         function cargarCamposPorGenero() {
-            const generoId = document.getElementById('genero_id').value;
+            const genero = document.getElementById('genero_id').value;
             const contenedor = document.getElementById('camposEspecificos');
             contenedor.innerHTML = '';
 
-            if (!catalogsLoaded) {
-                contenedor.innerHTML = '<p>Cargando catálogos...</p>';
-                return;
-            }
+            if (!genero) return;
 
-            switch (generoId) {
-                case '1': // Pintura
-                    if (!catalogos.soporte.length || !catalogos.estilo.length || !catalogos.tematica.length) {
-                        contenedor.innerHTML = '<p>Cargando catálogos de pintura...</p>';
-                        return;
-                    }
+            switch (genero) {
+                case 'Pintura':
                     contenedor.innerHTML = `
                         <h4>Campos de Pintura</h4>
                         <div class="form-group">
-                            <label for="soporte_id">Soporte</label>
-                            <select id="soporte_id" required></select>
+                            <label for="detalle_soporte">Soporte</label>
+                            <input type="text" id="detalle_soporte" required placeholder="Ej: Lienzo, Madera">
                         </div>
                         <div class="form-group">
-                            <label>Estilos</label>
-                            <div id="estilosCheckbox" class="checkbox-group"></div>
+                            <label for="detalle_estilos">Estilos (separados por coma)</label>
+                            <input type="text" id="detalle_estilos" placeholder="Ej: Renacentista, Barroco">
                         </div>
                         <div class="form-group">
-                            <label>Temáticas</label>
-                            <div id="tematicasCheckbox" class="checkbox-group"></div>
+                            <label for="detalle_tematicas">Temáticas (separadas por coma)</label>
+                            <input type="text" id="detalle_tematicas" placeholder="Ej: Religioso, Retrato">
                         </div>
                     `;
-                    llenarSelect('soporte_id', catalogos.soporte, 'soporte_id', 'nombre');
-                    const estilosDiv = document.getElementById('estilosCheckbox');
-                    catalogos.estilo.forEach(e => {
-                        const div = document.createElement('div');
-                        div.className = 'checkbox-item';
-                        const cb = document.createElement('input');
-                        cb.type = 'checkbox';
-                        cb.value = e.estilo_id;
-                        cb.id = `estilo_${e.estilo_id}`;
-                        const label = document.createElement('label');
-                        label.htmlFor = `estilo_${e.estilo_id}`;
-                        label.textContent = e.nombre;
-                        div.appendChild(cb);
-                        div.appendChild(label);
-                        estilosDiv.appendChild(div);
-                    });
-                    const tematicasDiv = document.getElementById('tematicasCheckbox');
-                    catalogos.tematica.forEach(t => {
-                        const div = document.createElement('div');
-                        div.className = 'checkbox-item';
-                        const cb = document.createElement('input');
-                        cb.type = 'checkbox';
-                        cb.value = t.tematica_id;
-                        cb.id = `tematica_${t.tematica_id}`;
-                        const label = document.createElement('label');
-                        label.htmlFor = `tematica_${t.tematica_id}`;
-                        label.textContent = t.nombre;
-                        div.appendChild(cb);
-                        div.appendChild(label);
-                        tematicasDiv.appendChild(div);
-                    });
                     break;
-                case '2': // Escultura
-                    if (!catalogos.tipoEscultura.length || !catalogos.material.length || !catalogos.tecnicaEscultura.length) {
-                        contenedor.innerHTML = '<p>Cargando catálogos de escultura...</p>';
-                        return;
-                    }
+                case 'Escultura':
                     contenedor.innerHTML = `
                         <h4>Campos de Escultura</h4>
                         <div class="form-group">
-                            <label for="tipo_id">Tipo de Escultura</label>
-                            <select id="tipo_id" required></select>
+                            <label for="detalle_tipo_escultura">Tipo de Escultura</label>
+                            <input type="text" id="detalle_tipo_escultura" required placeholder="Ej: Bajorrelieve, Bulto redondo">
                         </div>
                         <div class="form-group">
-                            <label for="peso">Peso (kg)</label>
-                            <input type="number" id="peso" step="0.01" value="0">
+                            <label for="peso_escultura">Peso (kg)</label>
+                            <input type="number" id="peso_escultura" step="0.01" value="0">
                         </div>
                         <div class="form-group">
-                            <label for="profundidad">Profundidad (cm)</label>
-                            <input type="number" id="profundidad" step="0.01" value="0">
+                            <label for="profundidad_escultura">Profundidad (cm)</label>
+                            <input type="number" id="profundidad_escultura" step="0.01" value="0">
                         </div>
                         <div class="form-group">
-                            <label>Materiales</label>
-                            <div id="materialesCheckbox" class="checkbox-group"></div>
+                            <label for="detalle_materiales">Materiales (separados por coma)</label>
+                            <input type="text" id="detalle_materiales" placeholder="Ej: Mármol, Bronce">
                         </div>
                         <div class="form-group">
-                            <label>Técnicas</label>
-                            <div id="tecnicasCheckbox" class="checkbox-group"></div>
+                            <label for="detalle_tecnicas">Técnicas (separadas por coma)</label>
+                            <input type="text" id="detalle_tecnicas" placeholder="Ej: Talla, Fundición">
                         </div>
                     `;
-                    llenarSelect('tipo_id', catalogos.tipoEscultura, 'tipo_id', 'nombre');
-                    const materialesDiv = document.getElementById('materialesCheckbox');
-                    catalogos.material.forEach(m => {
-                        const div = document.createElement('div');
-                        div.className = 'checkbox-item';
-                        const cb = document.createElement('input');
-                        cb.type = 'checkbox';
-                        cb.value = m.material_id;
-                        cb.id = `material_${m.material_id}`;
-                        const label = document.createElement('label');
-                        label.htmlFor = `material_${m.material_id}`;
-                        label.textContent = m.nombre;
-                        div.appendChild(cb);
-                        div.appendChild(label);
-                        materialesDiv.appendChild(div);
-                    });
-                    const tecnicasDiv = document.getElementById('tecnicasCheckbox');
-                    catalogos.tecnicaEscultura.forEach(t => {
-                        const div = document.createElement('div');
-                        div.className = 'checkbox-item';
-                        const cb = document.createElement('input');
-                        cb.type = 'checkbox';
-                        cb.value = t.tecnica_id;
-                        cb.id = `tecnica_${t.tecnica_id}`;
-                        const label = document.createElement('label');
-                        label.htmlFor = `tecnica_${t.tecnica_id}`;
-                        label.textContent = t.nombre;
-                        div.appendChild(cb);
-                        div.appendChild(label);
-                        tecnicasDiv.appendChild(div);
-                    });
                     break;
-                case '3': // Fotografía
-                    if (!catalogos.impresion.length || !catalogos.camara.length || !catalogos.tecnicaFotografica.length) {
-                        contenedor.innerHTML = '<p>Cargando catálogos de fotografía...</p>';
-                        return;
-                    }
+                case 'Fotografía':
                     contenedor.innerHTML = `
                         <h4>Campos de Fotografía</h4>
                         <div class="form-group">
@@ -457,27 +361,20 @@
                             <input type="date" id="fecha_captura" required>
                         </div>
                         <div class="form-group">
-                            <label for="impresion_id">Impresión</label>
-                            <select id="impresion_id" required></select>
+                            <label for="detalle_impresion">Impresión</label>
+                            <input type="text" id="detalle_impresion" required placeholder="Ej: Gelatina de plata">
                         </div>
                         <div class="form-group">
-                            <label for="camara_id">Cámara</label>
-                            <select id="camara_id" required></select>
+                            <label for="detalle_camara">Cámara</label>
+                            <input type="text" id="detalle_camara" required placeholder="Ej: Leica M3">
                         </div>
                         <div class="form-group">
-                            <label for="tecnica_id">Técnica Fotográfica</label>
-                            <select id="tecnica_id" required></select>
+                            <label for="detalle_tecnica_fotografica">Técnica Fotográfica</label>
+                            <input type="text" id="detalle_tecnica_fotografica" required placeholder="Ej: Blanco y negro">
                         </div>
                     `;
-                    llenarSelect('impresion_id', catalogos.impresion, 'impresion_id', 'nombre');
-                    llenarSelect('camara_id', catalogos.camara, 'camara_id', 'nombre');
-                    llenarSelect('tecnica_id', catalogos.tecnicaFotografica, 'tecnica_id', 'nombre');
                     break;
-                case '4': // Cerámica
-                    if (!catalogos.coccion.length || !catalogos.arcilla.length || !catalogos.modelado.length || !catalogos.esmaltado.length) {
-                        contenedor.innerHTML = '<p>Cargando catálogos de cerámica...</p>';
-                        return;
-                    }
+                case 'Cerámica':
                     contenedor.innerHTML = `
                         <h4>Campos de Cerámica</h4>
                         <div class="form-group">
@@ -493,32 +390,24 @@
                             <input type="text" id="funcionalidad" value="Desconocido">
                         </div>
                         <div class="form-group">
-                            <label for="coccion_id">Cocción</label>
-                            <select id="coccion_id" required></select>
+                            <label for="detalle_coccion">Cocción</label>
+                            <input type="text" id="detalle_coccion" required placeholder="Ej: Oxidación">
                         </div>
                         <div class="form-group">
-                            <label for="arcilla_id">Arcilla</label>
-                            <select id="arcilla_id" required></select>
+                            <label for="detalle_arcilla">Arcilla</label>
+                            <input type="text" id="detalle_arcilla" required placeholder="Ej: Terracota">
                         </div>
                         <div class="form-group">
-                            <label for="modelado_id">Modelado</label>
-                            <select id="modelado_id" required></select>
+                            <label for="detalle_modelado">Modelado</label>
+                            <input type="text" id="detalle_modelado" required placeholder="Ej: Torno">
                         </div>
                         <div class="form-group">
-                            <label for="esmaltado_id">Esmaltado</label>
-                            <select id="esmaltado_id" required></select>
+                            <label for="detalle_esmaltado">Esmaltado</label>
+                            <input type="text" id="detalle_esmaltado" required placeholder="Ej: Estaño">
                         </div>
                     `;
-                    llenarSelect('coccion_id', catalogos.coccion, 'coccion_id', 'nombre');
-                    llenarSelect('arcilla_id', catalogos.arcilla, 'arcilla_id', 'nombre');
-                    llenarSelect('modelado_id', catalogos.modelado, 'modelado_id', 'nombre');
-                    llenarSelect('esmaltado_id', catalogos.esmaltado, 'esmaltado_id', 'nombre');
                     break;
-                case '5': // Orfebrería
-                    if (!catalogos.piezaOrfebreria.length || !catalogos.metales.length) {
-                        contenedor.innerHTML = '<p>Cargando catálogos de orfebrería...</p>';
-                        return;
-                    }
+                case 'Orfebrería':
                     contenedor.innerHTML = `
                         <h4>Campos de Orfebrería</h4>
                         <div class="form-group">
@@ -534,35 +423,18 @@
                             <input type="number" id="peso_orfebreria" step="0.01" required>
                         </div>
                         <div class="form-group">
-                            <label for="pieza_id">Pieza</label>
-                            <select id="pieza_id" required></select>
+                            <label for="detalle_pieza">Pieza</label>
+                            <input type="text" id="detalle_pieza" required placeholder="Ej: Copón, Cáliz">
                         </div>
                         <div class="form-group">
-                            <label for="metal_predominante_id">Metal Predominante</label>
-                            <select id="metal_predominante_id" required></select>
+                            <label for="detalle_metal_predominante">Metal Predominante</label>
+                            <input type="text" id="detalle_metal_predominante" required placeholder="Ej: Oro">
                         </div>
                         <div class="form-group">
-                            <label>Otros Metales</label>
-                            <div id="otrosMetalesCheckbox" class="checkbox-group"></div>
+                            <label for="detalle_metales">Otros Metales (separados por coma)</label>
+                            <input type="text" id="detalle_metales" placeholder="Ej: Plata, Cobre">
                         </div>
                     `;
-                    llenarSelect('pieza_id', catalogos.piezaOrfebreria, 'pieza_id', 'nombre');
-                    llenarSelect('metal_predominante_id', catalogos.metales, 'metal_id', 'nombre');
-                    const otrosDiv = document.getElementById('otrosMetalesCheckbox');
-                    catalogos.metales.forEach(m => {
-                        const div = document.createElement('div');
-                        div.className = 'checkbox-item';
-                        const cb = document.createElement('input');
-                        cb.type = 'checkbox';
-                        cb.value = m.metal_id;
-                        cb.id = `otroMetal_${m.metal_id}`;
-                        const label = document.createElement('label');
-                        label.htmlFor = `otroMetal_${m.metal_id}`;
-                        label.textContent = m.nombre;
-                        div.appendChild(cb);
-                        div.appendChild(label);
-                        otrosDiv.appendChild(div);
-                    });
                     break;
             }
         }
@@ -582,46 +454,103 @@
             }
         });
 
+        /**
+         * Extrae el valor numérico del precio desde distintos formatos (Decimal128, number, string).
+         * @param {*} precio - Precio en formato $numberDecimal, number o string.
+         * @returns {string} Precio como string, default "0.00".
+         */
+        function extraerPrecio(precio) {
+            if (!precio) return '0.00';
+            if (typeof precio === 'object' && precio.$numberDecimal) return precio.$numberDecimal;
+            if (typeof precio === 'number') return precio.toString();
+            return precio;
+        }
+
+        /**
+         * Obtiene el nombre completo de un artista desde el objeto (puede venir como string o {nombre, apellido}).
+         * @param {Object|string} artista - Artista o string con el nombre.
+         * @returns {string} Nombre completo o "Desconocido".
+         */
+        function obtenerNombreArtista(artista) {
+            if (!artista) return 'Desconocido';
+            if (typeof artista === 'string') return artista;
+            const nombre = artista.nombre_completo || `${artista.nombre || ''} ${artista.apellido || ''}`.trim();
+            return nombre || 'Desconocido';
+        }
+
+        /**
+         * Obtiene la URL de la primera foto del array de fotos para el thumbnail.
+         * @param {Array} fotos - Array de strings URL de fotos.
+         * @returns {string} URL de la primera foto o string vacío.
+         */
+        function obtenerFotoThumbnail(fotos) {
+            if (!fotos || !Array.isArray(fotos) || fotos.length === 0) return '';
+            return fotos[0];
+        }
+
+        /**
+         * Obtiene el catálogo completo de obras y renderiza la tabla con sus datos.
+         * GET /catalogo → puebla #tablaObras con imagen, nombre, artista, género, precio y acciones.
+         */
         async function cargarObras() {
-            const res = await fetch(`${API_BASE}/obras`);
-            const obras = await res.json();
+            const res = await fetch(`${API_BASE}/catalogo`);
+            const result = await res.json();
+            const obras = result.data || [];
             const tbody = document.getElementById('tablaObras');
             tbody.innerHTML = '';
             obras.forEach(o => {
                 const tr = document.createElement('tr');
+                const precio = extraerPrecio(o.precio_venta);
+                const artistaNombre = obtenerNombreArtista(o.artista);
+                const fotoUrl = obtenerFotoThumbnail(o.fotos);
                 tr.innerHTML = `
-                    <td>${o.obra_id}</td>
-                    <td><img src="${API_BASE}/obras/${o.obra_id}/foto" alt="foto" class="thumbnail" onerror="this.style.display='none'"></td>
+                    <td>${o._id}</td>
+                    <td>${fotoUrl ? `<img src="${fotoUrl}" alt="foto" class="thumbnail" onerror="this.style.display='none'">` : ''}</td>
                     <td>${o.nombre}</td>
-                    <td>${o.artista_nombre}</td>
-                    <td>${o.genero_nombre}</td>
-                    <td>$${o.precio_venta}</td>
-                    <td>${o.estado}</td>
+                    <td>${artistaNombre}</td>
+                    <td>${o.genero || ''}</td>
+                    <td>$${precio}</td>
+                    <td>${o.estado || ''}</td>
                     <td>
-                        <button class="btn" onclick="editarObra(${o.obra_id})">Editar</button>
-                        <button class="btn btn-danger" onclick="eliminarObra(${o.obra_id})">Eliminar</button>
+                        <button class="btn" onclick='editarObra("${o._id}")'>Editar</button>
+                        <button class="btn btn-danger" onclick='eliminarObra("${o._id}")'>Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
+        /**
+         * Carga los datos de una obra por ID, rellena el formulario en modo edición
+         * y renderiza los campos específicos según su género.
+         * @param {string} id - ID de la obra a editar.
+         * GET /catalogo/{id}
+         */
         window.editarObra = async function(id) {
             try {
-                const res = await fetch(`${API_BASE}/obras/${id}`);
-                const obra = await res.json();
-                if (!res.ok) throw new Error(obra.error);
+                const res = await fetch(`${API_BASE}/catalogo/${id}`);
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error);
+                const obra = result.data || result;
                 
-                document.getElementById('obraId').value = obra.obra_id;
-                document.getElementById('nombre').value = obra.nombre;
-                document.getElementById('codigo_inventario').value = obra.codigo_inventario;
-                document.getElementById('artista_id').value = obra.artista_id;
-                document.getElementById('genero_id').value = obra.genero_id;
-                document.getElementById('epoca_id').value = obra.epoca_id;
-                document.getElementById('precio_venta').value = obra.precio_venta;
-                document.getElementById('fecha_creacion').value = obra.fecha_creacion.split('T')[0];
-                document.getElementById('alto').value = obra.alto;
-                document.getElementById('ancho').value = obra.ancho;
+                document.getElementById('obraId').value = obra._id;
+                document.getElementById('nombre').value = obra.nombre || '';
+                document.getElementById('codigo_inventario').value = obra.codigo_inventario || '';
+                // Artista: el objeto artista puede venir con _id o ser un ID directo
+                if (obra.artista && obra.artista._id) {
+                    document.getElementById('artista_id').value = obra.artista._id;
+                } else if (obra.artista_id) {
+                    document.getElementById('artista_id').value = obra.artista_id;
+                }
+                document.getElementById('genero_id').value = obra.genero || '';
+                document.getElementById('epoca_nombre').value = (obra.epoca && obra.epoca.nombre) || obra.epoca || '';
+                const precio = extraerPrecio(obra.precio_venta);
+                document.getElementById('precio_venta').value = precio;
+                if (obra.fecha_creacion) {
+                    document.getElementById('fecha_creacion').value = obra.fecha_creacion.split('T')[0];
+                }
+                document.getElementById('alto').value = obra.alto || 0;
+                document.getElementById('ancho').value = obra.ancho || 0;
                 document.getElementById('descripcion').value = obra.descripcion || '';
                 currentEstado = obra.estado; // Guardar estado actual
 
@@ -630,78 +559,63 @@
 
                 // Llenar campos específicos después de que se hayan creado
                 setTimeout(() => {
-                    if (obra.genero_id == 1) {
-                        if (obra.soporte_id) document.getElementById('soporte_id').value = obra.soporte_id;
-                        if (obra.estilo_ids && Array.isArray(obra.estilo_ids)) {
-                            obra.estilo_ids.forEach(id => {
-                                const cb = document.getElementById(`estilo_${id}`);
-                                if (cb) cb.checked = true;
-                            });
+                    const d = obra.detalles || {};
+                    const genero = obra.genero || '';
+                    if (genero === 'Pintura') {
+                        if (d.soporte) document.getElementById('detalle_soporte').value = d.soporte;
+                        if (d.estilos && Array.isArray(d.estilos)) {
+                            document.getElementById('detalle_estilos').value = d.estilos.join(', ');
                         }
-                        if (obra.tematica_ids && Array.isArray(obra.tematica_ids)) {
-                            obra.tematica_ids.forEach(id => {
-                                const cb = document.getElementById(`tematica_${id}`);
-                                if (cb) cb.checked = true;
-                            });
+                        if (d.tematicas && Array.isArray(d.tematicas)) {
+                            document.getElementById('detalle_tematicas').value = d.tematicas.join(', ');
                         }
-                    } else if (obra.genero_id == 2) {
-                        if (obra.tipo_id) document.getElementById('tipo_id').value = obra.tipo_id;
-                        if (obra.peso) document.getElementById('peso').value = obra.peso;
-                        if (obra.profundidad) document.getElementById('profundidad').value = obra.profundidad;
-                        if (obra.material_ids && Array.isArray(obra.material_ids)) {
-                            obra.material_ids.forEach(id => {
-                                const cb = document.getElementById(`material_${id}`);
-                                if (cb) cb.checked = true;
-                            });
+                    } else if (genero === 'Escultura') {
+                        if (d.tipo_escultura) document.getElementById('detalle_tipo_escultura').value = d.tipo_escultura;
+                        if (d.peso) document.getElementById('peso_escultura').value = d.peso;
+                        if (d.profundidad) document.getElementById('profundidad_escultura').value = d.profundidad;
+                        if (d.materiales && Array.isArray(d.materiales)) {
+                            document.getElementById('detalle_materiales').value = d.materiales.join(', ');
                         }
-                        if (obra.tecnica_ids && Array.isArray(obra.tecnica_ids)) {
-                            obra.tecnica_ids.forEach(id => {
-                                const cb = document.getElementById(`tecnica_${id}`);
-                                if (cb) cb.checked = true;
-                            });
+                        if (d.tecnicas && Array.isArray(d.tecnicas)) {
+                            document.getElementById('detalle_tecnicas').value = d.tecnicas.join(', ');
                         }
-                    } else if (obra.genero_id == 3) {
-                        if (obra.tiraje) document.getElementById('tiraje').value = obra.tiraje;
-                        if (obra.obturacion) document.getElementById('obturacion').value = obra.obturacion;
-                        if (obra.apertura) document.getElementById('apertura').value = obra.apertura;
-                        if (obra.iso) document.getElementById('iso').value = obra.iso;
-                        if (obra.resolucion) document.getElementById('resolucion').value = obra.resolucion;
-                        if (obra.fecha_captura) document.getElementById('fecha_captura').value = obra.fecha_captura.split('T')[0];
-                        if (obra.impresion_id) document.getElementById('impresion_id').value = obra.impresion_id;
-                        if (obra.camara_id) document.getElementById('camara_id').value = obra.camara_id;
-                        if (obra.tecnica_id) document.getElementById('tecnica_id').value = obra.tecnica_id;
-                    } else if (obra.genero_id == 4) {
-                        if (obra.profundidad) document.getElementById('profundidad_ceramica').value = obra.profundidad;
-                        if (obra.diametro) document.getElementById('diametro').value = obra.diametro;
-                        if (obra.funcionalidad) document.getElementById('funcionalidad').value = obra.funcionalidad;
-                        if (obra.coccion_id) document.getElementById('coccion_id').value = obra.coccion_id;
-                        if (obra.arcilla_id) document.getElementById('arcilla_id').value = obra.arcilla_id;
-                        if (obra.modelado_id) document.getElementById('modelado_id').value = obra.modelado_id;
-                        if (obra.esmaltado_id) document.getElementById('esmaltado_id').value = obra.esmaltado_id;
-                    } else if (obra.genero_id == 5) {
-                        if (obra.profundidad) document.getElementById('profundidad_orfebreria').value = obra.profundidad;
-                        if (obra.diametro) document.getElementById('diametro_orfebreria').value = obra.diametro;
-                        if (obra.peso) document.getElementById('peso_orfebreria').value = obra.peso;
-                        if (obra.pieza_id) document.getElementById('pieza_id').value = obra.pieza_id;
-                        if (obra.metal_predominante_id) document.getElementById('metal_predominante_id').value = obra.metal_predominante_id;
-                        if (obra.otros_metal_ids && Array.isArray(obra.otros_metal_ids)) {
-                            obra.otros_metal_ids.forEach(id => {
-                                const cb = document.getElementById(`otroMetal_${id}`);
-                                if (cb) cb.checked = true;
-                            });
+                    } else if (genero === 'Fotografía') {
+                        if (d.tiraje) document.getElementById('tiraje').value = d.tiraje;
+                        if (d.obturacion) document.getElementById('obturacion').value = d.obturacion;
+                        if (d.apertura) document.getElementById('apertura').value = d.apertura;
+                        if (d.iso) document.getElementById('iso').value = d.iso;
+                        if (d.resolucion) document.getElementById('resolucion').value = d.resolucion;
+                        if (d.fecha_captura) document.getElementById('fecha_captura').value = d.fecha_captura.split('T')[0];
+                        if (d.impresion) document.getElementById('detalle_impresion').value = d.impresion;
+                        if (d.camara) document.getElementById('detalle_camara').value = d.camara;
+                        if (d.tecnica_fotografica) document.getElementById('detalle_tecnica_fotografica').value = d.tecnica_fotografica;
+                    } else if (genero === 'Cerámica') {
+                        if (d.profundidad) document.getElementById('profundidad_ceramica').value = d.profundidad;
+                        if (d.diametro) document.getElementById('diametro').value = d.diametro;
+                        if (d.funcionalidad) document.getElementById('funcionalidad').value = d.funcionalidad;
+                        if (d.coccion) document.getElementById('detalle_coccion').value = d.coccion;
+                        if (d.arcilla) document.getElementById('detalle_arcilla').value = d.arcilla;
+                        if (d.modelado) document.getElementById('detalle_modelado').value = d.modelado;
+                        if (d.esmaltado) document.getElementById('detalle_esmaltado').value = d.esmaltado;
+                    } else if (genero === 'Orfebrería') {
+                        if (d.profundidad) document.getElementById('profundidad_orfebreria').value = d.profundidad;
+                        if (d.diametro) document.getElementById('diametro_orfebreria').value = d.diametro;
+                        if (d.peso) document.getElementById('peso_orfebreria').value = d.peso;
+                        if (d.pieza) document.getElementById('detalle_pieza').value = d.pieza;
+                        if (d.metal_predominante) document.getElementById('detalle_metal_predominante').value = d.metal_predominante;
+                        if (d.metales && Array.isArray(d.metales)) {
+                            document.getElementById('detalle_metales').value = d.metales.join(', ');
                         }
                     }
                 }, 100);
 
-                // Mostrar vista previa de la foto si existe
-                const fotoUrl = `${API_BASE}/obras/${id}/foto`;
-                fetch(fotoUrl, { method: 'HEAD' })
-                    .then(res => {
-                        if (res.ok) {
-                            document.getElementById('previewContainer').innerHTML = `<img src="${fotoUrl}" class="preview-image">`;
-                        }
-                    })
-                    .catch(() => {});
+                // Mostrar vista previa de la foto desde fotos[0]
+                const fotoUrl = obtenerFotoThumbnail(obra.fotos);
+                if (fotoUrl) {
+                    document.getElementById('previewContainer').innerHTML = `<img src="${fotoUrl}" class="preview-image">`;
+                } else {
+                    document.getElementById('previewContainer').innerHTML = '';
+                }
 
                 document.getElementById('formTitle').innerText = 'Editar Obra';
                 document.getElementById('formContainer').classList.remove('hidden');
@@ -711,10 +625,15 @@
             }
         };
 
+        /**
+         * Elimina una obra tras confirmación del usuario.
+         * @param {string} id - ID de la obra a eliminar.
+         * DELETE /catalogo/obras/{id}
+         */
         window.eliminarObra = async function(id) {
             if (!confirm('¿Eliminar obra?')) return;
             try {
-                const res = await authFetch(`${API_BASE}/obras/${id}`, { method: 'DELETE' });
+                const res = await authFetch(`${API_BASE}/catalogo/obras/${id}`, { method: 'DELETE' });
                 if (res.ok) {
                     alert('Obra eliminada');
                     cargarObras();
@@ -727,16 +646,31 @@
             }
         };
 
+        /**
+         * Divide un string por comas, recorta espacios y filtra elementos vacíos.
+         * @param {string} valor - String con valores separados por coma.
+         * @returns {string[]} Array de strings limpios.
+         */
+        function splitPorComa(valor) {
+            if (!valor || !valor.trim()) return [];
+            return valor.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        }
+
+        /**
+         * Maneja el envío del formulario de obra (creación o edición).
+         * Arma FormData con datos comunes + específicos según género.
+         * POST /catalogo/obras — PUT /catalogo/obras/{id}
+         */
         document.getElementById('obraForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData();
-            // Datos comunes
+            // Datos comunes — formato MongoDB
             formData.append('nombre', document.getElementById('nombre').value);
             formData.append('codigo_inventario', document.getElementById('codigo_inventario').value);
             formData.append('artista_id', document.getElementById('artista_id').value);
-            formData.append('genero_id', document.getElementById('genero_id').value);
-            formData.append('epoca_id', document.getElementById('epoca_id').value);
+            formData.append('genero', document.getElementById('genero_id').value);
+            formData.append('epoca[nombre]', document.getElementById('epoca_nombre').value);
             formData.append('precio_venta', document.getElementById('precio_venta').value);
             formData.append('fecha_creacion', document.getElementById('fecha_creacion').value);
             formData.append('alto', document.getElementById('alto').value);
@@ -756,74 +690,54 @@
                 formData.append('foto', imagenFile);
             }
 
-            const generoId = document.getElementById('genero_id').value;
+            const genero = document.getElementById('genero_id').value;
 
-            // Datos específicos según género
-            switch (generoId) {
-                case '1': // Pintura
-                    formData.append('soporte_id', document.getElementById('soporte_id').value);
-                    const estilos = [];
-                    document.querySelectorAll('#estilosCheckbox input[type=checkbox]:checked').forEach(cb => {
-                        estilos.push(parseInt(cb.value));
-                    });
-                    formData.append('estilos', JSON.stringify(estilos));
-                    const tematicas = [];
-                    document.querySelectorAll('#tematicasCheckbox input[type=checkbox]:checked').forEach(cb => {
-                        tematicas.push(parseInt(cb.value));
-                    });
-                    formData.append('tematicas', JSON.stringify(tematicas));
+            // Datos específicos según género — formato MongoDB (detalles.xxx)
+            switch (genero) {
+                case 'Pintura':
+                    formData.append('detalles[soporte]', document.getElementById('detalle_soporte').value);
+                    formData.append('detalles[estilos]', JSON.stringify(splitPorComa(document.getElementById('detalle_estilos').value)));
+                    formData.append('detalles[tematicas]', JSON.stringify(splitPorComa(document.getElementById('detalle_tematicas').value)));
                     break;
-                case '2': // Escultura
-                    formData.append('tipo_id', document.getElementById('tipo_id').value);
-                    formData.append('peso', document.getElementById('peso').value);
-                    formData.append('profundidad', document.getElementById('profundidad').value);
-                    const materiales = [];
-                    document.querySelectorAll('#materialesCheckbox input[type=checkbox]:checked').forEach(cb => {
-                        materiales.push(parseInt(cb.value));
-                    });
-                    formData.append('materiales', JSON.stringify(materiales));
-                    const tecnicas = [];
-                    document.querySelectorAll('#tecnicasCheckbox input[type=checkbox]:checked').forEach(cb => {
-                        tecnicas.push(parseInt(cb.value));
-                    });
-                    formData.append('tecnicas', JSON.stringify(tecnicas));
+                case 'Escultura':
+                    formData.append('detalles[tipo_escultura]', document.getElementById('detalle_tipo_escultura').value);
+                    formData.append('detalles[peso]', document.getElementById('peso_escultura').value);
+                    formData.append('detalles[profundidad]', document.getElementById('profundidad_escultura').value);
+                    formData.append('detalles[materiales]', JSON.stringify(splitPorComa(document.getElementById('detalle_materiales').value)));
+                    formData.append('detalles[tecnicas]', JSON.stringify(splitPorComa(document.getElementById('detalle_tecnicas').value)));
                     break;
-                case '3': // Fotografía
-                    formData.append('tiraje', document.getElementById('tiraje').value);
-                    formData.append('obturacion', document.getElementById('obturacion').value);
-                    formData.append('apertura', document.getElementById('apertura').value);
-                    formData.append('iso', document.getElementById('iso').value);
-                    formData.append('resolucion', document.getElementById('resolucion').value);
-                    formData.append('fecha_captura', document.getElementById('fecha_captura').value);
-                    formData.append('impresion_id', document.getElementById('impresion_id').value);
-                    formData.append('camara_id', document.getElementById('camara_id').value);
-                    formData.append('tecnica_id', document.getElementById('tecnica_id').value);
+                case 'Fotografía':
+                    formData.append('detalles[tiraje]', document.getElementById('tiraje').value);
+                    formData.append('detalles[obturacion]', document.getElementById('obturacion').value);
+                    formData.append('detalles[apertura]', document.getElementById('apertura').value);
+                    formData.append('detalles[iso]', document.getElementById('iso').value);
+                    formData.append('detalles[resolucion]', document.getElementById('resolucion').value);
+                    formData.append('detalles[fecha_captura]', document.getElementById('fecha_captura').value);
+                    formData.append('detalles[impresion]', document.getElementById('detalle_impresion').value);
+                    formData.append('detalles[camara]', document.getElementById('detalle_camara').value);
+                    formData.append('detalles[tecnica_fotografica]', document.getElementById('detalle_tecnica_fotografica').value);
                     break;
-                case '4': // Cerámica
-                    formData.append('profundidad', document.getElementById('profundidad_ceramica').value);
-                    formData.append('diametro', document.getElementById('diametro').value);
-                    formData.append('funcionalidad', document.getElementById('funcionalidad').value);
-                    formData.append('coccion_id', document.getElementById('coccion_id').value);
-                    formData.append('arcilla_id', document.getElementById('arcilla_id').value);
-                    formData.append('modelado_id', document.getElementById('modelado_id').value);
-                    formData.append('esmaltado_id', document.getElementById('esmaltado_id').value);
+                case 'Cerámica':
+                    formData.append('detalles[profundidad]', document.getElementById('profundidad_ceramica').value);
+                    formData.append('detalles[diametro]', document.getElementById('diametro').value);
+                    formData.append('detalles[funcionalidad]', document.getElementById('funcionalidad').value);
+                    formData.append('detalles[coccion]', document.getElementById('detalle_coccion').value);
+                    formData.append('detalles[arcilla]', document.getElementById('detalle_arcilla').value);
+                    formData.append('detalles[modelado]', document.getElementById('detalle_modelado').value);
+                    formData.append('detalles[esmaltado]', document.getElementById('detalle_esmaltado').value);
                     break;
-                case '5': // Orfebrería
-                    formData.append('profundidad', document.getElementById('profundidad_orfebreria').value);
-                    formData.append('diametro', document.getElementById('diametro_orfebreria').value);
-                    formData.append('peso', document.getElementById('peso_orfebreria').value);
-                    formData.append('pieza_id', document.getElementById('pieza_id').value);
-                    formData.append('metal_predominante_id', document.getElementById('metal_predominante_id').value);
-                    const otrosMetales = [];
-                    document.querySelectorAll('#otrosMetalesCheckbox input[type=checkbox]:checked').forEach(cb => {
-                        otrosMetales.push(parseInt(cb.value));
-                    });
-                    formData.append('otros_metales', JSON.stringify(otrosMetales));
+                case 'Orfebrería':
+                    formData.append('detalles[profundidad]', document.getElementById('profundidad_orfebreria').value);
+                    formData.append('detalles[diametro]', document.getElementById('diametro_orfebreria').value);
+                    formData.append('detalles[peso]', document.getElementById('peso_orfebreria').value);
+                    formData.append('detalles[pieza]', document.getElementById('detalle_pieza').value);
+                    formData.append('detalles[metal_predominante]', document.getElementById('detalle_metal_predominante').value);
+                    formData.append('detalles[metales]', JSON.stringify(splitPorComa(document.getElementById('detalle_metales').value)));
                     break;
             }
 
             try {
-                let url = `${API_BASE}/obras`;
+                let url = `${API_BASE}/catalogo/obras`;
                 let method = 'POST';
                 if (editId) {
                     url += `/${editId}`;
@@ -846,6 +760,9 @@
             }
         });
 
+        /**
+         * Muestra el formulario en modo "Nueva Obra", resetea todos los campos y limpia la previsualización.
+         */
         function mostrarFormulario() {
             document.getElementById('formContainer').classList.remove('hidden');
             document.getElementById('obraForm').reset();
@@ -856,6 +773,9 @@
             document.getElementById('formTitle').innerText = 'Nueva Obra';
         }
 
+        /**
+         * Oculta el formulario y limpia el ID de edición.
+         */
         function cancelarFormulario() {
             document.getElementById('formContainer').classList.add('hidden');
             editId = null;

@@ -1,8 +1,21 @@
+/**
+ * MongoDB connection manager with retry logic.
+ * Provides the primary connectDB function with automatic reconnection
+ * and a getConnectionStatus helper.
+ */
 const mongoose = require('mongoose');
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000;
 
+/**
+ * Connects to MongoDB with configurable retry logic.
+ * Uses connection pool with optimal settings for a web service.
+ *
+ * @param {number} [retryCount=0] - Current retry attempt (internal use).
+ * @returns {Promise<import('mongoose').Connection>} The Mongoose connection instance.
+ * @throws {Error} After exhausting MAX_RETRIES attempts.
+ */
 const connectDB = async (retryCount = 0) => {
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
@@ -25,6 +38,12 @@ const connectDB = async (retryCount = 0) => {
   }
 };
 
+/**
+ * Returns the current MongoDB connection readiness state.
+ * 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting.
+ *
+ * @returns {number} The Mongoose connection readyState.
+ */
 const getConnectionStatus = () => mongoose.connection.readyState;
 
 mongoose.connection.on('error', (err) => {

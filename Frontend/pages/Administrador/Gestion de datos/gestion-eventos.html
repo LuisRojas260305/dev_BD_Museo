@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Eventos - Auditoría</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins','Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+        body { background:#f8fafc; color:#1e293b; }
+        header { background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%); color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo h1 { font-size:1.5rem; font-weight:400; }
+        .logo a { color:white; text-decoration:none; }
+        .user-info { display:flex; align-items:center; gap:1rem; }
+        .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
+        .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
+        .filters { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; align-items:flex-end; }
+        .filter-group { display:flex; flex-direction:column; }
+        .filter-group label { font-size:0.85rem; color:#64748b; margin-bottom:0.25rem; }
+        .filter-group input, .filter-group select { padding:0.5rem; border:1px solid #cbd5e1; border-radius:4px; }
+        .btn-primary { background:#3498db; color:white; border:none; padding:0.5rem 1.5rem; border-radius:4px; cursor:pointer; }
+        .btn-primary:hover { background:#2980b9; }
+        table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+        th { background:#1e293b; color:white; padding:0.75rem 1rem; text-align:left; font-weight:500; }
+        td { padding:0.75rem 1rem; border-bottom:1px solid #e2e8f0; }
+        tr:hover { background:#f1f5f9; }
+        .severidad-info { color:#3498db; }
+        .severidad-warning { color:#f39c12; }
+        .severidad-critical { color:#e74c3c; font-weight:bold; }
+        .pagination { display:flex; justify-content:center; gap:0.5rem; margin-top:1.5rem; }
+        .pagination button { padding:0.4rem 0.8rem; border:1px solid #cbd5e1; border-radius:4px; background:white; cursor:pointer; }
+        .pagination button.active { background:#3498db; color:white; border-color:#3498db; }
+        .pagination button:disabled { opacity:0.5; cursor:not-allowed; }
+        .loading { text-align:center; padding:3rem; color:#64748b; }
+        .error { text-align:center; padding:2rem; color:#e74c3c; }
+        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
+        .badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:9999px; font-size:0.8rem; font-weight:500; }
+        .badge-info { background:#dbeafe; color:#1d4ed8; }
+        .badge-warning { background:#fef3c7; color:#b45309; }
+        .badge-critical { background:#fee2e2; color:#b91c1c; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><h1><a href="../admin-dashboard.html">🎨 Eventos - Auditoría</a></h1></div>
+        <div class="user-info">
+            <span id="bienvenida"></span>
+            <a href="../admin-dashboard.html" class="logout-btn">Volver</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-group">
+                <label>Tipo de evento</label>
+                <select id="filterTipo">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Severidad</label>
+                <select id="filterSeveridad">
+                    <option value="">Todas</option>
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Desde</label>
+                <input type="date" id="filterDesde">
+            </div>
+            <div class="filter-group">
+                <label>Hasta</label>
+                <input type="date" id="filterHasta">
+            </div>
+            <button class="btn-primary" onclick="cargarEventos(1)">Filtrar</button>
+        </div>
+
+        <div id="loading" class="loading">Cargando eventos...</div>
+        <div id="error" class="error" style="display:none"></div>
+
+        <table id="tablaEventos" style="display:none">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Usuario</th>
+                    <th>Severidad</th>
+                    <th>Metadatos</th>
+                </tr>
+            </thead>
+            <tbody id="eventosBody"></tbody>
+        </table>
+
+        <div id="pagination" class="pagination" style="display:none"></div>
+    </div>
+
+    <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
+
+    <script src="../../../js/auth.js"></script>
+    <script>
+        // Gestión de Eventos — Visualización y filtrado de eventos de auditoría.
+        // API: /eventos (GET con paginación y filtros por tipo, severidad, fecha).
+        // auth.js (getUser, authFetch para autenticación).
+
+        const user = getUser();
+        if (!user || user.tipo !== 'administrador') {
+            alert('Acceso no autorizado');
+            window.location.href = '../../index.html';
+        }
+        document.getElementById('bienvenida').innerText = `Bienvenido, ${user.nombre}`;
+
+        /**
+         * Carga los tipos de evento disponibles desde la API para poblar el filtro.
+         * GET /eventos?limit=1000 → extrae tipos únicos del resultado.
+         */
+        async function cargarTipos() {
+            try {
+                const res = await authFetch(`${API_BASE}/eventos?limit=1000`);
+                const json = await res.json();
+                if (json.data) {
+                    const tipos = new Set(json.data.map(e => e.tipo_evento));
+                    const select = document.getElementById('filterTipo');
+                    tipos.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t;
+                        opt.textContent = t;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                // si falla, no hay tipos para el filtro
+            }
+        }
+
+        let paginaActual = 1;
+        let totalPaginas = 1;
+
+        /**
+         * Obtiene eventos paginados con filtros y renderiza tabla + paginación.
+         * @param {number} [pagina=1] - Número de página a cargar.
+         * GET /eventos?limit=20&page={pagina}&tipo_evento=&severidad=&desde=&hasta=
+         */
+        async function cargarEventos(pagina = 1) {
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const tabla = document.getElementById('tablaEventos');
+            const pagination = document.getElementById('pagination');
+            const body = document.getElementById('eventosBody');
+
+            loading.style.display = 'block';
+            errorDiv.style.display = 'none';
+            body.innerHTML = '';
+
+            const params = new URLSearchParams();
+            params.append('limit', 20);
+            params.append('page', pagina);
+
+            const tipo = document.getElementById('filterTipo').value;
+            if (tipo) params.append('tipo_evento', tipo);
+            const severidad = document.getElementById('filterSeveridad').value;
+            if (severidad) params.append('severidad', severidad);
+            const desde = document.getElementById('filterDesde').value;
+            if (desde) params.append('desde', desde);
+            const hasta = document.getElementById('filterHasta').value;
+            if (hasta) params.append('hasta', hasta);
+
+            try {
+                const res = await authFetch(`${API_BASE}/eventos?${params}`);
+                if (!res.ok) {
+                    if (res.status === 503) throw new Error('Servicio de auditoría no disponible');
+                    throw new Error('Error al obtener eventos');
+                }
+                const json = await res.json();
+                const eventos = json.data || [];
+                const total = json.total || eventos.length;
+                totalPaginas = Math.ceil(total / 20);
+
+                if (eventos.length === 0) {
+                    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem;">No se encontraron eventos</td></tr>';
+                } else {
+                    eventos.forEach(e => {
+                        const fecha = e.fecha_hora ? new Date(e.fecha_hora).toLocaleString() : '-';
+                        const metaStr = e.metadata ? JSON.stringify(e.metadata).substring(0, 100) : '-';
+                        const severidadClass = {
+                            'info': 'badge-info',
+                            'warning': 'badge-warning',
+                            'critical': 'badge-critical',
+                        }[e.severidad] || 'badge-info';
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td style="white-space:nowrap">${fecha}</td>
+                            <td><span class="badge badge-info">${e.tipo_evento || '-'}</span></td>
+                            <td>${e.usuario || '-'}</td>
+                            <td><span class="badge ${severidadClass}">${e.severidad || '-'}</span></td>
+                            <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${metaStr}</td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                }
+
+                tabla.style.display = 'table';
+                renderPagination(pagina);
+                paginaActual = pagina;
+            } catch (err) {
+                errorDiv.textContent = err.message;
+                errorDiv.style.display = 'block';
+                tabla.style.display = 'none';
+                pagination.style.display = 'none';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        /**
+         * Renderiza los controles de paginación (anterior, números, siguiente).
+         * @param {number} pagina - Página actual activa.
+         */
+        function renderPagination(pagina) {
+            const div = document.getElementById('pagination');
+            if (totalPaginas <= 1) {
+                div.style.display = 'none';
+                return;
+            }
+            div.style.display = 'flex';
+            div.innerHTML = '';
+
+            const prev = document.createElement('button');
+            prev.textContent = '«';
+            prev.disabled = pagina <= 1;
+            prev.onclick = () => cargarEventos(pagina - 1);
+            div.appendChild(prev);
+
+            for (let i = 1; i <= totalPaginas; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === pagina) btn.className = 'active';
+                btn.onclick = () => cargarEventos(i);
+                div.appendChild(btn);
+            }
+
+            const next = document.createElement('button');
+            next.textContent = '»';
+            next.disabled = pagina >= totalPaginas;
+            next.onclick = () => cargarEventos(pagina + 1);
+            div.appendChild(next);
+        }
+
+        // Inicializar
+        cargarTipos();
+        cargarEventos(1);
+    </script>
+</body>
+</html>

@@ -1,13 +1,19 @@
+/**
+ * Archivo principal de entrada del backend del Museo.
+ * Configura Express con CORS, middlewares, enrutamiento y manejo global de errores.
+ * Inicia el servidor tras verificar la conexión a la base de datos.
+ */
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { testConnection } = require('./config/database');
+const { auditar } = require('./services/auditoriaHelper');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middlewares
+// CORS — permitir todos los orígenes (desarrollo)
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -19,81 +25,55 @@ app.use((req, res, next) => {
     next();
 });
 
-// Aumentar límite para JSON (opcional, para otros endpoints)
+// Parse JSON con límite ampliado
 app.use(express.json({ limit: '10mb' }));
-
-// Rutas Tablas artistas
-{
-    app.use('/api/artistas', require('./routes/Artista/artistas'));
-    app.use('/api/nacionalidad', require('./routes/Artista/nacionalidad'));
-}
-
-// Rutas Tablas Ceramica
-{
-    app.use('/api/arcilla', require('./routes/Ceramica/arcilla'));
-    app.use('/api/coccion', require('./routes/Ceramica/coccion'));
-    app.use('/api/esmaltado', require('./routes/Ceramica/esmaltado'));
-    app.use('/api/modelado', require('./routes/Ceramica/modelado'));
-}
-
-// Rutas Tablas Escultura
-{
-    app.use('/api/tipo_escultura', require('./routes/Escultura/tipo_escultura'));
-    app.use('/api/material', require('./routes/Escultura/material'));
-    app.use('/api/tecnica_escultura', require('./routes/Escultura/tecnica_escultura'));
-}
-
-// Rutas Tablas Fotografia
-{
-    app.use('/api/impresion', require('./routes/Fotografia/impresion'));
-    app.use('/api/tecnica_fotografica', require('./routes/Fotografia/tecnica_fotografica'));
-    app.use('/api/camara', require('./routes/Fotografia/camara'));
-}
-
-// Rutas Tablas Pinturas
-{
-    app.use('/api/soporte', require('./routes/Pintura/soporte'));
-    app.use('/api/estilo', require('./routes/Pintura/estilo'));
-    app.use('/api/tematica', require('./routes/Pintura/tematica'));
-}
-
-// Rutas Tablas Orfebreria
-{
-    app.use('/api/pieza_orfebreria', require('./routes/Orfebreria/pieza_orfebreria'));
-    app.use('/api/metales', require('./routes/Orfebreria/metales'));
-}
-
-// Genero
-app.use('/api/genero', require('./routes/Obra/genero'));
 
 // Usuarios
 app.use('/api/usuarios', require('./routes/Usuario/usuarios'));
 app.use('/api/preguntas-seguridad', require('./routes/Usuario/preguntas'));
 
-// Obras
-app.use('/api/obras', require('./routes/Obra/obras'));
-app.use('/api/epoca', require('./routes/Obra/epoca'));
+// Catálogo público — proxy a mongodb-service
+app.use('/api/catalogo', require('./routes/catalogo.routes'));
+
+// Multimedia — servir fotos desde MySQL
+app.use('/api/multimedia', require('./routes/multimedia.routes'));
+
+// Eventos — proxy a cassandra-service
+app.use('/api/eventos', require('./routes/eventos.routes'));
 
 // Ventas
 app.use('/api/ventas', require('./routes/Compra/ventas'));
 app.use('/api/upload', require('./routes/Compra/upload'));
 app.use('/api/reportes', require('./routes/Compra/reportes'));
 
-// Ruta de prueba
+// Frontend estático
+const frontendPath = path.resolve(__dirname, '../Frontend/pages');
+app.use(express.static(frontendPath));
+app.use('/js', express.static(path.resolve(__dirname, '../Frontend/js')));
+
+// Página principal
 app.get('/', (req, res) => {
-    res.send('El servidor funciona');
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// Manejador de errores (para capturar errores de Multer, etc.)
+// Manejador global de errores
 app.use((err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ error: 'El archivo excede el tamaño permitido (5 MB).' });
     }
     console.error(err.stack);
+    auditar('error_sistema', 'sistema', 'critical', {
+        endpoint: req.originalUrl || req.url,
+        metodo: req.method,
+        codigo_error: err.message?.substring(0, 200)
+    });
     res.status(500).json({ error: err.message });
 });
 
-// Iniciar servidor
+/**
+ * Inicia el servidor Express luego de verificar la conexión a la base de datos.
+ * @returns {Promise<void>}
+ */
 async function startServer() {
     await testConnection();
     app.listen(port, () => {

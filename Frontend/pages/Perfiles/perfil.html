@@ -94,10 +94,32 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de perfil del usuario autenticado.
+         * Muestra datos personales, código de seguridad (con toggle),
+         * secciones para activar membresía, cambiar contraseña, regenerar
+         * código de seguridad y cambiar preguntas de seguridad.
+         *
+         * APIs utilizadas:
+         * - GET /api/usuarios/perfil (autenticada)
+         * - POST /api/usuarios/cambiar-pass-perfil (autenticada)
+         * - POST /api/usuarios/membresia (autenticada)
+         * - POST /api/usuarios/seguridad (autenticada)
+         * - GET /api/usuarios/mis-preguntas (autenticada)
+         * - POST /api/usuarios/regenerar-codigo (autenticada)
+         * - POST /api/usuarios/actualizar-preguntas (autenticada)
+         * - GET /api/preguntas-seguridad
+         */
         let codigoReal = "";
-        let preguntasUsuario = []; // Las preguntas actuales del usuario
-        let todasLasPreguntas = []; // Todas las preguntas disponibles
+        let preguntasUsuario = [];
+        let todasLasPreguntas = [];
 
+        /**
+         * Carga los datos del perfil del usuario desde la API.
+         * Actualiza la información mostrada y muestra/oculta secciones
+         * según el tipo de usuario (activar membresía, panel admin).
+         * @async
+         */
         async function cargarPerfil() {
             const res = await authFetch(`${API_BASE}/usuarios/perfil`);
             const user = await res.json();
@@ -137,11 +159,19 @@
             }
         }
 
+        /**
+         * Alterna la visualización del código de seguridad (mostrar/ocultar).
+         */
         function toggleCodigo() {
             const span = document.getElementById('txtCodigo');
             span.innerText = span.innerText === "********" ? codigoReal : "********";
         }
 
+        /**
+         * Cambia la contraseña del usuario autenticado.
+         * Valida que ambas contraseñas coincidan antes de enviar.
+         * @async
+         */
         async function cambiarPassword() {
             const p1 = document.getElementById('pass1').value;
             const p2 = document.getElementById('pass2').value;
@@ -157,12 +187,20 @@
             } else { alert("Error al cambiar contraseña"); }
         }
 
+        /**
+         * Cierra el modal y limpia los mensajes de error.
+         */
         function cerrarModal() { 
             document.getElementById('miModal').style.display = 'none';
             document.getElementById('modalError').innerText = '';
         }
 
-        // --- ACTIVAR MEMBRESÍA ---
+        /**
+         * Abre el modal de activación de membresía.
+         * Carga las preguntas de seguridad disponibles y muestra el
+         * formulario de pago con selección de 3 preguntas.
+         * @async
+         */
         async function abrirModalMembresia() {
             // Cargar todas las preguntas
             const res = await fetch(`${API_BASE}/preguntas-seguridad`);
@@ -211,6 +249,10 @@
             document.getElementById('miModal').style.display = 'flex';
         }
 
+        /**
+         * Valida que las preguntas de seguridad seleccionadas sean únicas
+         * (sin repeticiones). Muestra un mensaje de error si se repiten.
+         */
         function validarUnicas() {
             const selects = Array.from(document.querySelectorAll('.p-select'));
             const values = selects.map(s => s.value).filter(v => v !== "");
@@ -222,6 +264,13 @@
             }
         }
 
+        /**
+         * Ejecuta el proceso de activación de membresía:
+         * 1. Realiza el pago vía API.
+         * 2. Guarda las respuestas de seguridad.
+         * Muestra el código de seguridad generado al finalizar.
+         * @async
+         */
         async function ejecutarActivacionMembresia() {
             const errorMsg = document.getElementById('modalError');
             errorMsg.innerText = '';
@@ -275,7 +324,11 @@
             }
         }
 
-        // --- REGENERAR CÓDIGO ---
+        /**
+         * Abre el modal para regenerar el código de seguridad.
+         * Carga las preguntas de seguridad del usuario para que las responda.
+         * @async
+         */
         async function abrirModalRegenerar() {
             const res = await authFetch(`${API_BASE}/usuarios/mis-preguntas`);
             preguntasUsuario = await res.json();
@@ -294,6 +347,11 @@
             document.getElementById('miModal').style.display = 'flex';
         }
 
+        /**
+         * Envía las respuestas del usuario para regenerar el código de seguridad.
+         * Muestra el nuevo código al usuario y lo actualiza en la vista.
+         * @async
+         */
         async function ejecutarRegenerarCodigo() {
             const respuestas = preguntasUsuario.map((p, i) => ({
                 pregunta_id: document.getElementById(`r_ans${i}`).dataset.id,
@@ -312,7 +370,11 @@
             } else { alert(data.error); }
         }
 
-        // --- CAMBIAR PREGUNTAS ---
+        /**
+         * Abre el modal para cambiar las preguntas de seguridad.
+         * Solicita la contraseña actual y permite seleccionar 3 nuevas preguntas.
+         * @async
+         */
         async function abrirModalPreguntas() {
             const res = await fetch(`${API_BASE}/preguntas-seguridad`);
             todasLasPreguntas = await res.json();
@@ -337,6 +399,11 @@
             document.getElementById('miModal').style.display = 'flex';
         }
 
+        /**
+         * Envía las nuevas preguntas de seguridad al servidor,
+         * validando que sean 3 distintas y verificando la contraseña actual.
+         * @async
+         */
         async function ejecutarCambioPreguntas() {
             const passwordActual = document.getElementById('passConfirm').value;
             const selects = Array.from(document.querySelectorAll('.n-select'));

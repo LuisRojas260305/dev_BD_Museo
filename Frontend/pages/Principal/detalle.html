@@ -249,9 +249,22 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de detalle de una obra individual.
+         * Muestra información completa, características específicas del género,
+         * estado de disponibilidad y botón de compra para miembros.
+         *
+         * APIs utilizadas:
+         * - GET /api/catalogo/{id}
+         */
         const urlParams = new URLSearchParams(window.location.search);
         const obraId = urlParams.get('id');
 
+        /**
+         * Actualiza los botones de autenticación en el header.
+         * Muestra el nombre del usuario si está logueado, o botones de
+         * inicio de sesión / registro si es invitado.
+         */
         function updateAuthButtons() {
             const loggedIn = isLoggedIn();
             const user = getUser();
@@ -270,28 +283,30 @@
             }
         }
 
+        /**
+         * Carga los datos de una obra desde el catálogo por su ID.
+         * Normaliza campos como precio_venta, alto, ancho (pueden venir
+         * como Decimal128 de MongoDB) y renderiza la vista.
+         * @async
+         */
         async function cargarObra() {
+            let obra;
             try {
-                const baseURL = getCatalogBaseURL();
-                const usingMongo = baseURL !== API_BASE;
-                let obra;
-
-                if (usingMongo) {
-                    const res = await fetch(`${baseURL}/api/catalog/${obraId}`);
-                    if (!res.ok) throw new Error('No encontrada');
-                    const json = await res.json();
-                    obra = json.data;
-                    obra.obra_id = obra.obra_id || obra.obra_id_original || obra._id;
-                    obra.precio_venta = typeof obra.precio_venta === 'object'
-                        ? (Number(obra.precio_venta._serialized) || 0)
-                        : (obra.precio_venta || 0);
-                    obra.alto = typeof obra.alto === 'object' ? (Number(obra.alto._serialized) || 0) : (obra.alto || 0);
-                    obra.ancho = typeof obra.ancho === 'object' ? (Number(obra.ancho._serialized) || 0) : (obra.ancho || 0);
-                } else {
-                    const res = await fetch(`${baseURL}/obras/${obraId}`);
-                    if (!res.ok) throw new Error('No encontrada');
-                    obra = await res.json();
-                }
+                // Usar SOLO MongoDB via proxy — sin fallback MySQL
+                const res = await fetch(`${API_BASE}/catalogo/${obraId}`);
+                if (!res.ok) throw new Error('No encontrada');
+                const json = await res.json();
+                obra = json.data;
+                obra.obra_id = obra.obra_id || obra.obra_id_original || obra._id;
+                obra.precio_venta = typeof obra.precio_venta === 'object'
+                    ? (Number(obra.precio_venta._serialized) || 0)
+                    : (obra.precio_venta || 0);
+                obra.alto = typeof obra.alto === 'object'
+                    ? (Number(obra.alto._serialized) || 0)
+                    : (obra.alto || 0);
+                obra.ancho = typeof obra.ancho === 'object'
+                    ? (Number(obra.ancho._serialized) || 0)
+                    : (obra.ancho || 0);
 
                 render(obra);
             } catch (error) {
@@ -299,6 +314,18 @@
             }
         }
 
+        /**
+         * Renderiza la vista completa de detalle de la obra: imagen, metadatos,
+         * precio, estado, características específicas del género y botón de compra.
+         *
+         * @param {Object} obra - Datos de la obra obtenidos del catálogo.
+         * @param {string} obra.nombre - Nombre de la obra.
+         * @param {string} obra.descripcion - Descripción de la obra.
+         * @param {number} obra.precio_venta - Precio de venta.
+         * @param {string} obra.estado - Estado (1=Disponible, 2=Reservado, 3=Vendido o texto).
+         * @param {Object} obra.detalles - Características específicas según el género.
+         * @param {Array} obra.fotos - URLs de las imágenes.
+         */
         function render(obra) {
             // Mapeo de posibles valores numéricos de estado a texto
             const mapaEstados = {
@@ -306,7 +333,6 @@
                 2: 'Reservado',
                 3: 'Vendido'
             };
-            // Obtener el estado como texto: si es número se mapea, si ya es string se usa, si no, 'Desconocido'
             const estadoTexto = mapaEstados[obra.estado] || obra.estado || 'Desconocido';
 
             const main = document.getElementById('detailMain');
@@ -393,15 +419,16 @@
                 }
             }
 
-            // Clase CSS para el estado (usando estadoTexto)
             const estadoClase = {
                 'Disponible': 'status-disponible',
                 'Vendido': 'status-vendido',
                 'Reservado': 'status-reservado'
             }[estadoTexto] || '';
 
-            // URL de la imagen
-            const imagenUrl = `${API_BASE}/obras/${obra.obra_id}/foto`;
+            // URL de la imagen — desde fotos[0] de MongoDB (Multimedia table via /api/multimedia/{id})
+            const imagenUrl = obra.fotos && obra.fotos.length > 0
+                ? obra.fotos[0]
+                : 'https://via.placeholder.com/600x400?text=Sin+imagen';
 
             // Metadatos comunes (fecha y dimensiones)
             const metaItems = [];
@@ -421,10 +448,8 @@
                 </div>
             ` : '';
 
-            // Precio formateado
             const precioFormateado = Number(obra.precio_venta).toLocaleString();
 
-            // Renderizar HTML completo
             main.innerHTML = `
                 <div class="detail-container">
                     <div class="detail-image">
@@ -434,7 +459,7 @@
                     </div>
                     <div class="detail-info">
                         <h2>${obra.nombre}</h2>
-                        <p class="detail-artist">Artista: <a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a></p>
+                        <p class="detail-artist">Artista: ${obra.artista_id ? `<a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a>` : '<span>Desconocido</span>'}</p>
                         <span class="detail-genre">${obra.genero_nombre}</span>
                         <p class="detail-description">${obra.descripcion || ''}</p>
                         ${metaHTML}

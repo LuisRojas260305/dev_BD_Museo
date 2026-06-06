@@ -91,6 +91,10 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
+        // Gestión de Reservas — Concretar o cancelar reservas de obras pendientes.
+        // API: /ventas (GET con estado=reservada, PUT para concretar/cancelar).
+        // auth.js (getUser, authFetch para autenticación).
+
         let ventaSeleccionada = null;
 
         (function() {
@@ -104,6 +108,10 @@
             document.getElementById('userEmail').innerText = user.email;
         })();
 
+        /**
+         * Carga las reservas pendientes (ventas en estado "reservada") y las renderiza en tabla.
+         * GET /ventas?estado=reservada
+         */
         async function cargarReservas() {
             try {
                 const res = await authFetch(`${API_BASE}/ventas?estado=reservada`);
@@ -135,16 +143,27 @@
             }
         }
 
+        /**
+         * Abre el modal para ingresar dirección de envío y concretar la venta.
+         * @param {number} ventaId - ID de la venta a concretar.
+         */
         function abrirModalConcretar(ventaId) {
             ventaSeleccionada = ventaId;
             document.getElementById('modalEnvio').style.display = 'flex';
         }
 
+        /**
+         * Cierra el modal de dirección de envío y limpia la selección.
+         */
         function cerrarModal() {
             document.getElementById('modalEnvio').style.display = 'none';
             ventaSeleccionada = null;
         }
 
+        /**
+         * Confirma la venta enviando la dirección y cambiando el estado a "concretada".
+         * PUT /ventas/{id}/concretar — body: { direccion_envio }
+         */
         document.getElementById('confirmarEnvio').addEventListener('click', async function() {
             const direccion = document.getElementById('direccion').value.trim();
             if (!direccion) {
@@ -169,6 +188,11 @@
             }
         });
 
+        /**
+         * Cancela una reserva y devuelve la obra al estado disponible.
+         * @param {number} ventaId - ID de la venta a cancelar.
+         * PUT /ventas/{id}/cancelar
+         */
         async function cancelarReserva(ventaId) {
             if (!confirm('¿Está seguro de cancelar esta reserva? La obra volverá a estar disponible.')) return;
             try {

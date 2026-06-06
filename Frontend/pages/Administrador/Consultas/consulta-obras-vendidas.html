@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Admin - Obras Vendidas</title>
     <style>
-        /* mismos estilos */
+
         * {
             margin: 0;
             padding: 0;
@@ -77,7 +77,10 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
-        // Verificar administrador
+        // Consulta de Obras Vendidas — Filtra ventas por período y muestra resultados.
+        // API: /ventas (GET con estado=vendida, desde, hasta).
+        // auth.js (getUser, authFetch para autenticación).
+
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
@@ -87,13 +90,20 @@
             document.getElementById('userEmail').innerText = user.email;
         })();
 
-        // Función para formatear fecha (YYYY-MM-DD a objeto Date)
+        /**
+         * Convierte una cadena de fecha YYYY-MM-DD a objeto Date (hora local).
+         * @param {string} fechaStr - Fecha en formato YYYY-MM-DD.
+         * @returns {Date}
+         */
         function parseFechaLocal(fechaStr) {
             const [year, month, day] = fechaStr.split('-').map(Number);
             return new Date(year, month - 1, day);
         }
 
-        // Evento del formulario
+        /**
+         * Maneja el envío del formulario: consulta ventas por período y filtra localmente.
+         * GET /ventas?estado=vendida&desde={fechaInicio}&hasta={fechaFin}
+         */
         document.getElementById('periodoForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -139,6 +149,11 @@
             }
         });
 
+        /**
+         * Renderiza el listado de ventas filtradas en la tabla del DOM.
+         * Calcula precios, IVA y totales según la estructura de cada venta.
+         * @param {Array} ventas - Lista de objetos venta.
+         */
         function renderVentas(ventas) {
             const tbody = document.getElementById('tablaVentas');
             tbody.innerHTML = '';
@@ -206,11 +221,13 @@
             });
         }
 
-        // Función de logout
+        /**
+         * Cierra la sesión del usuario eliminando token y redirigiendo al inicio.
+         */
         window.logout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'index.html';
+            window.location.href = '/';
         };
     </script>
 </body>

@@ -78,8 +78,23 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de activación de membresía.
+         * Permite al usuario ingresar datos de pago y seleccionar
+         * 3 preguntas de seguridad para activar su membresía.
+         *
+         * APIs utilizadas:
+         * - GET /api/preguntas-seguridad
+         * - POST /api/usuarios/membresia (autenticada)
+         * - POST /api/usuarios/seguridad (autenticada)
+         */
         let preguntasData = [];
 
+        /**
+         * Carga las preguntas de seguridad disponibles desde la API
+         * y genera dinámicamente los 3 selectores con sus inputs.
+         * @async
+         */
         async function cargarPreguntas() {
             try {
                 const response = await fetch(`${API_BASE}/preguntas-seguridad`);
@@ -113,6 +128,11 @@
             }
         }
 
+        /**
+         * Valida que las preguntas seleccionadas no se repitan.
+         * Si hay duplicados, resetea el select actual y muestra alerta.
+         * @param {HTMLSelectElement} select - El select que disparó el cambio.
+         */
         function validarUnicas(select) {
             const selects = Array.from(document.querySelectorAll('.p-select'));
             const values = selects.map(s => s.value).filter(v => v !== "");
@@ -124,6 +144,12 @@
             }
         }
 
+        /**
+         * Maneja el envío del formulario de membresía:
+         * 1. Procesa el pago vía API.
+         * 2. Guarda las respuestas de seguridad seleccionadas.
+         * Muestra el código de seguridad al finalizar.
+         */
         document.getElementById('membresiaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const errorMsg = document.getElementById('errorMsg');

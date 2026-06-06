@@ -9,11 +9,8 @@ const obrasVendidasPorPeriodo = async (req, res) => {
     }
 
     const [rows] = await pool.query(`
-      SELECT v.venta_id, v.fecha_venta, o.obra_id, o.nombre as obra_nombre, o.precio_venta,
-             a.artista_id, a.nombre as artista_nombre
+      SELECT v.venta_id, v.fecha_venta, v.obra_id, v.obra_nombre, v.precio_venta, v.artista_nombre
       FROM Venta v
-      JOIN Obra o ON v.obra_id = o.obra_id
-      JOIN Artista a ON o.artista_id = a.artista_id
       WHERE v.estado = 'vendida' AND v.fecha_venta BETWEEN ? AND ?
     `, [desde, hasta]);
 
@@ -32,11 +29,9 @@ const resumenFacturacion = async (req, res) => {
     }
 
     const [rows] = await pool.query(`
-      SELECT f.factura_id, f.fecha_emision, f.precio_obra, f.porcentaje_ganancia,
-             f.ganancia_museo, f.total, v.venta_id, o.nombre as obra_nombre
+      SELECT f.*, v.obra_id, v.obra_nombre
       FROM Factura f
       JOIN Venta v ON f.venta_id = v.venta_id
-      JOIN Obra o ON v.obra_id = o.obra_id
       WHERE f.fecha_emision BETWEEN ? AND ?
     `, [desde, hasta]);
 

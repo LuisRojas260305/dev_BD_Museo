@@ -243,7 +243,6 @@
             <h1><a class="Nav" href="index.html">🎨 Museo de Arte Contemporáneo</a></h1>
         </div>
         <div class="auth-links" id="authLinks">
-            <!-- Se llenará dinámicamente con JS -->
         </div>
     </header>
 
@@ -252,14 +251,12 @@
             <label for="genre">Género</label>
             <select id="genre">
                 <option value="">Todos</option>
-                <!-- Se llenará dinámicamente -->
             </select>
         </div>
         <div class="filter-group">
             <label for="artist">Artista</label>
             <select id="artist">
                 <option value="">Todos</option>
-                <!-- Se llenará dinámicamente -->
             </select>
         </div>
         <div class="filter-group checkbox">
@@ -270,7 +267,6 @@
     </section>
 
     <main class="gallery" id="gallery">
-        <!-- Las tarjetas se generarán dinámicamente -->
     </main>
 
     <footer>
@@ -279,13 +275,23 @@
 
     <script src="../js/auth.js"></script>
     <script>
-
-        
-        
+        /**
+         * Página principal — Catálogo de obras del museo.
+         * Muestra la galería de obras con filtros por género, artista y precio.
+         *
+         * APIs utilizadas:
+         * - GET /api/catalogo?genero=&artista_id=&orden=precio
+         * - GET /api/catalogo/generos
+         * - GET /api/catalogo/artistas?sort=nombre
+         */
         let generos = [];
         let artistas = [];
 
-        // Función para actualizar botones de autenticación
+        /**
+         * Actualiza los botones de autenticación en el header según el estado
+         * de la sesión (logueado vs. invitado) y el tipo de usuario.
+         * Muestra enlace a admin si el usuario es administrador.
+         */
         function updateAuthButtons() {
             const loggedIn = isLoggedIn();
             const user = getUser();
@@ -311,15 +317,19 @@
 
         
 
-        // Cargar géneros para el filtro
+        /**
+         * Carga la lista de géneros desde la API y llena el select de filtro.
+         * @async
+         */
         async function cargarGeneros() {
             try {
-                const response = await fetch(`${API_BASE}/genero`);
-                generos = await response.json();
+                const response = await fetch(`${API_BASE}/catalogo/generos`);
+                const result = await response.json();
+                generos = result.data || [];
                 const select = document.getElementById('genre');
                 generos.forEach(g => {
                     const option = document.createElement('option');
-                    option.value = g.genero_id;
+                    option.value = g.nombre;
                     option.textContent = g.nombre;
                     select.appendChild(option);
                 });
@@ -328,16 +338,20 @@
             }
         }
 
-        // Cargar artistas para el filtro
+        /**
+         * Carga la lista de artistas desde la API y llena el select de filtro.
+         * @async
+         */
         async function cargarArtistas() {
             try {
-                const response = await fetch(`${API_BASE}/artistas`);
-                const data = await response.json();
-                artistas = data; // asumiendo que devuelve array con artista_id y nombre
+                // Usar MongoDB via proxy — sin MySQL
+                const response = await fetch(`${API_BASE}/catalogo/artistas?sort=nombre`);
+                const json = await response.json();
+                artistas = json.data || [];
                 const select = document.getElementById('artist');
                 artistas.forEach(a => {
                     const option = document.createElement('option');
-                    option.value = a.artista_id;
+                    option.value = a.artista_id_original || a._id;
                     option.textContent = a.nombre + (a.apellido ? ' ' + a.apellido : '');
                     select.appendChild(option);
                 });
@@ -346,47 +360,46 @@
             }
         }
 
+        /**
+         * Obtiene las obras del catálogo aplicando los filtros seleccionados
+         * (género, artista, orden por precio) y las renderiza en la galería.
+         * @async
+         */
         async function cargarObras() {
             const generoId = document.getElementById('genre').value;
             const artistaId = document.getElementById('artist').value;
             const ordenar = document.getElementById('sortByPrice').checked;
 
-            const baseURL = getCatalogBaseURL();
-            const usingMongo = baseURL !== API_BASE;
+            let obras = [];
 
-            let url;
+            // Usar SOLO MongoDB via proxy — sin fallback MySQL
             const params = new URLSearchParams();
-
-            if (usingMongo) {
-                url = `${baseURL}/api/catalog?`;
-                if (generoId) {
-                    const map = { 1: 'Pintura', 2: 'Escultura', 3: 'Orfebrería', 4: 'Cerámica', 5: 'Fotografía' };
-                    params.append('genero', map[generoId] || generoId);
-                }
-                if (ordenar) params.append('orden', 'precio');
-            } else {
-                url = `${baseURL}/obras?`;
-                if (generoId) params.append('genero_id', generoId);
-                if (artistaId) params.append('artista_id', artistaId);
-                if (ordenar) params.append('orden', 'precio');
+            if (generoId) {
+                params.append('genero', generoId);
             }
-
-            url += params.toString();
-
+            if (artistaId) {
+                params.append('artista_id', artistaId);
+            }
+            if (ordenar) params.append('orden', 'precio');
             try {
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (usingMongo) {
-                    renderObras(data.data || []);
-                } else {
-                    renderObras(data);
+                const res = await fetch(`${API_BASE}/catalogo?${params}`);
+                const data = await res.json();
+                if (data.data && data.data.length > 0) {
+                    obras = data.data;
                 }
             } catch (error) {
-                console.error('Error cargando obras:', error);
+                console.error('Error cargando obras desde catálogo:', error);
             }
+
+            renderObras(obras);
         }
 
+        /**
+         * Renderiza una lista de obras como tarjetas en la galería.
+         * Si no hay obras, muestra un mensaje de "No se encontraron obras".
+         *
+         * @param {Array} obras - Lista de obras con { nombre, fotos, precio_venta, artista_nombre, etc. }.
+         */
         function renderObras(obras) {
             const gallery = document.getElementById('gallery');
             gallery.innerHTML = '';
@@ -397,12 +410,14 @@
             }
 
             obras.forEach(obra => {
-                const artistaNombre = obra.artista_nombre || obra.artista?.nombre + ' ' + (obra.artista?.apellido || '') || 'Desconocido';
+                const artistaNombre = obra.artista_nombre || 'Desconocido';
                 const artistaId = obra.artista_id || obra.artista_id_original;
                 const generoNombre = obra.genero_nombre || obra.genero || '';
                 const obraId = obra.obra_id || obra.obra_id_original || obra._id;
                 const precio = typeof obra.precio_venta === 'object' ? (Number(obra.precio_venta._serialized) || 0) : (obra.precio_venta || 0);
-                const imagenUrl = `${API_BASE}/obras/${obra.obra_id_original || obra.obra_id}/foto`;
+                const imagenUrl = obra.fotos && obra.fotos.length > 0
+                    ? obra.fotos[0]
+                    : 'https://via.placeholder.com/300x200?text=Sin+imagen';
 
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -415,7 +430,7 @@
                     </a>
                     <div class="card-content">
                         <h3 class="card-title"><a href="Principal/detalle.html?id=${obraId}">${obra.nombre}</a></h3>
-                        <p class="card-artist">Artista: <a href="Principal/artista.html?id=${artistaId}">${artistaNombre}</a></p>
+                        <p class="card-artist">Artista: ${artistaId ? `<a href="Principal/artista.html?id=${artistaId}">${artistaNombre}</a>` : '<span>Desconocido</span>'}</p>
                         <span class="card-genre">${generoNombre}</span>
                         <div class="card-price">$${precio.toLocaleString()}</div>
                     </div>
@@ -424,11 +439,9 @@
             });
         }
 
-        // Inicialización
+        // Inicializar la página: autenticación, filtros y carga de obras
         updateAuthButtons();
-        isMongoDBAvailable().then(() => {
-            cargarGeneros().then(() => cargarArtistas()).then(() => cargarObras());
-        });
+        cargarGeneros().then(() => cargarArtistas()).then(() => cargarObras());
 
         document.getElementById('applyFilters').addEventListener('click', cargarObras);
     </script>

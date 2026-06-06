@@ -23,3 +23,12 @@ openspec/
 
 # Exportación de BD
 museo_completo.json
+
+# Cassandra binarios (tarball, ~450MB)
+Backend/cassandra/
+
+# Logs de intentos fallidos de Cassandra
+cassandra.logdir_IS_UNDEFINED/
+
+# Logs de Cassandra runtime
+Backend/cassandra-data/

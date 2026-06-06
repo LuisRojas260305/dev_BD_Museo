@@ -1,9 +1,12 @@
-// Importacion de los modulos
+/**
+ * Configuración y pool de conexiones a MySQL.
+ * Provee una pool reutilizable con hasta 10 conexiones simultáneas
+ * y una función de verificación de conectividad.
+ */
 const mysql = require('mysql2/promise');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// Creacion de la pool de conexiones
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -14,7 +17,10 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-// Funcion para probar la conexcion
+/**
+ * Prueba la conexión a la base de datos obteniendo y liberando una conexión.
+ * @returns {Promise<void>}
+ */
 async function testConnection() {
     try{
         const connection = await pool.getConnection();
