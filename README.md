@@ -149,14 +149,6 @@ dev_BD_Museo/
 │   ├── defensa-academica-mongodb.md
 │   └── decisiones/
 │
-├── openspec/                         # ★ SDD artifacts (Spec-Driven Development)
-│   └── changes/
-│       ├── fix-bugs-post-auditoria/
-│       ├── guia-ejecucion-proyecto/
-│       ├── migracion-admin-mongodb-cassandra/
-│       ├── refactor-migracion-mongodb/
-│       └── revision-estado-repo-museo/
-│
 ├── Backend/cassandra/                # Binarios de Apache Cassandra 5.0.8
 │   ├── bin/                          # cassandra, cqlsh, nodetool
 │   ├── conf/                         # cassandra.yaml, cassandra-env.sh
@@ -688,10 +680,3 @@ CREATE TABLE resumen_eventos (
 ## 📜 Licencia
 
 Proyecto académico — Universidad para Bases de Datos II (SBDII), 2026.
-
----
-
-## 👥 Autores
-
-- Luis Rojas — Desarrollo full-stack, arquitectura, documentación
-- Proyecto final — Bases de Datos II
