@@ -29,7 +29,18 @@ const getArtistById = async (req, res, next) => {
 
 const createArtist = async (req, res, next) => {
   try {
-    const artista = await Artista.create(req.body);
+    const body = { ...req.body };
+
+    // Parse generos_artisticos if it came as a JSON string (common with FormData/multipart)
+    if (body.generos_artisticos && typeof body.generos_artisticos === 'string') {
+      try {
+        body.generos_artisticos = JSON.parse(body.generos_artisticos);
+      } catch {
+        // If it's not valid JSON, keep it as-is (Mongoose will handle validation)
+      }
+    }
+
+    const artista = await Artista.create(body);
     res.status(201).json({ success: true, data: artista });
   } catch (err) {
     if (err.code === 11000) return res.status(409).json({ success: false, error: 'Artista duplicado' });
@@ -39,7 +50,18 @@ const createArtist = async (req, res, next) => {
 
 const updateArtist = async (req, res, next) => {
   try {
-    const artista = await Artista.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const body = { ...req.body };
+
+    // Parse generos_artisticos if it came as a JSON string (common with FormData/multipart)
+    if (body.generos_artisticos && typeof body.generos_artisticos === 'string') {
+      try {
+        body.generos_artisticos = JSON.parse(body.generos_artisticos);
+      } catch {
+        // If it's not valid JSON, keep it as-is
+      }
+    }
+
+    const artista = await Artista.findByIdAndUpdate(req.params.id, body, { new: true, runValidators: true });
     if (!artista) return res.status(404).json({ success: false, error: 'Artista no encontrado' });
     res.json({ success: true, data: artista });
   } catch (err) {

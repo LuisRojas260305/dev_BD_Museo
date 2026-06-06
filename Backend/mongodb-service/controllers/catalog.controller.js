@@ -24,6 +24,16 @@ const getCatalog = async (req, res, next) => {
 
     const pipeline = [
       { $match: match },
+      // Resolver artista_id → artista embebido (funciona para obras sin artista subdoc)
+      {
+        $lookup: {
+          from: 'artistas',
+          localField: 'artista_id',
+          foreignField: '_id',
+          as: 'artista',
+        },
+      },
+      { $unwind: { path: '$artista', preserveNullAndEmptyArrays: true } },
       {
         $facet: {
           metadata: [{ $count: 'total' }],
@@ -104,6 +114,16 @@ const searchCatalog = async (req, res, next) => {
     const obras = await Obra.aggregate([
       { $match: match },
       { $addFields: { relevancia: { $meta: 'textScore' } } },
+      // Resolver artista_id → artista embebido
+      {
+        $lookup: {
+          from: 'artistas',
+          localField: 'artista_id',
+          foreignField: '_id',
+          as: 'artista',
+        },
+      },
+      { $unwind: { path: '$artista', preserveNullAndEmptyArrays: true } },
       { $sort: { relevancia: -1 } },
       { $limit: 20 },
     ]);
@@ -185,6 +205,18 @@ const createObra = async (req, res, next) => {
             obraData.artista_id = new (require('mongoose').Types.ObjectId)(obraData.artista_id);
         }
 
+        // Poblar artista embebido desde la referencia (para que fieldMapper funcione)
+        if (obraData.artista_id) {
+            const artistaDoc = await Artista.findById(obraData.artista_id);
+            if (artistaDoc) {
+                obraData.artista = {
+                    nombre: artistaDoc.nombre,
+                    apellido: artistaDoc.apellido,
+                    nacionalidad: artistaDoc.nacionalidad,
+                };
+            }
+        }
+
         // Crear la obra — Mongoose usa el discriminatorKey 'genero' para
         // elegir automáticamente el discriminator correcto (Pintura, Escultura, etc.)
         const obra = await Obra.create({ genero, ...obraData });
@@ -215,6 +247,21 @@ const updateObra = async (req, res, next) => {
         // Convertir artista_id si viene como string
         if (updateData.artista_id && typeof updateData.artista_id === 'string') {
             updateData.artista_id = new (require('mongoose').Types.ObjectId)(updateData.artista_id);
+        }
+
+        // Poblar artista embebido desde la referencia
+        if (updateData.artista_id) {
+            const artistaDoc = await Artista.findById(updateData.artista_id);
+            if (artistaDoc) {
+                updateData.artista = {
+                    nombre: artistaDoc.nombre,
+                    apellido: artistaDoc.apellido,
+                    nacionalidad: artistaDoc.nacionalidad,
+                };
+            }
+        } else if (updateData.artista_id === null || updateData.artista_id === '') {
+            // Si desasocian el artista, limpiar el embebido también
+            updateData.artista = null;
         }
 
         const obra = await Obra.findByIdAndUpdate(id, updateData, {

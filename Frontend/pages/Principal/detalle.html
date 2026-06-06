@@ -396,8 +396,10 @@
                 'Reservado': 'status-reservado'
             }[estadoTexto] || '';
 
-            // URL de la imagen — las fotos siguen servidas por Express (por ahora)
-            const imagenUrl = `${API_BASE}/obras/${obra.obra_id}/foto`;
+            // URL de la imagen — desde fotos[0] de MongoDB (Multimedia table via /api/multimedia/{id})
+            const imagenUrl = obra.fotos && obra.fotos.length > 0
+                ? obra.fotos[0]
+                : 'https://via.placeholder.com/600x400?text=Sin+imagen';
 
             // Metadatos comunes (fecha y dimensiones)
             const metaItems = [];

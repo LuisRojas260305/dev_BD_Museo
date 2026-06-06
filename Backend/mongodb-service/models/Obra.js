@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { convertDecimal128 } = require('../utils/decimalHelper');
 
 const obraSchema = new mongoose.Schema({
   obra_id_original: { type: Number },
@@ -36,6 +37,16 @@ const obraSchema = new mongoose.Schema({
   discriminatorKey: 'genero',
   timestamps: true,
 });
+
+// Convert Decimal128 values to plain numbers on serialization (JSON + Object)
+const toJSONConfig = {
+  transform: (_doc, ret) => {
+    convertDecimal128(ret);
+    return ret;
+  },
+};
+obraSchema.set('toJSON', toJSONConfig);
+obraSchema.set('toObject', toJSONConfig);
 
 obraSchema.index({ genero: 1, precio_venta: 1 }, { background: true });
 obraSchema.index({ estado: 1, precio_venta: 1 }, { background: true });

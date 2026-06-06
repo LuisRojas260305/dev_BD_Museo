@@ -9,7 +9,7 @@ const {
   updateObra,
   deleteObra,
 } = require('../controllers/catalog.controller');
-const { getArtists, getArtistById } = require('../controllers/artist.controller');
+const { getArtists, getArtistById, createArtist, updateArtist, deleteArtist } = require('../controllers/artist.controller');
 const { getGeneros, getGeneroById, createGenero, updateGenero, deleteGenero } = require('../controllers/genero.controller');
 const { validateCatalogQuery, validateSearchQuery } = require('../middleware/validation');
 const { opcionalAuth, verificarToken, verificarAdmin } = require('../middleware/auth');
@@ -23,6 +23,9 @@ router.get('/ssl/contexto', createSslContext); // Inicializa contexto SSL (sin a
 // Artistas — antes de :id para evitar que "artistas" sea capturado como parámetro
 router.get('/artists', opcionalAuth, getArtists);
 router.get('/artists/:id', opcionalAuth, getArtistById);
+router.post('/artists', verificarToken, verificarAdmin, createArtist);
+router.put('/artists/:id', verificarToken, verificarAdmin, updateArtist);
+router.delete('/artists/:id', verificarToken, verificarAdmin, deleteArtist);
 
 // Géneros — antes de :id para evitar que "generos" sea capturado como parámetro
 router.get('/generos', opcionalAuth, getGeneros);

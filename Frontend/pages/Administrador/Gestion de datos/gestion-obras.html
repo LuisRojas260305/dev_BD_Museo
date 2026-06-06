@@ -220,13 +220,15 @@
 
         async function cargarArtistas() {
             const res = await fetch(`${API_BASE}/catalogo/artistas`);
-            artistas = await res.json();
+            const result = await res.json();
+            artistas = result.data || [];
             llenarSelect('artista_id', artistas, '_id', a => `${a.nombre} ${a.apellido || ''}`.trim());
         }
 
         async function cargarGeneros() {
             const res = await fetch(`${API_BASE}/catalogo/generos`);
-            generos = await res.json();
+            const result = await res.json();
+            generos = result.data || [];
             llenarSelect('genero_id', generos, 'nombre', 'nombre');
         }
 
@@ -441,7 +443,8 @@
 
         async function cargarObras() {
             const res = await fetch(`${API_BASE}/catalogo`);
-            const obras = await res.json();
+            const result = await res.json();
+            const obras = result.data || [];
             const tbody = document.getElementById('tablaObras');
             tbody.innerHTML = '';
             obras.forEach(o => {
@@ -469,8 +472,9 @@
         window.editarObra = async function(id) {
             try {
                 const res = await fetch(`${API_BASE}/catalogo/${id}`);
-                const obra = await res.json();
-                if (!res.ok) throw new Error(obra.error);
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error);
+                const obra = result.data || result;
                 
                 document.getElementById('obraId').value = obra._id;
                 document.getElementById('nombre').value = obra.nombre || '';

@@ -221,8 +221,10 @@
         }
 
         function renderizar(artista, obras) {
-            // URL de la foto del artista (fotos aún servidas por Express)
-            const fotoArtistaUrl = `${API_BASE}/artistas/${artista.artista_id_original || artistaId}/foto`;
+            // URL de la foto del artista — desde fotos[0] de MongoDB
+            const fotoArtistaUrl = artista.fotos && artista.fotos.length > 0
+                ? artista.fotos[0]
+                : 'https://via.placeholder.com/200x200?text=Sin+imagen';
 
             // Función auxiliar para formatear la fecha ISO a YYYY-MM-DD
             const formatearFecha = (fechaISO) => {
@@ -234,8 +236,10 @@
             let obrasHTML = '';
             obras.forEach(obra => {
                 const obraId = obra.obra_id || obra.obra_id_original || obra._id;
-                // URL de la foto de la obra usando su ID
-                const fotoObraUrl = `${API_BASE}/obras/${obraId}/foto`;
+                // URL de la foto de la obra — desde fotos[0] de MongoDB
+                const fotoObraUrl = obra.fotos && obra.fotos.length > 0
+                    ? obra.fotos[0]
+                    : 'https://via.placeholder.com/200x150?text=Sin+imagen';
                 obrasHTML += `
                     <div class="obra-card">
                         <a class="a-obras" href="detalle.html?id=${obraId}">
@@ -254,42 +258,35 @@
                 `;
             });
 
+            // Helper para mostrar géneros artísticos como string plano
+            const formatearGeneros = (generos) => {
+                if (!generos) return '';
+                if (Array.isArray(generos)) return generos.join(', ');
+                // Si por algún motivo es un string con formato de array, intentamos limpiarlo
+                if (typeof generos === 'string') {
+                    try {
+                        const parsed = JSON.parse(generos);
+                        return Array.isArray(parsed) ? parsed.join(', ') : generos;
+                    } catch { return generos; }
+                }
+                return String(generos);
+            };
+
             const main = document.getElementById('artistMain');
             main.innerHTML = `
                 <div class="artist-header">
                     <div class="artist-photo">
                         <img src="${fotoArtistaUrl}" 
                             alt="${artista.nombre} ${artista.apellido || ''}"
-                            onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200?text=Sin+imagen';">
-                    </div>
-                    <div class="artist-info">
-                        <h2>${artista.nombre} ${artista.apellido || ''}</h2>
-                        <p class="artist-nationality">${artista.nacionalidad || ''}</p>
-                        <p class="artist-bio">${artista.biografia || ''}</p>
-                        <p><strong>Fecha de nacimiento:</strong> ${formatearFecha(artista.fecha_nacimiento)}</p>
-                    </div>
-                </div>
-                <div class="artist-obras">
-                    <h3>Obras de ${artista.nombre} ${artista.apellido || ''}</h3>
-                    <div class="obras-grid">
-                        ${obrasHTML || '<p>No se encontraron obras de este artista.</p>'}
-                    </div>
-                </div>
-            `;
-            });
-
-            document.getElementById('artistMain').innerHTML = `
-                <div class="artist-header">
-                    <div class="artist-photo">
-                        <img src="${fotoArtistaUrl}" 
-                            alt="${artista.nombre} ${artista.apellido || ''}"
-                            onerror="this.onerror=null; this.src='https://via.placeholder.com/200';"
+                            onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200?text=Sin+imagen';"
                             style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
                     </div>
                     <div class="artist-info">
                         <h2>${artista.nombre} ${artista.apellido || ''}</h2>
-                        <p><strong>Nacionalidad:</strong> ${artista.nacionalidad_nombre || 'Desconocida'}</p>
+                        <p><strong>Nacionalidad:</strong> ${artista.nacionalidad || 'Desconocida'}</p>
+                        <p><strong>Géneros artísticos:</strong> ${formatearGeneros(artista.generos_artisticos)}</p>
                         <p><strong>Fecha de nacimiento:</strong> ${formatearFecha(artista.fecha_nacimiento)}</p>
+                        <p><strong>% Ganancia:</strong> ${artista.porcentaje_ganancia != null ? artista.porcentaje_ganancia + '%' : ''}</p>
                     </div>
                 </div>
                 <div class="artist-bio">

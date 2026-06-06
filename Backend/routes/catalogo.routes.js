@@ -88,6 +88,23 @@ router.get('/artistas', async (req, res, next) => {
     }
 });
 
+// GET /api/catalogo/artistas/:id — Obtener artista por ID (proxy a MongoDB)
+router.get('/artistas/:id', async (req, res, next) => {
+    try {
+        const data = await catalogProxy.getArtistById(req.params.id, req.query);
+        res.json(data);
+    } catch (err) {
+        if (err.code === 'ECONNREFUSED' || err.code === 'ECONNABORTED') {
+            return res.status(503).json({
+                success: false,
+                error: 'Catálogo no disponible',
+                details: 'El servicio de catálogo (MongoDB) no está disponible'
+            });
+        }
+        next(err);
+    }
+});
+
 // ---------------------------------------------------------------------------
 // CRUD Géneros (admin) — sin multer (no hay fotos)
 // ---------------------------------------------------------------------------
