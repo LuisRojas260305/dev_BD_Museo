@@ -387,12 +387,14 @@
             }
 
             obras.forEach(obra => {
-                const artistaNombre = obra.artista_nombre || obra.artista?.nombre + ' ' + (obra.artista?.apellido || '') || 'Desconocido';
-                const artistaId = obra.artista_id?.$oid || obra.artista_id?._id || obra.artista_id_original;
+                const artistaNombre = obra.artista_nombre || 'Desconocido';
+                const artistaId = obra.artista_id || obra.artista_id_original;
                 const generoNombre = obra.genero_nombre || obra.genero || '';
                 const obraId = obra.obra_id || obra.obra_id_original || obra._id;
                 const precio = typeof obra.precio_venta === 'object' ? (Number(obra.precio_venta._serialized) || 0) : (obra.precio_venta || 0);
-                const imagenUrl = `${API_BASE}/obras/${obraId}/foto`;
+                const imagenUrl = obra.fotos && obra.fotos.length > 0
+                    ? obra.fotos[0]
+                    : 'https://via.placeholder.com/300x200?text=Sin+imagen';
 
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -405,7 +407,7 @@
                     </a>
                     <div class="card-content">
                         <h3 class="card-title"><a href="Principal/detalle.html?id=${obraId}">${obra.nombre}</a></h3>
-                        <p class="card-artist">Artista: <a href="Principal/artista.html?id=${artistaId}">${artistaNombre}</a></p>
+                        <p class="card-artist">Artista: ${artistaId ? `<a href="Principal/artista.html?id=${artistaId}">${artistaNombre}</a>` : '<span>Desconocido</span>'}</p>
                         <span class="card-genre">${generoNombre}</span>
                         <div class="card-price">$${precio.toLocaleString()}</div>
                     </div>

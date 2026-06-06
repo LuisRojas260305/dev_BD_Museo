@@ -432,7 +432,7 @@
                     </div>
                     <div class="detail-info">
                         <h2>${obra.nombre}</h2>
-                        <p class="detail-artist">Artista: <a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a></p>
+                        <p class="detail-artist">Artista: ${obra.artista_id ? `<a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a>` : '<span>Desconocido</span>'}</p>
                         <span class="detail-genre">${obra.genero_nombre}</span>
                         <p class="detail-description">${obra.descripcion || ''}</p>
                         ${metaHTML}
