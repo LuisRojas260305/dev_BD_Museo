@@ -1,8 +1,18 @@
-// Módulo standalone — solo depende de jsonwebtoken (sin dependencia MySQL)
-// Reemplaza a middlewares/auth.js. Misma interfaz: verificarToken, verificarAdmin, verificarMiembro.
-// Puede copiarse a mongodb-service/middleware/authMiddleware.js sin cambios.
+/**
+ * Middleware de autenticación y autorización.
+ * Módulo standalone — solo depende de jsonwebtoken (sin dependencia MySQL).
+ * Misma interfaz que el auth original: verificarToken, verificarAdmin,
+ * verificarMiembro, opcionalAuth. Puede copiarse a otros servicios sin cambios.
+ */
 const jwt = require('jsonwebtoken');
 
+/**
+ * Verifica el token JWT o la internal API key para service-to-service.
+ * Si pasa, deja los datos del usuario en req.usuario.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const verificarToken = (req, res, next) => {
     // Internal API key para service-to-service (monolito → microservicios)
     const internalKey = req.header('x-internal-key');
@@ -22,19 +32,36 @@ const verificarToken = (req, res, next) => {
     }
 };
 
+/**
+ * Rechaza la solicitud si el usuario no es administrador o sistema.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const verificarAdmin = (req, res, next) => {
     if (req.usuario.tipo !== 'administrador' && req.usuario.tipo !== 'sistema')
         return res.status(403).json({ error: 'Requiere permisos de administrador' });
     next();
 };
 
+/**
+ * Rechaza la solicitud si el usuario no es miembro o administrador.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const verificarMiembro = (req, res, next) => {
     if (req.usuario.tipo !== 'miembro' && req.usuario.tipo !== 'administrador')
         return res.status(403).json({ error: 'Requiere ser miembro' });
     next();
 };
 
-// Auth opcional — si hay token o internal key lo verifica, si no, continúa sin usuario.
+/**
+ * Auth opcional — si hay token o internal key lo verifica, si no, continúa sin usuario.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const opcionalAuth = (req, res, next) => {
     const internalKey = req.header('x-internal-key');
     if (internalKey && internalKey === process.env.INTERNAL_API_KEY) {

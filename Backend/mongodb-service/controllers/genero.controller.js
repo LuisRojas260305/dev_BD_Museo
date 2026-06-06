@@ -1,6 +1,16 @@
+/**
+ * Genre controller — CRUD operations for artwork genres (géneros).
+ */
 const Genero = require('../models/Genero');
 const Obra = require('../models/Obra');
 
+/**
+ * GET /api/catalog/generos — Lists all genres sorted by name.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getGeneros = async (req, res, next) => {
   try {
     const generos = await Genero.find({}).sort({ nombre: 1 });
@@ -10,6 +20,13 @@ const getGeneros = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/catalog/generos/:id — Returns a single genre by ID.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getGeneroById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -23,6 +40,14 @@ const getGeneroById = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/catalog/generos — Creates a new genre.
+ * Returns 409 if the genre name already exists (unique constraint).
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const createGenero = async (req, res, next) => {
   try {
     const genero = await Genero.create(req.body);
@@ -35,6 +60,14 @@ const createGenero = async (req, res, next) => {
   }
 };
 
+/**
+ * PUT /api/catalog/generos/:id — Updates an existing genre.
+ * Returns 409 on duplicate name.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const updateGenero = async (req, res, next) => {
   try {
     const genero = await Genero.findByIdAndUpdate(req.params.id, req.body, {
@@ -53,6 +86,14 @@ const updateGenero = async (req, res, next) => {
   }
 };
 
+/**
+ * DELETE /api/catalog/generos/:id — Deletes a genre if no artworks are associated.
+ * Returns 409 if associated artworks exist, preventing orphaned references.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const deleteGenero = async (req, res, next) => {
   try {
     const genero = await Genero.findById(req.params.id);

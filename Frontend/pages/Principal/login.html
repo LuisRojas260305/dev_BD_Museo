@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Museo de Arte Contemporáneo - Iniciar Sesión</title>
     <style>
-        /* mismos estilos que registro, pero con botón azul */
+        /* Mismos estilos que registro, con botón azul para login */
         * {
             margin: 0;
             padding: 0;
@@ -142,6 +142,21 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de inicio de sesión.
+         * Autentica al usuario contra la API y redirige según su tipo
+         * (administrador, miembro o usuario regular).
+         *
+         * APIs utilizadas:
+         * - POST /api/usuarios/login
+         */
+
+        /**
+         * Maneja el envío del formulario de login.
+         * Envía credenciales (email, password) a la API, almacena el token
+         * y datos del usuario, y redirige al panel correspondiente.
+         * @param {Event} e - Evento de submit del formulario.
+         */
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;

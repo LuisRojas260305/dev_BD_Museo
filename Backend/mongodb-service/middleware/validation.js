@@ -1,3 +1,15 @@
+/**
+ * Request validation for the catalog microservice.
+ * Validates query parameters for the catalog listing and search endpoints.
+ */
+
+/**
+ * Validates catalog listing query parameters (genre, status, page, limit, price range).
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const validateCatalogQuery = (req, res, next) => {
   const { page, limit, precio_min, precio_max, genero, estado } = req.query;
 
@@ -39,6 +51,14 @@ const validateCatalogQuery = (req, res, next) => {
   next();
 };
 
+/**
+ * Validates search query parameters.
+ * Checks minimum query length (2 characters), then delegates to validateCatalogQuery.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const validateSearchQuery = (req, res, next) => {
   const { q } = req.query;
 

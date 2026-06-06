@@ -191,7 +191,6 @@
     </div>
 
     <main id="artistMain" class="artist-container">
-        <!-- Se llenará dinámicamente -->
     </main>
 
     <footer>
@@ -199,9 +198,22 @@
     </footer>
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de detalle de un artista.
+         * Muestra su foto, datos biográficos, fecha de nacimiento, nacionalidad,
+         * géneros artísticos y la lista de sus obras disponibles.
+         *
+         * APIs utilizadas:
+         * - GET /api/catalogo/artistas/{id}
+         * - GET /api/catalogo?artista_id={id}
+         */
         const urlParams = new URLSearchParams(window.location.search);
         const artistaId = urlParams.get('id');
 
+        /**
+         * Carga los datos del artista y sus obras desde el catálogo.
+         * @async
+         */
         async function cargarArtista() {
             try {
                 // Usar SOLO MongoDB via proxy — sin MySQL
@@ -220,23 +232,31 @@
             }
         }
 
+        /**
+         * Renderiza la página de detalle del artista: foto, datos biográficos,
+         * nacionalidad, géneros, fecha de nacimiento, y parrilla de sus obras.
+         *
+         * @param {Object} artista - Datos del artista desde la API.
+         * @param {Array} obras - Lista de obras del artista.
+         */
         function renderizar(artista, obras) {
-            // URL de la foto del artista — desde fotos[0] de MongoDB
             const fotoArtistaUrl = artista.fotos && artista.fotos.length > 0
                 ? artista.fotos[0]
                 : 'https://via.placeholder.com/200x200?text=Sin+imagen';
 
-            // Función auxiliar para formatear la fecha ISO a YYYY-MM-DD
+            /**
+             * Formatea una fecha ISO a YYYY-MM-DD.
+             * @param {string} fechaISO - Fecha en formato ISO (ej: 1475-03-06T04:27:44.000Z).
+             * @returns {string} Fecha formateada o 'Desconocida'.
+             */
             const formatearFecha = (fechaISO) => {
                 if (!fechaISO) return 'Desconocida';
-                // Extrae la parte antes de la 'T' (ej: 1475-03-06T04:27:44.000Z -> 1475-03-06)
                 return fechaISO.split('T')[0];
             };
 
             let obrasHTML = '';
             obras.forEach(obra => {
                 const obraId = obra.obra_id || obra.obra_id_original || obra._id;
-                // URL de la foto de la obra — desde fotos[0] de MongoDB
                 const fotoObraUrl = obra.fotos && obra.fotos.length > 0
                     ? obra.fotos[0]
                     : 'https://via.placeholder.com/200x150?text=Sin+imagen';
@@ -258,7 +278,12 @@
                 `;
             });
 
-            // Helper para mostrar géneros artísticos como string plano
+            /**
+             * Convierte la lista de géneros artísticos a un string plano.
+             * Maneja arrays, strings JSON y valores planos.
+             * @param {Array|string} generos - Lista de géneros artísticos.
+             * @returns {string} Géneros formateados como texto.
+             */
             const formatearGeneros = (generos) => {
                 if (!generos) return '';
                 if (Array.isArray(generos)) return generos.join(', ');

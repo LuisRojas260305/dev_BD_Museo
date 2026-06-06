@@ -1,5 +1,19 @@
+/**
+ * Controlador CRUD genérico reutilizable para tablas simples de MySQL.
+ * Crea automáticamente endpoints getAll, create, update y delete
+ * con validación de unicidad y manejo de errores de integridad referencial.
+ */
 const { pool } = require('../config/database');
 
+/**
+ * Crea un controlador CRUD para la tabla especificada.
+ * @param {string} tableName - Nombre de la tabla en MySQL
+ * @param {Object} [options] - Opciones de configuración
+ * @param {string} [options.idField] - Campo ID (por defecto: `${tableName}_id`)
+ * @param {string} [options.nameField='nombre'] - Campo para validar unicidad
+ * @param {boolean} [options.uniqueName=true] - Validar nombre único al crear/actualizar
+ * @returns {Object} Controlador con métodos getAll, create, update, delete
+ */
 const createGenericController = (tableName, options = {}) => {
   const { idField = `${tableName}_id`, nameField = 'nombre', uniqueName = true } = options;
 

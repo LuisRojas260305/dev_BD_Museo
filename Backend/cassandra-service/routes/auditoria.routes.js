@@ -1,3 +1,10 @@
+/**
+ * Rutas del microservicio de auditoría.
+ * - POST /eventos   → registro de evento (requiere token)
+ * - GET  /eventos   → consulta de eventos (requiere token + admin)
+ * - GET  /reportes  → resúmenes diarios (requiere token + admin)
+ * - GET  /health    → health check público
+ */
 const router = require('express').Router();
 const ctrl = require('../controllers/auditoria.controller');
 const { verificarToken, verificarAdmin } = require('../middleware/auth');

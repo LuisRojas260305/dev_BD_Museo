@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Admin - Artistas</title>
     <style>
-        /* Estilos igual que antes, añadir algunos para vista previa de imagen */
+
        * {
             margin: 0;
             padding: 0;
@@ -177,6 +177,9 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
+        // Gestión de Artistas — CRUD de artistas del museo.
+        // API: /catalogo/artistas (GET, POST, PUT, DELETE), /catalogo/generos (GET).
+        // auth.js (getUser, authFetch para autenticación).
         let generos = [];
         let editId = null;
         
@@ -189,6 +192,10 @@
             document.getElementById('userEmail').innerText = user.email;
         })();
 
+        /**
+         * Carga la lista de géneros desde la API y genera checkboxes para selección múltiple.
+         * Actualiza la variable global `generos` y renderiza en #generosCheckboxes.
+         */
         async function cargarGeneros() {
             const res = await fetch(`${API_BASE}/catalogo/generos`);
             const result = await res.json();
@@ -211,6 +218,10 @@
             });
         }
 
+        /**
+         * Carga y renderiza la tabla de artistas desde la API.
+         * GET /catalogo/artistas → puebla #tablaArtistas con foto, nombre, nacionalidad y acciones.
+         */
         async function cargarArtistas() {
             const res = await fetch(`${API_BASE}/catalogo/artistas`);
             const result = await res.json();
@@ -238,6 +249,11 @@
             }
         }
 
+        /**
+         * Carga los datos de un artista por ID y muestra el formulario en modo edición.
+         * @param {string} id - ID del artista a editar.
+         * GET /catalogo/artistas/{id} → rellena formulario, checkboxes y previsualización de foto.
+         */
         window.editarArtista = async function(id) {
             try {
                 const res = await fetch(`${API_BASE}/catalogo/artistas/${id}`);
@@ -281,6 +297,11 @@
             }
         };
 
+        /**
+         * Elimina un artista tras confirmación del usuario.
+         * @param {string} id - ID del artista a eliminar.
+         * DELETE /catalogo/artistas/{id}
+         */
         window.eliminarArtista = async function(id) {
             if (!confirm('¿Eliminar artista?')) return;
             try {
@@ -297,6 +318,11 @@
             }
         };
 
+        /**
+         * Maneja el envío del formulario de artista (creación o edición).
+         * Envía FormData con nombre, apellido, nacionalidad, foto, géneros, etc.
+         * POST /catalogo/artistas — PUT /catalogo/artistas/{id}
+         */
         document.getElementById('artistaForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -342,6 +368,9 @@
             }
         });
 
+        /**
+         * Muestra el formulario en modo "Nuevo Artista", resetea campos y desmarca checkboxes.
+         */
         function mostrarFormulario() {
             document.getElementById('formContainer').classList.remove('hidden');
             document.getElementById('artistaForm').reset();
@@ -354,11 +383,16 @@
             editId = null;
         }
 
+        /**
+         * Oculta el formulario de artista.
+         */
         function cancelarFormulario() {
             document.getElementById('formContainer').classList.add('hidden');
         }
 
-        // Vista previa de la imagen seleccionada
+        /**
+         * Muestra una vista previa de la foto seleccionada para el artista.
+         */
         document.getElementById('foto').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -374,7 +408,7 @@
             }
         });
 
-        // Inicializar: cargar géneros, luego artistas
+        // Inicializar: cargar géneros disponibles y luego la tabla de artistas.
         cargarGeneros().then(() => cargarArtistas());
     </script>
 </body>

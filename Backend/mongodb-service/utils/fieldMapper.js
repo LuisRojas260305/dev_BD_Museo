@@ -1,3 +1,8 @@
+/**
+ * Field mapper utility — transforms raw MongoDB artwork documents into the
+ * frontend-friendly response format. Resolves artist names from both embedded
+ * and populated artist data, and normalizes Decimal128 values to plain numbers.
+ */
 const { convertDecimal128 } = require('./decimalHelper');
 
 /**
@@ -15,6 +20,14 @@ function resolveArtistaNombre(obra) {
   return null;
 }
 
+/**
+ * Maps a raw artwork document to the API response format.
+ * Converts Decimal128 values to numbers, resolves the artist display name,
+ * and provides a stable obra_id (uses obra_id_original if available).
+ *
+ * @param {Object} obra - Raw artwork document from MongoDB.
+ * @returns {Object} Mapped artwork object ready for JSON serialization.
+ */
 const fieldMapper = (obra) => {
   // Deep-clone and convert all Decimal128 values to numbers.
   // Works for both top-level fields (precio_venta, alto, ancho) and

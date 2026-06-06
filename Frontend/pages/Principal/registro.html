@@ -148,6 +148,20 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de registro de nuevo usuario.
+         * Envía los datos del formulario a la API para crear una cuenta.
+         *
+         * APIs utilizadas:
+         * - POST /api/usuarios/registro
+         */
+
+        /**
+         * Maneja el envío del formulario de registro.
+         * Envía nombre, apellido, email y password a la API.
+         * En caso de éxito, redirige al login.
+         * @param {Event} e - Evento de submit del formulario.
+         */
         document.getElementById('registroForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const nombre = document.getElementById('nombre').value;

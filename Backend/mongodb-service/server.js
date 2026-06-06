@@ -1,3 +1,9 @@
+/**
+ * Entry point for the MongoDB microservice.
+ * Sets up Express server, connects to MongoDB via Mongoose,
+ * mounts the catalog API routes under /api/catalog,
+ * and applies the global error handling middleware.
+ */
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const express = require('express');

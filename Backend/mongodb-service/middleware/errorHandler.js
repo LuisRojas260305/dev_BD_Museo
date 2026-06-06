@@ -1,3 +1,19 @@
+/**
+ * Global error handling middleware.
+ * Normalizes Mongoose validation errors, CastErrors, duplicate key errors,
+ * and generic errors into a consistent JSON response format.
+ */
+
+/**
+ * Express error-handling middleware (4-argument signature).
+ * Handles Mongoose ValidationError, CastError, duplicate key (11000),
+ * and generic server errors with appropriate HTTP status codes.
+ *
+ * @param {Error} err
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 

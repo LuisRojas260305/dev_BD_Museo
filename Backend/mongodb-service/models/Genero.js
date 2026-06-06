@@ -1,3 +1,7 @@
+/**
+ * Genero model — Represents an artwork genre (e.g., Pintura, Escultura).
+ * Used as a reference collection for genre categorization.
+ */
 const mongoose = require('mongoose');
 
 const generoSchema = new mongoose.Schema({

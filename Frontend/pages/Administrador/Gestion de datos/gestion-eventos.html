@@ -98,6 +98,10 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
+        // Gestión de Eventos — Visualización y filtrado de eventos de auditoría.
+        // API: /eventos (GET con paginación y filtros por tipo, severidad, fecha).
+        // auth.js (getUser, authFetch para autenticación).
+
         const user = getUser();
         if (!user || user.tipo !== 'administrador') {
             alert('Acceso no autorizado');
@@ -105,6 +109,10 @@
         }
         document.getElementById('bienvenida').innerText = `Bienvenido, ${user.nombre}`;
 
+        /**
+         * Carga los tipos de evento disponibles desde la API para poblar el filtro.
+         * GET /eventos?limit=1000 → extrae tipos únicos del resultado.
+         */
         async function cargarTipos() {
             try {
                 const res = await authFetch(`${API_BASE}/eventos?limit=1000`);
@@ -127,6 +135,11 @@
         let paginaActual = 1;
         let totalPaginas = 1;
 
+        /**
+         * Obtiene eventos paginados con filtros y renderiza tabla + paginación.
+         * @param {number} [pagina=1] - Número de página a cargar.
+         * GET /eventos?limit=20&page={pagina}&tipo_evento=&severidad=&desde=&hasta=
+         */
         async function cargarEventos(pagina = 1) {
             const loading = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
@@ -199,6 +212,10 @@
             }
         }
 
+        /**
+         * Renderiza los controles de paginación (anterior, números, siguiente).
+         * @param {number} pagina - Página actual activa.
+         */
         function renderPagination(pagina) {
             const div = document.getElementById('pagination');
             if (totalPaginas <= 1) {

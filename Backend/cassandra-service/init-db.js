@@ -1,3 +1,9 @@
+/**
+ * Script de inicialización de la base de datos Cassandra.
+ * Lee el archivo scripts/schema.cql, lo divide en statements y los
+ * ejecuta secuencialmente contra el cluster para crear el keyspace
+ * y las tablas necesarias.
+ */
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');

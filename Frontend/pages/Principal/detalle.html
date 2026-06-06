@@ -249,9 +249,22 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de detalle de una obra individual.
+         * Muestra información completa, características específicas del género,
+         * estado de disponibilidad y botón de compra para miembros.
+         *
+         * APIs utilizadas:
+         * - GET /api/catalogo/{id}
+         */
         const urlParams = new URLSearchParams(window.location.search);
         const obraId = urlParams.get('id');
 
+        /**
+         * Actualiza los botones de autenticación en el header.
+         * Muestra el nombre del usuario si está logueado, o botones de
+         * inicio de sesión / registro si es invitado.
+         */
         function updateAuthButtons() {
             const loggedIn = isLoggedIn();
             const user = getUser();
@@ -270,6 +283,12 @@
             }
         }
 
+        /**
+         * Carga los datos de una obra desde el catálogo por su ID.
+         * Normaliza campos como precio_venta, alto, ancho (pueden venir
+         * como Decimal128 de MongoDB) y renderiza la vista.
+         * @async
+         */
         async function cargarObra() {
             let obra;
             try {
@@ -295,6 +314,18 @@
             }
         }
 
+        /**
+         * Renderiza la vista completa de detalle de la obra: imagen, metadatos,
+         * precio, estado, características específicas del género y botón de compra.
+         *
+         * @param {Object} obra - Datos de la obra obtenidos del catálogo.
+         * @param {string} obra.nombre - Nombre de la obra.
+         * @param {string} obra.descripcion - Descripción de la obra.
+         * @param {number} obra.precio_venta - Precio de venta.
+         * @param {string} obra.estado - Estado (1=Disponible, 2=Reservado, 3=Vendido o texto).
+         * @param {Object} obra.detalles - Características específicas según el género.
+         * @param {Array} obra.fotos - URLs de las imágenes.
+         */
         function render(obra) {
             // Mapeo de posibles valores numéricos de estado a texto
             const mapaEstados = {
@@ -302,7 +333,6 @@
                 2: 'Reservado',
                 3: 'Vendido'
             };
-            // Obtener el estado como texto: si es número se mapea, si ya es string se usa, si no, 'Desconocido'
             const estadoTexto = mapaEstados[obra.estado] || obra.estado || 'Desconocido';
 
             const main = document.getElementById('detailMain');
@@ -389,7 +419,6 @@
                 }
             }
 
-            // Clase CSS para el estado (usando estadoTexto)
             const estadoClase = {
                 'Disponible': 'status-disponible',
                 'Vendido': 'status-vendido',
@@ -419,10 +448,8 @@
                 </div>
             ` : '';
 
-            // Precio formateado
             const precioFormateado = Number(obra.precio_venta).toLocaleString();
 
-            // Renderizar HTML completo
             main.innerHTML = `
                 <div class="detail-container">
                     <div class="detail-image">

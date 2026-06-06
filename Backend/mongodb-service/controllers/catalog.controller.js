@@ -1,9 +1,22 @@
+/**
+ * Catalog controller — handles CRUD operations for museum artworks (obras).
+ * Includes catalog listing with filtering/pagination, search via text index,
+ * single-work detail with SSL view tracking, health check, and SSL context creation.
+ */
 const Artista = require('../models/Artista');
 const Obra = require('../models/Obra');
 const fieldMapper = require('../utils/fieldMapper');
 const { createContext, addView } = require('../../shared/sslContext');
 const { logEvent } = require('../../shared/sslLogger');
 
+/**
+ * GET /api/catalog — Lists artworks with optional filters (genre, status, artist, price range)
+ * and pagination. Resolves artist_id to embedded artist via $lookup aggregation.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getCatalog = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -62,6 +75,14 @@ const getCatalog = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/catalog/:id — Returns a single artwork by MongoDB ObjectId or original numeric ID.
+ * Supports SSL view tracking: if x-ssl-id header is present, registers a view event.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getCatalogById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -104,6 +125,14 @@ const getCatalogById = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/catalog/search — Full-text search on artwork names and descriptions.
+ * Supports additional filters (genre, price range). Results sorted by text relevance (max 20).
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const searchCatalog = async (req, res, next) => {
   try {
     const { q, genero, precio_min, precio_max } = req.query;
@@ -145,12 +174,27 @@ const searchCatalog = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/catalog/ssl/contexto — Creates a new SSL viewing context (no auth required).
+ * Used by the frontend to track anonymous user sessions for analytics.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
 const createSslContext = (req, res) => {
     const ctx = createContext();
     logEvent(ctx.ssl_id, 'contexto-creado', { endpoint: '/ssl/contexto' });
     res.json({ success: true, data: { ssl_id: ctx.ssl_id, creado_en: ctx.creado_en, ttl: ctx.ttl } });
 };
 
+/**
+ * GET /api/catalog/health — Health check endpoint.
+ * Returns 200 with { status: 'ok' } when MongoDB is connected,
+ * 503 with { status: 'error' } otherwise.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
 const healthCheck = (req, res) => {
   const { getConnectionStatus } = require('../config/db');
   const state = getConnectionStatus();
@@ -170,7 +214,10 @@ const healthCheck = (req, res) => {
 const VALID_GENEROS = ['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía'];
 
 /**
- * Valida que el género sea uno de los válidos.
+ * Validates that the genre is one of the accepted values.
+ *
+ * @param {string} genero - The genre name to validate.
+ * @returns {string|null} Error message string, or null if valid.
  */
 function validateGenero(genero) {
     if (!genero) return 'El campo genero es requerido';
@@ -181,14 +228,18 @@ function validateGenero(genero) {
 }
 
 /**
- * POST /api/catalog — Crear una obra
- * Recibe JSON con datos de obra (sin foto binaria).
+ * POST /api/catalog — Creates a new artwork.
+ * Receives JSON with artwork data (without binary photos).
+ * Validates genre, required fields, and populates embedded artist from the reference.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
  */
 const createObra = async (req, res, next) => {
     try {
         const { genero, ...obraData } = req.body;
 
-        // Validar género
         const errorGenero = validateGenero(genero);
         if (errorGenero) {
             return res.status(400).json({ success: false, error: errorGenero });
@@ -236,15 +287,19 @@ const createObra = async (req, res, next) => {
 };
 
 /**
- * PUT /api/catalog/:id — Actualizar una obra existente
- * Recibe JSON con campos a actualizar (merge parcial).
+ * PUT /api/catalog/:id — Updates an existing artwork (partial merge).
+ * Receives JSON with fields to update. Validates genre if changed,
+ * and synchronizes embedded artist data with the artist reference.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
  */
 const updateObra = async (req, res, next) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
 
-        // Validar género si se cambia
         if (updateData.genero) {
             const errorGenero = validateGenero(updateData.genero);
             if (errorGenero) {
@@ -289,7 +344,12 @@ const updateObra = async (req, res, next) => {
 };
 
 /**
- * DELETE /api/catalog/:id — Eliminar una obra
+ * DELETE /api/catalog/:id — Deletes an artwork by ID.
+ * Returns 404 if the artwork does not exist.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
  */
 const deleteObra = async (req, res, next) => {
     try {

@@ -1,3 +1,9 @@
+/**
+ * Obra model — Core artwork entity using Mongoose discriminator pattern.
+ * Base schema holds common fields (title, artist, price, dimensions, etc.)
+ * while discriminators (Pintura, Escultura, Orfebrería, Cerámica, Fotografía)
+ * add genre-specific detail fields.
+ */
 const mongoose = require('mongoose');
 const { convertDecimal128 } = require('../utils/decimalHelper');
 

@@ -103,6 +103,8 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        // Panel de Administración — Landing page del dashboard del admin.
+        // API: auth.js (getUser para verificar sesión, logout para cierre de sesión).
         const user = getUser();
         if (!user || user.tipo !== 'administrador') {
             alert('Acceso no autorizado');

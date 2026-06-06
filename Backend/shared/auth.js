@@ -1,11 +1,18 @@
-// Auth — Middleware de autenticación y autorización
-// Versión canónica. Standalone: solo depende de jsonwebtoken (sin dependencia MySQL).
-// Interfaz: verificarToken, verificarAdmin, verificarMiembro, opcionalAuth.
-// Internal API key para service-to-service (monolito → microservicios).
+/**
+ * Middleware de autenticación y autorización.
+ * Soporta JWT (Bearer token) e internal API key para comunicación service-to-service.
+ * Provee verificación de token, roles (admin/miembro) y autenticación opcional.
+ */
 const jwt = require('jsonwebtoken');
 
+/**
+ * Verifica el token JWT o la internal API key en el request.
+ * Si es válido, inyecta req.usuario con los datos del usuario autenticado.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const verificarToken = (req, res, next) => {
-    // Internal API key para service-to-service (monolito → microservicios)
     const internalKey = req.header('x-internal-key');
     if (internalKey && internalKey === process.env.INTERNAL_API_KEY) {
         req.usuario = { tipo: 'sistema', email: 'sistema@interna' };
@@ -23,19 +30,39 @@ const verificarToken = (req, res, next) => {
     }
 };
 
+/**
+ * Verifica que el usuario autenticado sea administrador.
+ * Debe ejecutarse después de verificarToken.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const verificarAdmin = (req, res, next) => {
     if (req.usuario.tipo !== 'administrador')
         return res.status(403).json({ error: 'Requiere permisos de administrador' });
     next();
 };
 
+/**
+ * Verifica que el usuario autenticado sea miembro o administrador.
+ * Debe ejecutarse después de verificarToken.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const verificarMiembro = (req, res, next) => {
     if (req.usuario.tipo !== 'miembro' && req.usuario.tipo !== 'administrador')
         return res.status(403).json({ error: 'Requiere ser miembro' });
     next();
 };
 
-// Auth opcional — si hay token o internal key lo verifica, si no, continúa sin usuario.
+/**
+ * Autenticación opcional — si hay token o internal key lo verifica,
+ * si no, continúa sin inyectar req.usuario.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const opcionalAuth = (req, res, next) => {
     const internalKey = req.header('x-internal-key');
     if (internalKey && internalKey === process.env.INTERNAL_API_KEY) {

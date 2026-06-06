@@ -1,3 +1,9 @@
+/**
+ * Modelo de eventos de auditoría.
+ * Proporciona acceso a la tabla `eventos_auditoria` en Cassandra con
+ * particionamiento por mes, consultas por rango de fechas y búsqueda
+ * de eventos asociados a una solicitud.
+ */
 const { client } = require('../config/cassandra');
 const cassandra = require('cassandra-driver');
 
@@ -28,6 +34,12 @@ function* mesesEntre(desde, hasta) {
     }
 }
 
+/**
+ * Registra un nuevo evento de auditoría en Cassandra.
+ * Genera un TimeUuid como identificador y almacena metadata como JSON string.
+ * @param {{ tipo_evento: string, usuario: string, severidad: string, metadata?: object, ip?: string }} params
+ * @returns {Promise<{ id: string, timestamp: Date }>}
+ */
 async function registrarEvento({ tipo_evento, usuario, severidad, metadata, ip }) {
     const ahora = new Date();
     const mes = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`;
@@ -41,6 +53,11 @@ async function registrarEvento({ tipo_evento, usuario, severidad, metadata, ip }
     return { id: id.toString(), timestamp: ahora };
 }
 
+/**
+ * Consulta eventos en un rango de fechas, iterando por particiones mensuales.
+ * @param {{ tipo_evento?: string, desde?: string, hasta?: string, limite?: number }} params
+ * @returns {Promise<Array<{ id: string, timestamp: Date, mes: string, tipo_evento: string, usuario: string, severidad: string, metadata: object, ip: string|null }>>}
+ */
 async function consultarEventos({ tipo_evento, desde, hasta, limite = 100 }) {
     const inicio = desde ? new Date(desde) : new Date('2000-01-01');
     const fin = hasta ? new Date(hasta) : new Date();
@@ -74,6 +91,12 @@ async function consultarEventos({ tipo_evento, desde, hasta, limite = 100 }) {
     }));
 }
 
+/**
+ * Busca eventos cuyo metadata contenga un ID de solicitud (búsqueda lineal sobre los últimos 3 meses).
+ * Útil para correlacionar eventos con una solicitud de compra.
+ * @param {string} solicitudId
+ * @returns {Promise<Array>}
+ */
 async function obtenerEventoPorSolicitud(solicitudId) {
     const meses = [];
     for (let i = 0; i < 3; i++) {

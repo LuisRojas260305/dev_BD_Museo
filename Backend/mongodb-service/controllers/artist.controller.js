@@ -1,5 +1,15 @@
+/**
+ * Artist controller — CRUD operations for museum artists (artistas).
+ */
 const Artista = require('../models/Artista');
 
+/**
+ * GET /api/catalog/artists — Lists all artists, optionally sorted by name.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getArtists = async (req, res, next) => {
   try {
     const sort = req.query.sort === 'nombre' ? { nombre: 1, apellido: 1 } : { createdAt: -1 };
@@ -10,6 +20,13 @@ const getArtists = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/catalog/artists/:id — Returns a single artist by MongoDB ObjectId or original numeric ID.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getArtistById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -27,6 +44,14 @@ const getArtistById = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/catalog/artists — Creates a new artist.
+ * Handles generos_artisticos as a JSON string for multipart/form-data support.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const createArtist = async (req, res, next) => {
   try {
     const body = { ...req.body };
@@ -48,6 +73,14 @@ const createArtist = async (req, res, next) => {
   }
 };
 
+/**
+ * PUT /api/catalog/artists/:id — Updates an existing artist (partial merge).
+ * Handles generos_artisticos as a JSON string for multipart/form-data support.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const updateArtist = async (req, res, next) => {
   try {
     const body = { ...req.body };
@@ -69,6 +102,13 @@ const updateArtist = async (req, res, next) => {
   }
 };
 
+/**
+ * DELETE /api/catalog/artists/:id — Deletes an artist by ID.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const deleteArtist = async (req, res, next) => {
   try {
     const artista = await Artista.findByIdAndDelete(req.params.id);

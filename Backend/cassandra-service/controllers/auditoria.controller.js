@@ -1,6 +1,17 @@
+/**
+ * Controladores HTTP para el microservicio de auditoría.
+ * Cada función maneja un endpoint: registro de eventos, consulta,
+ * reportes diarios y health check contra Cassandra.
+ */
 const eventosModel = require('../models/eventos');
 const resumenesModel = require('../models/resumenes');
 
+/**
+ * Crea un evento de auditoría y actualiza el resumen diario (fire-and-forget).
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 async function createEvent(req, res, next) {
     try {
         const { tipo_evento, severidad, metadata } = req.body;
@@ -33,6 +44,12 @@ async function createEvent(req, res, next) {
     }
 }
 
+/**
+ * Consulta eventos de auditoría con filtros opcionales (tipo, rango de fechas, límite).
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 async function getEvents(req, res, next) {
     try {
     const { tipo, tipo_evento, desde, hasta, limite } = req.query;
@@ -47,6 +64,12 @@ async function getEvents(req, res, next) {
     }
 }
 
+/**
+ * Devuelve reportes/resúmenes diarios filtrados por tipo de evento y fecha.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 async function getReports(req, res, next) {
     try {
         const { tipo, fecha } = req.query;
@@ -59,10 +82,14 @@ async function getReports(req, res, next) {
     }
 }
 
+/**
+ * Health check que verifica la conectividad con Cassandra ejecutando una consulta simple.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ */
 async function healthCheck(req, res) {
     try {
         const { client } = require('../config/cassandra');
-        // Verificar conectividad ejecutando una consulta simple
         await client.execute('SELECT release_version FROM system.local');
         res.json({ status: 'ok', cassandra: 'connected' });
     } catch {

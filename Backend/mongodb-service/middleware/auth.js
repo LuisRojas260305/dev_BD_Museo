@@ -1,6 +1,9 @@
-// Copia canónica de shared/authMiddleware.js
-// Misma interfaz: verificarToken, verificarAdmin, verificarMiembro.
-// Internal API key para service-to-service (monolito → microservicios).
+/**
+ * Authentication middleware — canonical copy of shared/authMiddleware.js.
+ * Provides JWT-based token verification, role-based authorization (admin/member),
+ * optional auth for public endpoints, and internal API key support
+ * for service-to-service communication (monolith → microservices).
+ */
 const jwt = require('jsonwebtoken');
 
 const verificarToken = (req, res, next) => {

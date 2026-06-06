@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Admin - Resumen Facturación</title>
     <style>
-        /* mismos estilos que consulta */
+
        * {
             margin: 0;
             padding: 0;
@@ -78,7 +78,10 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
-        // Verificar administrador
+        // Resumen de Facturación — Muestra facturas por período con detalle de ganancias y totales.
+        // API: /ventas/facturas (GET).
+        // auth.js (getUser, authFetch para autenticación).
+
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
@@ -88,12 +91,20 @@
             document.getElementById('userEmail').innerText = user.email;
         })();
 
-        // Función para parsear fecha local
+        /**
+         * Convierte una cadena de fecha YYYY-MM-DD a objeto Date (hora local).
+         * @param {string} fechaStr - Fecha en formato YYYY-MM-DD.
+         * @returns {Date}
+         */
         function parseFechaLocal(fechaStr) {
             const [year, month, day] = fechaStr.split('-').map(Number);
             return new Date(year, month - 1, day);
         }
 
+        /**
+         * Maneja el envío del formulario: consulta facturas y filtra por fecha localmente.
+         * GET /ventas/facturas → filtra por fecha_emision entre inicio y fin.
+         */
         document.getElementById('periodoForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const fechaInicio = document.getElementById('fechaInicio').value;
@@ -129,6 +140,10 @@
             }
         });
 
+        /**
+         * Renderiza el resumen de facturación con totales acumulados.
+         * @param {Array} facturas - Lista de objetos factura.
+         */
         function renderResumen(facturas) {
             const tbody = document.getElementById('tablaResumen');
             tbody.innerHTML = '';
@@ -170,6 +185,9 @@
             `;
         }
 
+        /**
+         * Cierra la sesión del usuario eliminando token y redirigiendo al inicio.
+         */
         window.logout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

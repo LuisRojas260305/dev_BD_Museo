@@ -1,3 +1,9 @@
+/**
+ * Configuración y conexión a Cassandra.
+ * Exporta el cliente configurado con pooling y consistencia LocalOne,
+ * una función connect() para iniciar la conexión y getClient() para
+ * obtener la instancia compartida.
+ */
 const cassandra = require('cassandra-driver');
 
 const client = new cassandra.Client({
@@ -16,6 +22,10 @@ const client = new cassandra.Client({
     },
 });
 
+/**
+ * Inicia la conexión con el cluster Cassandra.
+ * Imprime en consola el resultado de la operación.
+ */
 async function connect() {
     try {
         await client.connect();
@@ -25,6 +35,7 @@ async function connect() {
     }
 }
 
+/** Devuelve la instancia compartida del cliente Cassandra. */
 function getClient() { return client; }
 
 module.exports = { client, connect, getClient };

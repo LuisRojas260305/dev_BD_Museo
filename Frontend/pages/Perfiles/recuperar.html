@@ -39,8 +39,22 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de recuperación de contraseña.
+         * Permite al usuario ingresar su email, responder sus preguntas
+         * de seguridad y establecer una nueva contraseña.
+         *
+         * APIs utilizadas:
+         * - GET /api/usuarios/preguntas-de/{email}
+         * - POST /api/usuarios/recuperar-password-externo
+         */
         let preguntasUsuario = [];
 
+        /**
+         * Busca las preguntas de seguridad asociadas al email ingresado.
+         * Si existen, muestra el formulario para responderlas y cambiar la contraseña.
+         * @async
+         */
         async function buscarPreguntas() {
             const email = document.getElementById('email').value;
             if(!email) return alert("Ingresa un correo");
@@ -63,6 +77,11 @@
             }
         }
 
+        /**
+         * Envía las respuestas de seguridad y la nueva contraseña al servidor.
+         * Si la validación es exitosa, redirige al login.
+         * @async
+         */
         async function recuperarPassword() {
             const email = document.getElementById('email').value;
             const p1 = document.getElementById('nuevaPass1').value;

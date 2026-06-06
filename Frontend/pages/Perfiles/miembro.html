@@ -143,6 +143,22 @@
 
     <script src="../../js/auth.js"></script>
     <script>
+        /**
+         * Página de activación de membresía (versión simplificada).
+         * Permite al usuario ingresar datos de pago y seleccionar
+         * 3 preguntas de seguridad para activar su membresía.
+         *
+         * APIs utilizadas:
+         * - GET /api/preguntas-seguridad
+         * - POST /api/usuarios/membresia (autenticada)
+         * - POST /api/usuarios/seguridad (autenticada)
+         */
+
+        /**
+         * Carga las preguntas de seguridad desde la API y genera
+         * los 3 selectores en el formulario.
+         * @async
+         */
         async function cargarPreguntas() {
             try {
                 const response = await fetch(`${API_BASE}/preguntas-seguridad`);
@@ -166,6 +182,12 @@
             }
         }
 
+        /**
+         * Maneja el envío del formulario de membresía:
+         * 1. Procesa el pago y obtiene el código de seguridad.
+         * 2. Guarda las respuestas de seguridad.
+         * Redirige al perfil al finalizar.
+         */
         document.getElementById('membresiaForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const errorMsg = document.getElementById('errorMsg');

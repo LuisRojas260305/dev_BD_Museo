@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Admin - Géneros</title>
     <style>
-        /* mismos estilos */
+
         * {
             margin: 0;
             padding: 0;
@@ -88,6 +88,10 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
+        // Gestión de Géneros — CRUD de géneros artísticos del catálogo.
+        // API: /catalogo/generos (GET, POST, PUT, DELETE).
+        // auth.js (getUser, authFetch para autenticación).
+
         (function() {
             const user = getUser();
             if (!user || user.tipo !== 'administrador') {
@@ -104,6 +108,10 @@
         const formTitle = document.getElementById('formTitle');
         let editId = null;
 
+        /**
+         * Obtiene la lista de géneros desde la API y actualiza la tabla.
+         * GET /catalogo/generos → renderiza en #tablaGeneros.
+         */
         async function cargarGeneros() {
             try {
                 const res = await fetch(`${API_BASE}/catalogo/generos`);
@@ -117,6 +125,10 @@
             }
         }
 
+        /**
+         * Renderiza el array global `generos` en la tabla del DOM.
+         * Genera filas con ID, nombre, descripción y botones de acción.
+         */
         function renderGeneros() {
             tbody.innerHTML = '';
             generos.forEach(g => {
@@ -134,6 +146,10 @@
             });
         }
 
+        /**
+         * Muestra el formulario en modo creación o edición.
+         * @param {Object|null} genero - Si se provee, rellena los campos para edición.
+         */
         function mostrarFormulario(genero = null) {
             formContainer.classList.remove('hidden');
             if (genero) {
@@ -150,17 +166,23 @@
             }
         }
 
+        /**
+         * Oculta el formulario de género.
+         */
         function cancelarFormulario() {
             formContainer.classList.add('hidden');
         }
 
+        /**
+         * Maneja el envío del formulario de género (creación o edición).
+         * POST /catalogo/generos — PUT /catalogo/generos/{id}
+         */
         generoForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const generoData = {
                 nombre: document.getElementById('nombre').value,
                 descripcion: document.getElementById('descripcion').value || null
-                // Si quisieras comentario, añádelo aquí
-            };
+                };
 
             try {
                 let url = `${API_BASE}/catalogo/generos`;
@@ -186,6 +208,11 @@
             }
         });
 
+        /**
+         * Obtiene los datos de un género por ID y abre el formulario en modo edición.
+         * @param {string} id - ID del género a editar.
+         * GET /catalogo/generos/{id}
+         */
         window.editarGenero = async function(id) {
             try {
                 const res = await fetch(`${API_BASE}/catalogo/generos/${id}`);
@@ -198,6 +225,11 @@
             }
         };
 
+        /**
+         * Elimina un género tras confirmación del usuario.
+         * @param {string} id - ID del género a eliminar.
+         * DELETE /catalogo/generos/{id}
+         */
         window.eliminarGenero = async function(id) {
             if (!confirm('¿Eliminar género?')) return;
             try {
@@ -213,6 +245,9 @@
             }
         };
 
+        /**
+         * Cierra la sesión del usuario eliminando token y redirigiendo al inicio.
+         */
         window.logout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

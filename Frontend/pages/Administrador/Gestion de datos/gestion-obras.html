@@ -180,6 +180,10 @@
 
     <script src="../../../js/auth.js"></script>
     <script>
+        // Gestión de Obras — CRUD completo de obras artísticas con campos dinámicos según género.
+        // API: /catalogo (GET), /catalogo/obras (POST, PUT, DELETE), /catalogo/artistas (GET),
+        //      /catalogo/generos (GET), /catalogo/{id} (GET para editar).
+        // auth.js (getUser, authFetch para autenticación).
         let artistas = [], generos = [];
         let editId = null;
         let currentEstado = null; // Para guardar el estado al editar
@@ -203,6 +207,11 @@
             document.getElementById('userEmail').innerText = user.email;
         })();
 
+        /**
+         * Genera un código de inventario basado en el género y un número aleatorio.
+         * @param {string} genero - Nombre del género (Pintura, Escultura, etc.).
+         * @returns {string} Código en formato PREFIJO-XXXXX (ej. PIN-01234).
+         */
         function generarCodigoInventario(genero) {
             if (!genero || !generoPrefijo[genero]) return '';
             const prefijo = generoPrefijo[genero];
@@ -210,6 +219,10 @@
             return `${prefijo}-${numero}`;
         }
 
+        /**
+         * Se dispara al cambiar el género: genera código de inventario (solo en creación)
+         * y actualiza los campos específicos según el género seleccionado.
+         */
         function onGeneroChange() {
             const genero = document.getElementById('genero_id').value;
             if (genero && !editId) {
@@ -218,6 +231,10 @@
             cargarCamposPorGenero();
         }
 
+        /**
+         * Obtiene la lista de artistas desde la API y llena el select correspondiente.
+         * GET /catalogo/artistas
+         */
         async function cargarArtistas() {
             const res = await fetch(`${API_BASE}/catalogo/artistas`);
             const result = await res.json();
@@ -225,6 +242,10 @@
             llenarSelect('artista_id', artistas, '_id', a => `${a.nombre} ${a.apellido || ''}`.trim());
         }
 
+        /**
+         * Obtiene la lista de géneros desde la API y llena el select correspondiente.
+         * GET /catalogo/generos
+         */
         async function cargarGeneros() {
             const res = await fetch(`${API_BASE}/catalogo/generos`);
             const result = await res.json();
@@ -232,6 +253,13 @@
             llenarSelect('genero_id', generos, 'nombre', 'nombre');
         }
 
+        /**
+         * Llena un elemento <select> con opciones a partir de un array de items.
+         * @param {string} id - ID del elemento select.
+         * @param {Array} items - Array de objetos para poblar las opciones.
+         * @param {string} valueKey - Propiedad del objeto a usar como value.
+         * @param {string|Function} textKey - Propiedad o función para obtener el texto visible.
+         */
         function llenarSelect(id, items, valueKey, textKey) {
             const select = document.getElementById(id);
             select.innerHTML = '<option value="">Seleccione</option>';
@@ -243,7 +271,7 @@
             });
         }
 
-        // Cargar datos iniciales
+        // Inicializar: cargar artistas y géneros, luego la tabla de obras.
         Promise.all([
             cargarArtistas(),
             cargarGeneros()
@@ -251,6 +279,10 @@
             cargarObras();
         });
 
+        /**
+         * Renderiza los campos dinámicos del formulario según el género seleccionado.
+         * Muestra campos específicos para Pintura, Escultura, Fotografía, Cerámica u Orfebrería.
+         */
         function cargarCamposPorGenero() {
             const genero = document.getElementById('genero_id').value;
             const contenedor = document.getElementById('camposEspecificos');
@@ -422,6 +454,11 @@
             }
         });
 
+        /**
+         * Extrae el valor numérico del precio desde distintos formatos (Decimal128, number, string).
+         * @param {*} precio - Precio en formato $numberDecimal, number o string.
+         * @returns {string} Precio como string, default "0.00".
+         */
         function extraerPrecio(precio) {
             if (!precio) return '0.00';
             if (typeof precio === 'object' && precio.$numberDecimal) return precio.$numberDecimal;
@@ -429,6 +466,11 @@
             return precio;
         }
 
+        /**
+         * Obtiene el nombre completo de un artista desde el objeto (puede venir como string o {nombre, apellido}).
+         * @param {Object|string} artista - Artista o string con el nombre.
+         * @returns {string} Nombre completo o "Desconocido".
+         */
         function obtenerNombreArtista(artista) {
             if (!artista) return 'Desconocido';
             if (typeof artista === 'string') return artista;
@@ -436,11 +478,20 @@
             return nombre || 'Desconocido';
         }
 
+        /**
+         * Obtiene la URL de la primera foto del array de fotos para el thumbnail.
+         * @param {Array} fotos - Array de strings URL de fotos.
+         * @returns {string} URL de la primera foto o string vacío.
+         */
         function obtenerFotoThumbnail(fotos) {
             if (!fotos || !Array.isArray(fotos) || fotos.length === 0) return '';
             return fotos[0];
         }
 
+        /**
+         * Obtiene el catálogo completo de obras y renderiza la tabla con sus datos.
+         * GET /catalogo → puebla #tablaObras con imagen, nombre, artista, género, precio y acciones.
+         */
         async function cargarObras() {
             const res = await fetch(`${API_BASE}/catalogo`);
             const result = await res.json();
@@ -469,6 +520,12 @@
             });
         }
 
+        /**
+         * Carga los datos de una obra por ID, rellena el formulario en modo edición
+         * y renderiza los campos específicos según su género.
+         * @param {string} id - ID de la obra a editar.
+         * GET /catalogo/{id}
+         */
         window.editarObra = async function(id) {
             try {
                 const res = await fetch(`${API_BASE}/catalogo/${id}`);
@@ -568,6 +625,11 @@
             }
         };
 
+        /**
+         * Elimina una obra tras confirmación del usuario.
+         * @param {string} id - ID de la obra a eliminar.
+         * DELETE /catalogo/obras/{id}
+         */
         window.eliminarObra = async function(id) {
             if (!confirm('¿Eliminar obra?')) return;
             try {
@@ -584,11 +646,21 @@
             }
         };
 
+        /**
+         * Divide un string por comas, recorta espacios y filtra elementos vacíos.
+         * @param {string} valor - String con valores separados por coma.
+         * @returns {string[]} Array de strings limpios.
+         */
         function splitPorComa(valor) {
             if (!valor || !valor.trim()) return [];
             return valor.split(',').map(s => s.trim()).filter(s => s.length > 0);
         }
 
+        /**
+         * Maneja el envío del formulario de obra (creación o edición).
+         * Arma FormData con datos comunes + específicos según género.
+         * POST /catalogo/obras — PUT /catalogo/obras/{id}
+         */
         document.getElementById('obraForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -688,6 +760,9 @@
             }
         });
 
+        /**
+         * Muestra el formulario en modo "Nueva Obra", resetea todos los campos y limpia la previsualización.
+         */
         function mostrarFormulario() {
             document.getElementById('formContainer').classList.remove('hidden');
             document.getElementById('obraForm').reset();
@@ -698,6 +773,9 @@
             document.getElementById('formTitle').innerText = 'Nueva Obra';
         }
 
+        /**
+         * Oculta el formulario y limpia el ID de edición.
+         */
         function cancelarFormulario() {
             document.getElementById('formContainer').classList.add('hidden');
             editId = null;

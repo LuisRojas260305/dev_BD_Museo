@@ -1,6 +1,7 @@
-// Helper para manejo de fotos en MySQL tabla Multimedia
-// La tabla Multimedia debe existir con el schema definido en Fase 7.
-// Por ahora se asume que la tabla ya está creada.
+/**
+ * Helper para manejo de fotos en la tabla Multimedia de MySQL.
+ * Proporciona operaciones CRUD básicas sobre archivos multimedia.
+ */
 const { pool } = require('../config/database');
 
 const TABLE = 'Multimedia';

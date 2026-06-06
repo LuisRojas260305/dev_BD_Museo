@@ -1,7 +1,9 @@
-// SSL — Session Context Layer
-// Contexto de navegación que persiste durante la visita del usuario.
-// Reemplaza el uso de sesiones tradicionales en vistas de catálogo.
-// Almacenamiento en memoria con TTL configurable.
+/**
+ * SSL — Session Context Layer.
+ * Contexto de navegación que persiste durante la visita del usuario.
+ * Reemplaza el uso de sesiones tradicionales en vistas de catálogo.
+ * Almacenamiento en memoria con TTL configurable.
+ */
 const { v4: uuidv4 } = require('uuid');
 
 const DEFAULT_TTL = 3600; // 1 hora en segundos
@@ -9,6 +11,11 @@ const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutos
 
 const contextos = new Map();
 
+/**
+ * Crea un nuevo contexto SSL con un ID único y TTL configurable.
+ * @param {number} [ttl=3600] - Tiempo de vida en segundos
+ * @returns {{ssl_id: string, creado_en: string, ultima_actividad: string, vistas: Array, ttl: number}}
+ */
 const createContext = (ttl = DEFAULT_TTL) => {
     const ssl = {
         ssl_id: uuidv4(),
@@ -21,6 +28,11 @@ const createContext = (ttl = DEFAULT_TTL) => {
     return ssl;
 };
 
+/**
+ * Obtiene un contexto SSL por su ID si no ha expirado.
+ * @param {string} ssl_id - ID del contexto
+ * @returns {Object|null} Contexto SSL o null si no existe o expiró
+ */
 const getContext = (ssl_id) => {
     const ctx = contextos.get(ssl_id);
     if (!ctx) return null;
@@ -32,6 +44,13 @@ const getContext = (ssl_id) => {
     return ssl;
 };
 
+/**
+ * Agrega una vista de obra al contexto SSL y renueva su TTL.
+ * @param {string} ssl_id - ID del contexto
+ * @param {string} obra_id - ID de la obra visitada
+ * @param {string} [tipo_vista='detalle'] - Tipo de vista
+ * @returns {Object|null} Contexto actualizado o null si no existe o expiró
+ */
 const addView = (ssl_id, obra_id, tipo_vista = 'detalle') => {
     const ctx = contextos.get(ssl_id);
     if (!ctx) return null;
@@ -46,6 +65,11 @@ const addView = (ssl_id, obra_id, tipo_vista = 'detalle') => {
     return ssl;
 };
 
+/**
+ * Verifica si un contexto SSL ha expirado.
+ * @param {string} ssl_id - ID del contexto
+ * @returns {boolean} true si expiró o no existe
+ */
 const expiro = (ssl_id) => {
     const ctx = contextos.get(ssl_id);
     if (!ctx) return true;

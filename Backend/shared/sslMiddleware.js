@@ -1,10 +1,20 @@
-// SSL — Express Middleware
-// Gestiona el Session Context Layer automáticamente en cada request.
-// Busca x-ssl-id en header, si no existe crea uno nuevo.
-// Expone req.ssl con el contexto actual.
+/**
+ * Middleware Express que gestiona el Session Context Layer (SSL).
+ * Busca x-ssl-id en el header; si no existe, crea un nuevo contexto.
+ * Expone req.ssl con el contexto actual de navegación.
+ */
 const { createContext, getContext } = require('./sslContext');
 const { logEvent } = require('./sslLogger');
 
+/**
+ * Middleware SSL - inyecta req.ssl con el contexto de navegacion actual.
+ * Si el cliente envio x-ssl-id y el contexto sigue vigente, lo reutiliza;
+ * de lo contrario crea uno nuevo y lo devuelve en el header de respuesta.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const sslMiddleware = (req, res, next) => {
     let sslId = req.headers['x-ssl-id'];
 

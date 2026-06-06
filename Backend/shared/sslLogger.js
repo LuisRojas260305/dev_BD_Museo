@@ -1,5 +1,12 @@
-// SSL — Logger estructurado
-// Registro de eventos SSL en formato JSON para trazabilidad.
+/**
+ * Logger estructurado para eventos SSL.
+ * Genera entradas en formato JSON para trazabilidad.
+ *
+ * @param {string} ssl_id - ID del contexto SSL
+ * @param {string} evento - Nombre del evento
+ * @param {Object} [metadata={}] - Datos adicionales
+ * @returns {Object} Entrada de log generada
+ */
 const logEvent = (ssl_id, evento, metadata = {}) => {
     const entry = {
         ssl_id,
