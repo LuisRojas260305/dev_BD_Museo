@@ -1,3 +1,4 @@
+const store = require('./eventStore');
 const { client } = require('../config/cassandra');
 
 const UPSERT_RESUMEN = `
@@ -11,34 +12,34 @@ const QUERY_RESUMEN = `
 `;
 
 async function actualizarResumen(tipo_evento, fecha) {
-    await client.execute(UPSERT_RESUMEN, [
-        tipo_evento, fecha
-    ], { prepare: true });
+    try {
+        await client.execute(UPSERT_RESUMEN, [tipo_evento, fecha], { prepare: true });
+    } catch {
+        // Fallback a archivo
+        store.actualizarResumen(tipo_evento, fecha);
+    }
 }
 
 async function consultarResumenes({ tipo_evento, fecha }) {
-    if (tipo_evento && fecha) {
-        const rs = await client.execute(QUERY_RESUMEN, [tipo_evento, fecha], { prepare: true });
-        return rs.rows.map(formatResumen);
-    }
-    if (tipo_evento) {
-        const tipos = [tipo_evento];
+    try {
+        if (!fecha) return [];
+
+        const tipos = tipo_evento ? [tipo_evento] : [
+            'login_exitoso', 'login_fallido', 'solicitud_compra', 'compra_aceptada',
+            'compra_rechazada', 'compra_cancelada', 'modificacion_obra',
+            'modificacion_artista', 'cambio_rol', 'error_sistema',
+        ];
+
         const resultados = [];
         for (const tipo of tipos) {
             const rs = await client.execute(QUERY_RESUMEN, [tipo, fecha], { prepare: true });
             resultados.push(...rs.rows.map(formatResumen));
         }
         return resultados;
+    } catch {
+        // Fallback a archivo
+        return store.consultarResumenes({ tipo_evento, fecha });
     }
-    const tipos = ['login_exitoso','login_fallido','solicitud_compra','compra_aceptada',
-                   'compra_rechazada','compra_cancelada','modificacion_obra',
-                   'modificacion_artista','cambio_rol','error_sistema'];
-    const resultados = [];
-    for (const tipo of tipos) {
-        const rs = await client.execute(QUERY_RESUMEN, [tipo, fecha], { prepare: true });
-        resultados.push(...rs.rows.map(formatResumen));
-    }
-    return resultados;
 }
 
 function formatResumen(row) {

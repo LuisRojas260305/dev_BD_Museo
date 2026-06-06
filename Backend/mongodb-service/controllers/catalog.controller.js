@@ -90,7 +90,15 @@ const getCatalogById = async (req, res, next) => {
       }
     }
 
-    res.json({ success: true, data: fieldMapper(obra.toObject()) });
+    const result = fieldMapper(obra.toObject());
+
+    // Asegurar que artista_id sea siempre un string (no el objeto populado)
+    // para que el frontend pueda usarlo en links como artista.html?id=XXX
+    if (result.artista_id && typeof result.artista_id === 'object') {
+      result.artista_id = result.artista_id._id ? result.artista_id._id.toString() : null;
+    }
+
+    res.json({ success: true, data: result });
   } catch (err) {
     next(err);
   }

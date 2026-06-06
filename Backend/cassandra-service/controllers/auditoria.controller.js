@@ -41,7 +41,7 @@ async function getEvents(req, res, next) {
     const eventos = await eventosModel.consultarEventos({
         tipo_evento: tipoEvento, desde, hasta, limite: parseInt(limite) || 100
     });
-        res.json(eventos);
+        res.json({ success: true, data: eventos, total: eventos.length });
     } catch (err) {
         next(err);
     }
@@ -53,7 +53,7 @@ async function getReports(req, res, next) {
         if (!fecha) return res.status(400).json({ error: "El parámetro 'fecha' es obligatorio" });
 
         const reportes = await resumenesModel.consultarResumenes({ tipo_evento: tipo, fecha });
-        res.json(reportes);
+        res.json({ success: true, data: reportes });
     } catch (err) {
         next(err);
     }
