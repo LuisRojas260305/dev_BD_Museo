@@ -1,6 +1,6 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
- * Smoke Test — Verifica que todo el sistema funcione end-to-end.
+ * Smoke Test - Verifica que todo el sistema funcione end-to-end.
  *
  * Prerequisitos:
  *   - MySQL en 3306 (con test_bodega_museo + seed data)
@@ -56,13 +56,13 @@ function assertStatusCode(expected) {
 }
 
 async function run() {
-  console.log('\n🚀 SMOKE TEST — Museo BD Architecture\n');
+  console.log('\n🚀 SMOKE TEST - Museo BD Architecture\n');
   console.log(`Target: ${API}\n`);
 
   // =========================================================================
-  // 1. Health check — mongodb-service
+  // 1. Health check - mongodb-service
   // =========================================================================
-  await test('1. Health check — mongodb-service', async () => {
+  await test('1. Health check - mongodb-service', async () => {
     const res = await axios.get(`${CATALOG_API}/health`);
     assertStatusCode(200)(res);
     assertOk(res.data.status === 'ok', `Expected 'ok', got '${res.data.status}'`);
@@ -70,9 +70,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 2. Catalog public — GET /api/catalogo (list with pagination)
+  // 2. Catalog public - GET /api/catalogo (list with pagination)
   // =========================================================================
-  await test('2. Catalog public — GET /api/catalogo', async () => {
+  await test('2. Catalog public - GET /api/catalogo', async () => {
     const res = await axios.get(`${API}/catalogo`);
     assertStatusCode(200)(res);
     assertOk(res.data.success === true, 'Missing success flag');
@@ -87,9 +87,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 3. Catalog search — GET /api/catalogo/search?q=Gioconda
+  // 3. Catalog search - GET /api/catalogo/search?q=Gioconda
   // =========================================================================
-  await test('3. Catalog search — GET /api/catalogo/search?q=Gioconda', async () => {
+  await test('3. Catalog search - GET /api/catalogo/search?q=Gioconda', async () => {
     const res = await axios.get(`${API}/catalogo/search`, { params: { q: 'Gioconda' } });
     assertStatusCode(200)(res);
     assertOk(res.data.success === true, 'Missing success flag');
@@ -98,9 +98,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 4. Generos public — GET /api/catalogo/generos
+  // 4. Generos public - GET /api/catalogo/generos
   // =========================================================================
-  await test('4. Generos public — GET /api/catalogo/generos', async () => {
+  await test('4. Generos public - GET /api/catalogo/generos', async () => {
     const res = await axios.get(`${API}/catalogo/generos`);
     assertStatusCode(200)(res);
     assertOk(res.data.success === true, 'Missing success flag');
@@ -109,9 +109,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 5. Artistas public — GET /api/catalogo/artistas
+  // 5. Artistas public - GET /api/catalogo/artistas
   // =========================================================================
-  await test('5. Artistas public — GET /api/catalogo/artistas', async () => {
+  await test('5. Artistas public - GET /api/catalogo/artistas', async () => {
     const res = await axios.get(`${API}/catalogo/artistas`);
     assertStatusCode(200)(res);
     assertOk(res.data.success === true, 'Missing success flag');
@@ -120,9 +120,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 6. Login as admin — POST /api/usuarios/login
+  // 6. Login as admin - POST /api/usuarios/login
   // =========================================================================
-  await test('6. Login as admin — POST /api/usuarios/login', async () => {
+  await test('6. Login as admin - POST /api/usuarios/login', async () => {
     const res = await axios.post(`${API}/usuarios/login`, {
       email: 'admin@museo.com',
       password: 'admin123',
@@ -135,9 +135,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 7. Admin login test — verify token
+  // 7. Admin login test - verify token
   // =========================================================================
-  await test('7. Verify admin token — GET /api/usuarios/perfil', async () => {
+  await test('7. Verify admin token - GET /api/usuarios/perfil', async () => {
     const res = await axios.get(`${API}/usuarios/perfil`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
@@ -147,9 +147,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 8. Create obra via admin — POST /api/catalogo/obras
+  // 8. Create obra via admin - POST /api/catalogo/obras
   // =========================================================================
-  await test('8. Create obra via admin — POST /api/catalogo/obras', async () => {
+  await test('8. Create obra via admin - POST /api/catalogo/obras', async () => {
     const obraData = {
       codigo_inventario: 'SMOKE-001',
       nombre: 'Obra de Smoke Test',
@@ -173,9 +173,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 9. Update obra — PUT /api/catalogo/obras/:id
+  // 9. Update obra - PUT /api/catalogo/obras/:id
   // =========================================================================
-  await test('9. Update obra — PUT /api/catalogo/obras/:id', async () => {
+  await test('9. Update obra - PUT /api/catalogo/obras/:id', async () => {
     const updateData = {
       precio_venta: 88888.88,
       descripcion: 'Obra actualizada durante smoke test',
@@ -190,9 +190,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 10. Delete obra — DELETE /api/catalogo/obras/:id
+  // 10. Delete obra - DELETE /api/catalogo/obras/:id
   // =========================================================================
-  await test('10. Delete obra — DELETE /api/catalogo/obras/:id', async () => {
+  await test('10. Delete obra - DELETE /api/catalogo/obras/:id', async () => {
     const res = await axios.delete(`${API}/catalogo/obras/${createdObraId}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
@@ -202,9 +202,9 @@ async function run() {
   })();
 
   // =========================================================================
-  // 11. Create genero — POST /api/catalogo/generos
+  // 11. Create genero - POST /api/catalogo/generos
   // =========================================================================
-  await test('11. Create genero — POST /api/catalogo/generos', async () => {
+  await test('11. Create genero - POST /api/catalogo/generos', async () => {
     const generoData = {
       nombre: 'SmokeTest',
       descripcion: 'Género temporal del smoke test',
@@ -227,9 +227,9 @@ async function run() {
   } catch (_) { /* ignore cleanup failure */ }
 
   // =========================================================================
-  // 12. Create artista — POST /api/catalogo/artistas
+  // 12. Create artista - POST /api/catalogo/artistas
   // =========================================================================
-  await test('12. Create artista — POST /api/catalogo/artistas', async () => {
+  await test('12. Create artista - POST /api/catalogo/artistas', async () => {
     const artistaData = {
       nombre: 'Smoke',
       apellido: 'Tester',
@@ -257,9 +257,9 @@ async function run() {
   } catch (_) { /* ignore cleanup failure */ }
 
   // =========================================================================
-  // 13. Detail page — GET /api/catalogo/:id
+  // 13. Detail page - GET /api/catalogo/:id
   // =========================================================================
-  await test('13. Detail page — GET /api/catalogo/:id', async () => {
+  await test('13. Detail page - GET /api/catalogo/:id', async () => {
     assertOk(obraDetailId, 'No obra ID available from step 2');
     const res = await axios.get(`${API}/catalogo/${obraDetailId}`);
     assertStatusCode(200)(res);
@@ -268,12 +268,12 @@ async function run() {
   })();
 
   // =========================================================================
-  // 14. Purchase flow — register user → login → pay membership → re-login
+  // 14. Purchase flow - register user → login → pay membership → re-login
   //     → reserve obra → login admin → confirm sale
   // =========================================================================
   const testEmail = `smoke_${Date.now()}@test.com`;
 
-  await test('14a. Register user — POST /api/usuarios/registro', async () => {
+  await test('14a. Register user - POST /api/usuarios/registro', async () => {
     const res = await axios.post(`${API}/usuarios/registro`, {
       email: testEmail,
       password: 'testpass123',
@@ -285,7 +285,7 @@ async function run() {
     assertOk(res.data.message, 'Missing message');
   })();
 
-  await test('14b. Login as new user — POST /api/usuarios/login', async () => {
+  await test('14b. Login as new user - POST /api/usuarios/login', async () => {
     const res = await axios.post(`${API}/usuarios/login`, {
       email: testEmail,
       password: 'testpass123',
@@ -296,7 +296,7 @@ async function run() {
     userToken = res.data.token;
   })();
 
-  await test('14c. Pay membership — POST /api/usuarios/membresia', async () => {
+  await test('14c. Pay membership - POST /api/usuarios/membresia', async () => {
     const res = await axios.post(`${API}/usuarios/membresia`, {
       tarjeta_numero: '4111111111111111',
       tarjeta_nombre: 'Smoke User',
@@ -321,7 +321,7 @@ async function run() {
     userToken = res.data.token;
   })();
 
-  await test('14e. Reserve obra — POST /api/ventas/reservar', async () => {
+  await test('14e. Reserve obra - POST /api/ventas/reservar', async () => {
     // Get an available obra
     const catRes = await axios.get(`${API}/catalogo`, { params: { estado: 'Disponible', limit: 1 } });
     assertOk(catRes.data.data.length > 0, 'No available obras');
@@ -338,7 +338,7 @@ async function run() {
     ventaId = res.data.venta_id;
   })();
 
-  await test('14f. Login as admin — POST /api/usuarios/login', async () => {
+  await test('14f. Login as admin - POST /api/usuarios/login', async () => {
     const res = await axios.post(`${API}/usuarios/login`, {
       email: 'admin@museo.com',
       password: 'admin123',
@@ -348,7 +348,7 @@ async function run() {
     adminToken = res.data.token;
   })();
 
-  await test('14g. Confirm sale — PUT /api/ventas/:id/concretar', async () => {
+  await test('14g. Confirm sale - PUT /api/ventas/:id/concretar', async () => {
     const res = await axios.put(`${API}/ventas/${ventaId}/concretar`, {
       direccion_envio: 'Calle Test 123, Ciudad Smoke, CP 00000',
     }, {

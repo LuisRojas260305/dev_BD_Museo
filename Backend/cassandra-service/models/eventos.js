@@ -7,22 +7,28 @@
 const { client } = require('../config/cassandra');
 const cassandra = require('cassandra-driver');
 
-const INSERT_EVENTO = `
-    INSERT INTO eventos_auditoria (mes, timestamp, id, tipo_evento, usuario, severidad, metadata, ip)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-`;
+const TIPOS_LOGIN   = ['login_exitoso', 'login_fallido'];
+const TIPOS_COMPRA  = ['solicitud_compra', 'reserva_creada', 'compra_aceptada', 'compra_rechazada', 'reserva_cancelada'];
+const TIPOS_ADMIN   = ['cambio_rol', 'crear_usuario', 'eliminar_usuario', 'modificar_obra', 'eliminar_obra'];
 
-const QUERY_EVENTOS = `
-    SELECT * FROM eventos_auditoria
-    WHERE mes = ? AND timestamp >= ? AND timestamp <= ?
-    ORDER BY timestamp DESC LIMIT ?
-`;
+function tablaParaTipo(tipo_evento) {
+    if (TIPOS_LOGIN.includes(tipo_evento))  return 'eventos_login';
+    if (TIPOS_COMPRA.includes(tipo_evento)) return 'eventos_compra';
+    if (TIPOS_ADMIN.includes(tipo_evento))  return 'eventos_admin';
+    return 'eventos_sistema';
+}
 
-const QUERY_EVENTOS_SIN_DESDE = `
-    SELECT * FROM eventos_auditoria
-    WHERE mes = ? AND timestamp <= ?
-    ORDER BY timestamp DESC LIMIT ?
-`;
+const TODAS_TABLAS = ['eventos_login', 'eventos_compra', 'eventos_admin', 'eventos_sistema'];
+
+function insertQuery(tabla) {
+    return `INSERT INTO ${tabla} (mes, timestamp, id, tipo_evento, usuario, severidad, metadata, ip) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+}
+
+function selectQuery(tabla, conDesde) {
+    return conDesde
+        ? `SELECT * FROM ${tabla} WHERE mes = ? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?`
+        : `SELECT * FROM ${tabla} WHERE mes = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?`;
+}
 
 function* mesesEntre(desde, hasta) {
     let d = new Date(desde);
@@ -45,8 +51,9 @@ async function registrarEvento({ tipo_evento, usuario, severidad, metadata, ip }
     const mes = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`;
     const id = cassandra.types.TimeUuid.now();
     const metaStr = metadata ? JSON.stringify(metadata) : '{}';
+    const tabla = tablaParaTipo(tipo_evento);
 
-    await client.execute(INSERT_EVENTO, [
+    await client.execute(insertQuery(tabla), [
         mes, ahora, id, tipo_evento, usuario, severidad, metaStr, ip || null
     ], { prepare: true });
 
@@ -63,23 +70,23 @@ async function consultarEventos({ tipo_evento, desde, hasta, limite = 100 }) {
     const fin = hasta ? new Date(hasta) : new Date();
     const max = Math.min(limite, 1000);
 
+    const tablas = tipo_evento ? [tablaParaTipo(tipo_evento)] : TODAS_TABLAS;
     const resultados = [];
-    for (const mes of mesesEntre(inicio, fin)) {
-        const params = desde
-            ? [mes, inicio, fin, max - resultados.length]
-            : [mes, fin, max - resultados.length];
-        const query = desde ? QUERY_EVENTOS : QUERY_EVENTOS_SIN_DESDE;
 
-        const rs = await client.execute(query, params, { prepare: true });
-        resultados.push(...rs.rows);
-        if (resultados.length >= max) break;
+    for (const tabla of tablas) {
+        for (const mes of mesesEntre(inicio, fin)) {
+            const params = desde
+                ? [mes, inicio, fin, max]
+                : [mes, fin, max];
+            const rs = await client.execute(selectQuery(tabla, !!desde), params, { prepare: true });
+            resultados.push(...rs.rows);
+            if (resultados.length >= max * tablas.length) break;
+        }
     }
 
-    let filtrados = tipo_evento
-        ? resultados.filter(row => row.tipo_evento === tipo_evento)
-        : resultados;
+    resultados.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    return filtrados.slice(0, max).map(row => ({
+    return resultados.slice(0, max).map(row => ({
         id: row.id.toString(),
         timestamp: row.timestamp,
         mes: row.mes,
@@ -106,15 +113,17 @@ async function obtenerEventoPorSolicitud(solicitudId) {
     }
 
     const resultados = [];
-    for (const mes of meses) {
-        const rs = await client.execute(
-            'SELECT * FROM eventos_auditoria WHERE mes = ?',
-            [mes],
-            { prepare: true }
-        );
-        for (const row of rs.rows) {
-            if (row.metadata && row.metadata.includes(solicitudId)) {
-                resultados.push(row);
+    for (const tabla of TODAS_TABLAS) {
+        for (const mes of meses) {
+            const rs = await client.execute(
+                `SELECT * FROM ${tabla} WHERE mes = ?`,
+                [mes],
+                { prepare: true }
+            );
+            for (const row of rs.rows) {
+                if (row.metadata && row.metadata.includes(solicitudId)) {
+                    resultados.push(row);
+                }
             }
         }
     }

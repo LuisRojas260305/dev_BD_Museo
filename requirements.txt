@@ -1,0 +1,141 @@
+﻿# ============================================================
+#  MUSEO DE ARTE CONTEMPORANEO - Requisitos del sistema
+# ============================================================
+#
+#  Este proyecto usa 3 bases de datos y 3 microservicios Node.js.
+#  Instala todo lo que se lista aqui antes de correr el proyecto.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# 1. RUNTIME
+# ------------------------------------------------------------
+Node.js          >= 18.0.0     (probado en v24.15.0)
+                               https://nodejs.org/
+npm              >= 9.0.0      (viene con Node.js)
+
+
+# ------------------------------------------------------------
+# 2. BASES DE DATOS
+# ------------------------------------------------------------
+
+# MySQL / MariaDB - gestion de usuarios, ventas, facturas, membresias
+XAMPP            >= 8.2        https://www.apachefriends.org/
+  Incluye:
+    Apache       >= 2.4
+    MariaDB      >= 10.4       (usado como MySQL)
+    phpMyAdmin   (panel web en http://localhost/phpmyadmin)
+
+# MongoDB - catalogo de obras y artistas
+MongoDB Server   7.0           https://www.mongodb.com/try/download/community
+  Debe correr como servicio de Windows (puerto 27017)
+  Panel web (opcional):
+    mongo-express 1.0.0        npm install -g mongo-express
+
+# Apache Cassandra - auditoria y contadores de visitas
+Apache Cassandra 3.11.19       https://cassandra.apache.org/download/
+  Requiere:
+    OpenJDK      11             https://www.microsoft.com/openjdk
+  Directorio de instalacion usado: C:\cassandra-install\apache-cassandra-3.11.19
+  Datos en:                        C:\cassandra-data\
+
+
+# ------------------------------------------------------------
+# 3. DEPENDENCIAS NODE.JS POR SERVICIO
+#    (se instalan con "npm install" en cada carpeta)
+# ------------------------------------------------------------
+
+# Backend principal  (puerto 3000)  - Backend/
+axios            ^1.16.1
+bcrypt           ^6.0.0
+cors             ^2.8.6
+dotenv           ^17.3.1
+express          ^5.2.1
+jsonwebtoken     ^9.0.3
+multer           ^2.1.1
+mysql2           ^3.22.3
+uuid             ^14.0.0
+
+# mongodb-service   (puerto 3001)  - Backend/mongodb-service/
+cors             ^2.8.6
+dotenv           ^17.3.1
+express          ^5.2.1
+mongoose         ^9.6.1
+mysql2           ^3.22.3
+uuid             ^14.0.0
+
+# cassandra-service (puerto 3002)  - Backend/cassandra-service/
+axios            ^1.16.1
+cassandra-driver ^4.8.0
+cors             ^2.8.5
+dotenv           ^16.4.7
+express          ^5.2.1
+jsonwebtoken     ^9.0.2
+
+
+# ------------------------------------------------------------
+# 4. VARIABLES DE ENTORNO
+#    Cada servicio tiene su propio archivo .env en su carpeta
+# ------------------------------------------------------------
+
+# Backend/.env
+PORT=3000
+JWT_SECRET=<clave_secreta>
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=Museo
+MONGODB_SERVICE_URL=http://localhost:3001
+CASSANDRA_URL=http://localhost:3002/api/auditoria
+INTERNAL_API_KEY=museo_internal_key_2026
+
+# Backend/mongodb-service/.env
+PORT=3001
+MONGODB_URI=mongodb://localhost:27017/museo_catalogo
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=Museo
+
+# Backend/cassandra-service/.env
+PORT=3002
+CASSANDRA_CONTACT_POINTS=127.0.0.1
+CASSANDRA_DC=datacenter1
+JWT_SECRET=<misma_clave_que_backend>
+INTERNAL_API_KEY=museo_internal_key_2026
+
+
+# ------------------------------------------------------------
+# 5. INSTALACION RAPIDA
+# ------------------------------------------------------------
+#
+#  1. Instalar todo el software de las secciones 1, 2 y 3
+#  2. Crear la base MySQL:
+#       mysql -u root < Backend/scripts/sql/schema.sql
+#       mysql -u root < Backend/scripts/sql/seed.sql
+#  3. Instalar dependencias de cada servicio:
+#       cd Backend              && npm install
+#       cd Backend/mongodb-service   && npm install
+#       cd Backend/cassandra-service && npm install
+#  4. Crear las tablas de Cassandra:
+#       cd Backend/cassandra-service && node init-db.js
+#  5. Arrancar todo con el script del escritorio:
+#       iniciar_museo.bat
+#
+#  El seed de MongoDB se ejecuta automaticamente si la BD esta vacia.
+# ------------------------------------------------------------
+
+
+# ------------------------------------------------------------
+# 6. PUERTOS USADOS
+# ------------------------------------------------------------
+80     Apache (XAMPP)
+3000   Backend principal (Node.js)
+3001   mongodb-service  (Node.js)
+3002   cassandra-service (Node.js)
+7000   Cassandra inter-node
+7001   Cassandra TLS
+7199   Cassandra JMX
+8081   mongo-express (panel web MongoDB)
+9042   Cassandra CQL nativo
+27017  MongoDB

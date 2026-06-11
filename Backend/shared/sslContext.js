@@ -1,5 +1,5 @@
-/**
- * SSL — Session Context Layer.
+﻿/**
+ * SSL - Session Context Layer.
  * Contexto de navegación que persiste durante la visita del usuario.
  * Reemplaza el uso de sesiones tradicionales en vistas de catálogo.
  * Almacenamiento en memoria con TTL configurable.

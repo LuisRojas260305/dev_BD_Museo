@@ -1,5 +1,5 @@
-/**
- * Obra model — Core artwork entity using Mongoose discriminator pattern.
+﻿/**
+ * Obra model - Core artwork entity using Mongoose discriminator pattern.
  * Base schema holds common fields (title, artist, price, dimensions, etc.)
  * while discriminators (Pintura, Escultura, Orfebrería, Cerámica, Fotografía)
  * add genre-specific detail fields.
@@ -20,7 +20,7 @@ const obraSchema = new mongoose.Schema({
   genero: {
     type: String,
     required: true,
-    enum: ['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía'],
+    enum: ['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía', 'Cristalería', 'Textil', 'Grabado', 'Acuarela'],
   },
   epoca: {
     nombre: { type: String },
@@ -117,6 +117,47 @@ Obra.discriminator('Fotografía', new mongoose.Schema({
     impresion: { type: String },
     camara: { type: String },
     tecnica_fotografica: { type: String },
+  },
+}));
+
+Obra.discriminator('Cristalería', new mongoose.Schema({
+  detalles: {
+    tipo_vidrio: { type: String },
+    tecnica: { type: String },
+    transparencia: { type: String },
+    color: { type: String },
+    profundidad: { type: mongoose.Schema.Types.Decimal128 },
+    diametro: { type: mongoose.Schema.Types.Decimal128 },
+    peso: { type: mongoose.Schema.Types.Decimal128 },
+  },
+}));
+
+Obra.discriminator('Textil', new mongoose.Schema({
+  detalles: {
+    tipo_tejido: { type: String },
+    fibra: [{ type: String }],
+    tecnica: { type: String },
+    urdimbre: { type: String },
+    trama: { type: String },
+  },
+}));
+
+Obra.discriminator('Grabado', new mongoose.Schema({
+  detalles: {
+    soporte: { type: String },
+    tecnica_grabado: { type: String },
+    tiraje: { type: Number },
+    num_edicion: { type: String },
+    tinta: { type: String },
+  },
+}));
+
+Obra.discriminator('Acuarela', new mongoose.Schema({
+  detalles: {
+    soporte: { type: String },
+    tecnica: { type: String },
+    estilos: [{ type: String }],
+    tematicas: [{ type: String }],
   },
 }));
 

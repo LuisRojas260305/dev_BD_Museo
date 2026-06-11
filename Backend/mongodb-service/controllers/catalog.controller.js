@@ -1,5 +1,5 @@
-/**
- * Catalog controller — handles CRUD operations for museum artworks (obras).
+﻿/**
+ * Catalog controller - handles CRUD operations for museum artworks (obras).
  * Includes catalog listing with filtering/pagination, search via text index,
  * single-work detail with SSL view tracking, health check, and SSL context creation.
  */
@@ -10,7 +10,7 @@ const { createContext, addView } = require('../../shared/sslContext');
 const { logEvent } = require('../../shared/sslLogger');
 
 /**
- * GET /api/catalog — Lists artworks with optional filters (genre, status, artist, price range)
+ * GET /api/catalog - Lists artworks with optional filters (genre, status, artist, price range)
  * and pagination. Resolves artist_id to embedded artist via $lookup aggregation.
  *
  * @param {import('express').Request} req
@@ -20,7 +20,7 @@ const { logEvent } = require('../../shared/sslLogger');
 const getCatalog = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 200);
     const skip = (page - 1) * limit;
 
     const match = {};
@@ -35,33 +35,25 @@ const getCatalog = async (req, res, next) => {
       if (req.query.precio_max) match.precio_venta.$lte = parseFloat(req.query.precio_max);
     }
 
-    const pipeline = [
-      { $match: match },
-      // Resolver artista_id → artista embebido (funciona para obras sin artista subdoc)
-      {
-        $lookup: {
-          from: 'artistas',
-          localField: 'artista_id',
-          foreignField: '_id',
-          as: 'artista',
-        },
-      },
+    const lookup = [
+      { $lookup: { from: 'artistas', localField: 'artista_id', foreignField: '_id', as: 'artista' } },
       { $unwind: { path: '$artista', preserveNullAndEmptyArrays: true } },
-      {
-        $facet: {
-          metadata: [{ $count: 'total' }],
-          data: [
-            { $sort: { createdAt: -1 } },
-            { $skip: skip },
-            { $limit: limit },
-          ],
-        },
-      },
     ];
 
-    const results = await Obra.aggregate(pipeline);
-    const total = results[0]?.metadata[0]?.total || 0;
-    const obras = (results[0]?.data || []).map(fieldMapper);
+    const hayFiltros = req.query.genero || req.query.artista_id || req.query.precio_min || req.query.precio_max || req.query.estado;
+
+    const countResult = await Obra.aggregate([{ $match: match }, { $count: 'total' }]);
+    const total = countResult[0]?.total || 0;
+
+    const dataPipeline = [
+      { $match: match },
+      { $sort: { _id: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      ...lookup,
+    ];
+
+    const obras = (await Obra.aggregate(dataPipeline)).map(fieldMapper);
 
     res.json({
       success: true,
@@ -69,6 +61,7 @@ const getCatalog = async (req, res, next) => {
       total,
       page,
       limit,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (err) {
     next(err);
@@ -76,7 +69,7 @@ const getCatalog = async (req, res, next) => {
 };
 
 /**
- * GET /api/catalog/:id — Returns a single artwork by MongoDB ObjectId or original numeric ID.
+ * GET /api/catalog/:id - Returns a single artwork by MongoDB ObjectId or original numeric ID.
  * Supports SSL view tracking: if x-ssl-id header is present, registers a view event.
  *
  * @param {import('express').Request} req
@@ -102,7 +95,7 @@ const getCatalogById = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'Obra no encontrada' });
     }
 
-    // SSL — registrar vista de obra
+    // SSL - registrar vista de obra
     const sslId = req.headers['x-ssl-id'] || req.ssl?.ssl_id;
     if (sslId) {
       const ctxActualizado = addView(sslId, id, 'detalle');
@@ -126,7 +119,7 @@ const getCatalogById = async (req, res, next) => {
 };
 
 /**
- * GET /api/catalog/search — Full-text search on artwork names and descriptions.
+ * GET /api/catalog/search - Full-text search on artwork names and descriptions.
  * Supports additional filters (genre, price range). Results sorted by text relevance (max 20).
  *
  * @param {import('express').Request} req
@@ -175,7 +168,7 @@ const searchCatalog = async (req, res, next) => {
 };
 
 /**
- * GET /api/catalog/ssl/contexto — Creates a new SSL viewing context (no auth required).
+ * GET /api/catalog/ssl/contexto - Creates a new SSL viewing context (no auth required).
  * Used by the frontend to track anonymous user sessions for analytics.
  *
  * @param {import('express').Request} req
@@ -188,7 +181,7 @@ const createSslContext = (req, res) => {
 };
 
 /**
- * GET /api/catalog/health — Health check endpoint.
+ * GET /api/catalog/health - Health check endpoint.
  * Returns 200 with { status: 'ok' } when MongoDB is connected,
  * 503 with { status: 'error' } otherwise.
  *
@@ -211,7 +204,7 @@ const healthCheck = (req, res) => {
 // CRUD de Obras (admin)
 // ---------------------------------------------------------------------------
 
-const VALID_GENEROS = ['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía'];
+const VALID_GENEROS = ['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía', 'Cristalería', 'Textil', 'Grabado', 'Acuarela'];
 
 /**
  * Validates that the genre is one of the accepted values.
@@ -228,7 +221,7 @@ function validateGenero(genero) {
 }
 
 /**
- * POST /api/catalog — Creates a new artwork.
+ * POST /api/catalog - Creates a new artwork.
  * Receives JSON with artwork data (without binary photos).
  * Validates genre, required fields, and populates embedded artist from the reference.
  *
@@ -276,7 +269,7 @@ const createObra = async (req, res, next) => {
             }
         }
 
-        // Crear la obra — Mongoose usa el discriminatorKey 'genero' para
+        // Crear la obra - Mongoose usa el discriminatorKey 'genero' para
         // elegir automáticamente el discriminator correcto (Pintura, Escultura, etc.)
         const obra = await Obra.create({ genero, ...obraData });
 
@@ -287,7 +280,7 @@ const createObra = async (req, res, next) => {
 };
 
 /**
- * PUT /api/catalog/:id — Updates an existing artwork (partial merge).
+ * PUT /api/catalog/:id - Updates an existing artwork (partial merge).
  * Receives JSON with fields to update. Validates genre if changed,
  * and synchronizes embedded artist data with the artist reference.
  *
@@ -344,7 +337,7 @@ const updateObra = async (req, res, next) => {
 };
 
 /**
- * DELETE /api/catalog/:id — Deletes an artwork by ID.
+ * DELETE /api/catalog/:id - Deletes an artwork by ID.
  * Returns 404 if the artwork does not exist.
  *
  * @param {import('express').Request} req

@@ -1,174 +1,150 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Confirmar Compra</title>
-    <style>
-        /* Estilos reutilizados de otras páginas del sistema */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            line-height: 1.5;
-        }
-        header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .logo h1 { font-size:1.5rem; }
-        .auth-links a {
-             color:white; 
-             text-decoration:none; 
-             margin-left:1rem; 
-             padding:0.5rem 1rem; 
-             border-radius:30px; 
-             background:#e67e22; }
-        .auth-links a:hover { 
-            box-shadow: #152779 0px 0px 5px;
-        }
-        .container { max-width:600px; margin:2rem auto; background:white; padding:2rem; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
-        h2 { color:#2c3e50; margin-bottom:1.5rem; }
-        .obra-resumen { background:#f9f9f9; padding:1rem; border-radius:8px; margin-bottom:2rem; }
-        .form-group { margin-bottom:1.2rem; }
-        label { display:block; margin-bottom:0.3rem; font-weight:600; }
-        input { width:100%; padding:0.8rem; border:1px solid #ccc; border-radius:4px; }
-        .btn-confirmar { background:#27ae60; color:white; border:none; padding:1rem; font-size:1.2rem; border-radius:4px; cursor:pointer; width:100%; }
-        .btn-confirmar:hover { background:#2ecc71; }
-        .error { color:red; margin-top:0.5rem; }
-        .Nav{
-            text-decoration: none;
-            color: whitesmoke;
-        }
-        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museo - confirmar compra</title>
+  <link rel="stylesheet" href="/css/museo.css">
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page-wrap { max-width: 560px; margin: 0 auto; padding: 2rem 1.5rem; flex: 1; }
+    .buy-card {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2.2rem;
+      box-shadow: var(--shadow-md);
+      animation: fadeUp 0.4s ease;
+    }
+    .buy-card h2 {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 1.2rem;
+    }
+    .obra-resumen {
+      background: var(--warm-white);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .obra-resumen .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      font-size: 0.88rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .obra-resumen .row:last-child { border-bottom: none; }
+    .obra-resumen .row .lbl { color: var(--text-muted); }
+    .obra-resumen .row .val { font-weight: 500; color: var(--text); }
+    .obra-resumen .precio-row { font-size: 1.1rem; }
+    .obra-resumen .precio-row .val {
+      color: var(--wine);
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    .security-note {
+      background: var(--gold-tint);
+      border: 1px solid rgba(184,146,74,0.25);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 1rem;
+      font-size: 0.82rem;
+      color: #7a5a1a;
+      margin-bottom: 1rem;
+    }
+    .error-msg { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 0.6rem 0.9rem; font-size: 0.85rem; margin-top: 0.5rem; display: none; }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo"><h1><a class="Nav" href="../index.html">🎨 Museo de Arte Contemporáneo</a></h1></div>
-        <div class="auth-links"><a href="#" onclick="logout()">Cerrar sesión</a></div>
-    </header>
 
-    <div class="container" id="container">
-    </div>
+<header class="m-header">
+  <a class="m-logo" href="../index.html"><img src="/img/logo.png" alt="Museo de arte contemporáneo"></a>
+  <nav class="m-nav">
+    <a class="btn-ghost" style="cursor:pointer" onclick="logout()">Salir</a>
+  </nav>
+</header>
 
-    <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
+<div class="page-wrap">
+  <a class="back-link" href="javascript:history.back()">Volver</a>
+  <div class="buy-card" style="margin-top:1rem" id="container"></div>
+</div>
 
-    <script src="../../js/auth.js"></script>
-    <script>
-        /**
-         * Página de confirmación de compra / reserva de una obra.
-         * Verifica que el usuario sea miembro o administrador, muestra
-         * el resumen de la obra y permite confirmar la reserva con un
-         * código de seguridad.
-         *
-         * APIs utilizadas:
-         * - GET /api/catalogo/{id}
-         * - POST /api/ventas/reservar (autenticada)
-         */
-        const urlParams = new URLSearchParams(window.location.search);
-        const obraId = urlParams.get('id');
+<footer class="m-footer"><span>&copy; 2026 Museo de arte contemporáneo</span>
+  <a class="footer-github" href="https://github.com/LuisRojas260305/dev_BD_Museo/" target="_blank" aria-label="Repositorio en GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.93.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg></a></footer>
 
-        // Verificar que el usuario es miembro o administrador
-        const user = getUser();
-        if (!user || (user.tipo !== 'miembro' && user.tipo !== 'administrador')) {
-            alert('Debes ser miembro para comprar');
-            window.location.href = 'login.html';
-        }
+<script src="../../js/auth.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const obraId = urlParams.get('id');
 
-        /**
-         * Carga los datos de la obra desde el catálogo y los renderiza.
-         * @async
-         */
-        async function cargarObra() {
-            const res = await fetch(`${API_BASE}/catalogo/${obraId}`);
-            if (!res.ok) {
-                document.getElementById('container').innerHTML = '<h2>Obra no encontrada</h2>';
-                return;
-            }
-            const data = await res.json();
-            // El catálogo proxy devuelve { success, data }
-            const obra = data.data || data;
-            render(obra);
-        }
+  const user = getUser();
+  if (!user || (user.tipo !== 'miembro' && user.tipo !== 'administrador')) {
+    alert('Debes ser miembro para comprar');
+    window.location.href = 'login.html';
+  }
 
-        /**
-         * Renderiza el resumen de la obra y el formulario de confirmación
-         * con campo para el código de seguridad.
-         *
-         * @param {Object} obra - Datos de la obra (nombre, artista, precio, estado).
-         */
-        function render(obra) {
-            // Obtener nombre del artista desde el objeto embebido de MongoDB
-            const artistaNombre = obra.artista?.nombre_completo
-                || (obra.artista?.nombre
-                    ? obra.artista.nombre + (obra.artista?.apellido ? ' ' + obra.artista.apellido : '')
-                    : 'Desconocido');
-            // El precio puede venir como Decimal128 de MongoDB
-            const precio = obra.precio_venta?.$numberDecimal || obra.precio_venta;
+  async function cargarObra() {
+    const res = await fetch(`${API_BASE}/catalogo/${obraId}`);
+    if (!res.ok) { document.getElementById('container').innerHTML = '<p>Obra no encontrada</p>'; return; }
+    const data = await res.json();
+    render(data.data || data);
+  }
 
-            const container = document.getElementById('container');
-            container.innerHTML = `
-                <h2>Confirmar Compra</h2>
-                <div class="obra-resumen">
-                    <p><strong>Obra:</strong> ${obra.nombre}</p>
-                    <p><strong>Artista:</strong> ${artistaNombre}</p>
-                    <p><strong>Precio:</strong> $${precio}</p>
-                    <p><strong>Estado actual:</strong> ${obra.estado}</p>
-                </div>
-                <form id="confirmForm">
-                    <div class="form-group">
-                        <label for="codigo">Código de Seguridad</label>
-                        <input type="text" id="codigo" required placeholder="Ej: A1B2C3D4">
-                    </div>
-                    <button type="submit" class="btn-confirmar">Confirmar Reserva</button>
-                    <p class="error" id="errorMsg"></p>
-                </form>
-            `;
-            document.getElementById('confirmForm').addEventListener('submit', reservar);
-        }
+  function render(obra) {
+    const artistaNombre = obra.artista?.nombre_completo
+      || (obra.artista?.nombre ? obra.artista.nombre + (obra.artista?.apellido ? ' ' + obra.artista.apellido : '') : 'Desconocido');
+    const precio = obra.precio_venta?.$numberDecimal || obra.precio_venta;
 
-        /**
-         * Envía la solicitud de reserva al servidor con el código de seguridad.
-         * Muestra el resultado (éxito o error) al usuario.
-         * @async
-         * @param {Event} e - Evento de submit del formulario.
-         */
-        async function reservar(e) {
-            e.preventDefault();
-            const codigo = document.getElementById('codigo').value.trim();
-            const errorMsg = document.getElementById('errorMsg');
-            try {
-                const res = await authFetch(`${API_BASE}/ventas/reservar`, {
-                    method: 'POST',
-                    body: JSON.stringify({ obra_id: obraId, codigo_seguridad: codigo })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    alert(`Reserva exitosa. La obra ha pasado a estado RESERVADA. ID de venta: ${data.venta_id}`);
-                    window.location.href = '../index.html';
-                } else {
-                    errorMsg.innerText = 'Error: ' + data.error;
-                }
-            } catch (error) {
-                errorMsg.innerText = 'Error de conexión';
-            }
-        }
+    document.getElementById('container').innerHTML = `
+      <h2>Confirmar compra</h2>
+      <div class="obra-resumen">
+        <div class="row"><span class="lbl">Obra</span><span class="val">${obra.nombre}</span></div>
+        <div class="row"><span class="lbl">Artista</span><span class="val">${artistaNombre}</span></div>
+        <div class="row precio-row"><span class="lbl">Precio</span><span class="val">${Number(precio).toLocaleString()} $</span></div>
+        <div class="row"><span class="lbl">Estado</span><span class="val">${obra.estado || 'disponible'}</span></div>
+      </div>
+      <div class="security-note">Ingresa tu código de seguridad para confirmar la reserva de esta obra.</div>
+      <form id="confirmForm">
+        <div class="form-group">
+          <label class="form-label">Código de seguridad</label>
+          <input class="form-input" type="text" id="codigo" required placeholder="ej: A1B2C3D4" autocomplete="off">
+        </div>
+        <button type="submit" class="btn btn-wine btn-full btn-lg">Confirmar reserva</button>
+        <div class="error-msg" id="errorMsg"></div>
+      </form>
+    `;
+    document.getElementById('confirmForm').addEventListener('submit', reservar);
+  }
 
-        cargarObra();
-    </script>
+  async function reservar(e) {
+    e.preventDefault();
+    const codigo   = document.getElementById('codigo').value.trim();
+    const errEl    = document.getElementById('errorMsg');
+    errEl.style.display = 'none';
+    try {
+      const res  = await authFetch(`${API_BASE}/ventas/reservar`, {
+        method: 'POST',
+        body: JSON.stringify({ obra_id: obraId, codigo_seguridad: codigo })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`Reserva confirmada. La obra pasa a estado reservada. ID de venta: ${data.venta_id}`);
+        window.location.href = '../index.html';
+      } else {
+        errEl.innerText = data.error || 'Error al procesar la reserva';
+        errEl.style.display = 'block';
+      }
+    } catch {
+      errEl.innerText = 'Error de conexión';
+      errEl.style.display = 'block';
+    }
+  }
+
+  cargarObra();
+</script>
 </body>
 </html>

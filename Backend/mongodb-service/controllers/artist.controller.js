@@ -1,10 +1,10 @@
-/**
- * Artist controller — CRUD operations for museum artists (artistas).
+﻿/**
+ * Artist controller - CRUD operations for museum artists (artistas).
  */
 const Artista = require('../models/Artista');
 
 /**
- * GET /api/catalog/artists — Lists all artists, optionally sorted by name.
+ * GET /api/catalog/artists - Lists all artists, optionally sorted by name.
  *
  * @param {import('express').Request} req
  * @param {import('express').Response} res
@@ -21,7 +21,7 @@ const getArtists = async (req, res, next) => {
 };
 
 /**
- * GET /api/catalog/artists/:id — Returns a single artist by MongoDB ObjectId or original numeric ID.
+ * GET /api/catalog/artists/:id - Returns a single artist by MongoDB ObjectId or original numeric ID.
  *
  * @param {import('express').Request} req
  * @param {import('express').Response} res
@@ -45,7 +45,7 @@ const getArtistById = async (req, res, next) => {
 };
 
 /**
- * POST /api/catalog/artists — Creates a new artist.
+ * POST /api/catalog/artists - Creates a new artist.
  * Handles generos_artisticos as a JSON string for multipart/form-data support.
  *
  * @param {import('express').Request} req
@@ -74,7 +74,7 @@ const createArtist = async (req, res, next) => {
 };
 
 /**
- * PUT /api/catalog/artists/:id — Updates an existing artist (partial merge).
+ * PUT /api/catalog/artists/:id - Updates an existing artist (partial merge).
  * Handles generos_artisticos as a JSON string for multipart/form-data support.
  *
  * @param {import('express').Request} req
@@ -103,7 +103,7 @@ const updateArtist = async (req, res, next) => {
 };
 
 /**
- * DELETE /api/catalog/artists/:id — Deletes an artist by ID.
+ * DELETE /api/catalog/artists/:id - Deletes an artist by ID.
  *
  * @param {import('express').Request} req
  * @param {import('express').Response} res

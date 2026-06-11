@@ -10,6 +10,10 @@ const generosData = [
   { nombre: 'Orfebrería', descripcion: 'Arte de trabajar metales preciosos' },
   { nombre: 'Cerámica', descripcion: 'Arte de crear objetos de arcilla cocida' },
   { nombre: 'Fotografía', descripcion: 'Arte de capturar imágenes mediante luz' },
+  { nombre: 'Cristalería', descripcion: 'Arte de crear objetos decorativos y funcionales en vidrio' },
+  { nombre: 'Textil', descripcion: 'Arte de crear tapices, bordados y tejidos artísticos' },
+  { nombre: 'Grabado', descripcion: 'Arte de incisión sobre matrices para obtener estampas' },
+  { nombre: 'Acuarela', descripcion: 'Técnica pictórica con pigmentos diluidos en agua sobre papel' },
 ];
 
 const artistasData = [
@@ -21,7 +25,9 @@ const artistasData = [
     nacionalidad: 'Italiana',
     porcentaje_ganancia: 10.0,
     generos_artisticos: ['Pintura'],
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Leonardo_self.jpg',
+    ],
   },
   {
     nombre: 'Frida',
@@ -31,7 +37,9 @@ const artistasData = [
     nacionalidad: 'Mexicana',
     porcentaje_ganancia: 8.0,
     generos_artisticos: ['Pintura'],
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Frida_Kahlo%2C_by_Guillermo_Kahlo.jpg',
+    ],
   },
   {
     nombre: 'Pablo',
@@ -41,7 +49,9 @@ const artistasData = [
     nacionalidad: 'Española',
     porcentaje_ganancia: 12.0,
     generos_artisticos: ['Pintura', 'Escultura'],
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Pablo_picasso_1.jpg',
+    ],
   },
   {
     nombre: 'Salvador',
@@ -51,7 +61,9 @@ const artistasData = [
     nacionalidad: 'Española',
     porcentaje_ganancia: 9.0,
     generos_artisticos: ['Pintura', 'Fotografía'],
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Salvador_Dali_NYWTS.jpg',
+    ],
   },
   {
     nombre: 'Auguste',
@@ -61,7 +73,9 @@ const artistasData = [
     nacionalidad: 'Francesa',
     porcentaje_ganancia: 7.0,
     generos_artisticos: ['Escultura'],
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Auguste_Rodin.jpg',
+    ],
   },
   {
     nombre: 'Ansel',
@@ -71,7 +85,9 @@ const artistasData = [
     nacionalidad: 'Estadounidense',
     porcentaje_ganancia: 6.0,
     generos_artisticos: ['Fotografía'],
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Ansel_Adams_and_camera.jpg',
+    ],
   },
   {
     nombre: 'Bernard',
@@ -81,7 +97,9 @@ const artistasData = [
     nacionalidad: 'Británica',
     porcentaje_ganancia: 5.0,
     generos_artisticos: ['Cerámica'],
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Bernard_Leach_1953.jpg',
+    ],
   },
   {
     nombre: 'René',
@@ -90,8 +108,58 @@ const artistasData = [
     fecha_nacimiento: new Date('1860-04-06'),
     nacionalidad: 'Francesa',
     porcentaje_ganancia: 8.0,
-    generos_artisticos: ['Orfebrería'],
-    fotos: [],
+    generos_artisticos: ['Orfebrería', 'Cristalería'],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Ren%C3%A9_Lalique_01.jpg',
+    ],
+  },
+  {
+    nombre: 'Émile',
+    apellido: 'Gallé',
+    biografia: 'Maestro vidriero y ceramista francés, figura central del Art Nouveau de Nancy.',
+    fecha_nacimiento: new Date('1846-05-04'),
+    nacionalidad: 'Francesa',
+    porcentaje_ganancia: 7.0,
+    generos_artisticos: ['Cristalería', 'Cerámica'],
+    fotos: [
+      'https://placehold.co/300x300/1a4a6e/white?text=Emile+Galle',
+    ],
+  },
+  {
+    nombre: 'William',
+    apellido: 'Morris',
+    biografia: 'Diseñador y artista británico, fundador del movimiento Arts and Crafts, maestro del diseño textil.',
+    fecha_nacimiento: new Date('1834-03-24'),
+    nacionalidad: 'Británica',
+    porcentaje_ganancia: 6.0,
+    generos_artisticos: ['Textil'],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/William_Morris_age_53.jpg',
+    ],
+  },
+  {
+    nombre: 'Francisco',
+    apellido: 'Goya',
+    biografia: 'Pintor y grabador español, maestro del Romanticismo y precursor del arte moderno.',
+    fecha_nacimiento: new Date('1746-03-30'),
+    nacionalidad: 'Española',
+    porcentaje_ganancia: 11.0,
+    generos_artisticos: ['Grabado', 'Pintura'],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Goya_self-portrait_%281815%2C_Real_Academia_de_Bellas_Artes_de_San_Fernando%29.jpg',
+    ],
+  },
+  {
+    nombre: 'John Singer',
+    apellido: 'Sargent',
+    biografia: 'Pintor estadounidense-británico, el acuarelista más virtuoso de finales del siglo XIX.',
+    fecha_nacimiento: new Date('1856-01-12'),
+    nacionalidad: 'Estadounidense',
+    porcentaje_ganancia: 7.0,
+    generos_artisticos: ['Acuarela', 'Pintura'],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/John_Singer_Sargent_-_Self-Portrait.jpg',
+    ],
   },
 ];
 
@@ -108,7 +176,9 @@ const pinturasData = [
     fecha_creacion: new Date('1506-01-01'),
     estado: 'Disponible',
     descripcion: 'Retrato de Lisa Gherardini, la obra más famosa del Renacimiento.',
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
+    ],
     detalles: { soporte: 'Lienzo', estilos: ['Renacimiento'], tematicas: ['Retrato'] },
   },
   {
@@ -121,7 +191,9 @@ const pinturasData = [
     fecha_creacion: new Date('1939-01-01'),
     estado: 'Disponible',
     descripcion: 'Doble autorretrato de Frida Kahlo representando sus dos personalidades.',
-    fotos: [],
+    fotos: [
+      'https://placehold.co/600x600/6c3483/white?text=Las+Dos+Fridas',
+    ],
     detalles: { soporte: 'Lienzo', estilos: ['Surrealismo'], tematicas: ['Retrato', 'Identidad'] },
   },
   {
@@ -134,7 +206,9 @@ const pinturasData = [
     fecha_creacion: new Date('1937-01-01'),
     estado: 'Disponible',
     descripcion: 'Famoso mural que representa el bombardeo de Guernica durante la Guerra Civil Española.',
-    fotos: [],
+    fotos: [
+      'https://upload.wikimedia.org/wikipedia/en/7/74/PicassoGuernica.jpg',
+    ],
     detalles: { soporte: 'Lienzo', estilos: ['Cubismo'], tematicas: ['Histórica', 'Política'] },
   },
   {
@@ -147,7 +221,9 @@ const pinturasData = [
     fecha_creacion: new Date('1931-01-01'),
     estado: 'Disponible',
     descripcion: 'Famoso cuadro surrealista con relojes derritiéndose.',
-    fotos: [],
+    fotos: [
+      'https://upload.wikimedia.org/wikipedia/en/d/dd/The_Persistence_of_Memory.jpg',
+    ],
     detalles: { soporte: 'Lienzo', estilos: ['Surrealismo'], tematicas: ['Tiempo', 'Memoria'] },
   },
   {
@@ -160,7 +236,9 @@ const pinturasData = [
     fecha_creacion: new Date('1510-01-01'),
     estado: 'Disponible',
     descripcion: 'Estudio de elementos naturales y objetos inanimados.',
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Leonardo_da_Vinci_Virgin_of_the_Rocks_(National_Gallery_London).jpg',
+    ],
     detalles: { soporte: 'Madera', estilos: ['Renacimiento'], tematicas: ['Naturaleza'] },
   },
   {
@@ -173,7 +251,9 @@ const pinturasData = [
     fecha_creacion: new Date('1933-01-01'),
     estado: 'Disponible',
     descripcion: 'Autorretrato de Frida Kahlo con collar de espinas.',
-    fotos: [],
+    fotos: [
+      'https://placehold.co/500x600/922b21/white?text=Autorretrato+con+Collar',
+    ],
     detalles: { soporte: 'Lienzo', estilos: ['Surrealismo'], tematicas: ['Retrato', 'Sufrimiento'] },
   },
   {
@@ -186,7 +266,9 @@ const pinturasData = [
     fecha_creacion: new Date('1937-01-01'),
     estado: 'Disponible',
     descripcion: 'Representación cubista de una mujer en llanto.',
-    fotos: [],
+    fotos: [
+      'https://placehold.co/500x600/1a2f4a/white?text=Mujer+Llorando',
+    ],
     detalles: { soporte: 'Lienzo', estilos: ['Cubismo'], tematicas: ['Retrato', 'Emoción'] },
   },
 ];
@@ -202,7 +284,9 @@ const esculturasData = [
     fecha_creacion: new Date('1904-01-01'),
     estado: 'Disponible',
     descripcion: 'Escultura que representa a un hombre reflexionando, parte de La Puerta del Infierno.',
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Rodin_TheThinker.jpg',
+    ],
     detalles: { peso: 150.0, profundidad: 40.0, tipo_escultura: 'Bulto redondo', materiales: ['Bronce'], tecnicas: ['Fundición'] },
   },
   {
@@ -215,7 +299,9 @@ const esculturasData = [
     fecha_creacion: new Date('1889-01-01'),
     estado: 'Disponible',
     descripcion: 'Escultura de mármol que representa una pareja abrazándose.',
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Le_baiser_d%27Auguste_Rodin.jpg',
+    ],
     detalles: { peso: 200.0, profundidad: 50.0, tipo_escultura: 'Bulto redondo', materiales: ['Mármol'], tecnicas: ['Talla directa'] },
   },
 ];
@@ -231,7 +317,9 @@ const fotografiasData = [
     fecha_creacion: new Date('1950-01-01'),
     estado: 'Disponible',
     descripcion: 'Fotografía icónica del amanecer en el Parque Nacional Yosemite.',
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Ansel-adams-monolith-the-face-of-half-dome_-_edit1.jpg',
+    ],
     detalles: {
       tiraje: 20, obturacion: '1/125', apertura: 'f/8', iso: 100,
       resolucion: '300dpi', fecha_captura: new Date('1950-06-15'),
@@ -248,7 +336,9 @@ const fotografiasData = [
     fecha_creacion: new Date('1952-01-01'),
     estado: 'Disponible',
     descripcion: 'Fotomontaje surrealista con relojes derritiéndose en un paisaje desértico.',
-    fotos: [],
+    fotos: [
+      'https://placehold.co/640x480/1a1a2e/white?text=Relojes+Blandos+al+Atardecer',
+    ],
     detalles: {
       tiraje: 15, obturacion: '1/60', apertura: 'f/11', iso: 200,
       resolucion: '300dpi', fecha_captura: new Date('1952-08-20'),
@@ -268,7 +358,9 @@ const ceramicasData = [
     fecha_creacion: new Date('1955-01-01'),
     estado: 'Disponible',
     descripcion: 'Jarrón de gres con esmalte de cobre reducción, técnica tradicional japonesa.',
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Vase_with_fish_by_Bernard_Leach%2C_V%26A_London.jpg',
+    ],
     detalles: {
       profundidad: 30.0,
       diametro: 25.0,
@@ -289,7 +381,9 @@ const ceramicasData = [
     fecha_creacion: new Date('1960-01-01'),
     estado: 'Disponible',
     descripcion: 'Cuenco de porcelana con esmalte celadón, inspirado en la cerámica coreana.',
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Celadon_Bowl_with_Inlaid_Flower_and_Insect_Design.jpg',
+    ],
     detalles: {
       profundidad: 12.0,
       diametro: 22.0,
@@ -313,7 +407,9 @@ const orfebreriasData = [
     fecha_creacion: new Date('1902-01-01'),
     estado: 'Disponible',
     descripcion: 'Collar con colgante de libélula en esmalte y oro, obra maestra del Art Nouveau.',
-    fotos: [],
+    fotos: [
+      'https://placehold.co/500x500/d4ac0d/white?text=Collar+Libelula+Art+Nouveau',
+    ],
     detalles: {
       profundidad: 1.0,
       diametro: 0.5,
@@ -333,7 +429,9 @@ const orfebreriasData = [
     fecha_creacion: new Date('1910-01-01'),
     estado: 'Disponible',
     descripcion: 'Copa ceremonial de oro trabajada con técnica de repujado y cincelado.',
-    fotos: [],
+    fotos: [
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Golden_cup_from_Vafio_1500_to_1450_BC%2C_NAMA_1759_080869.jpg',
+    ],
     detalles: {
       profundidad: 12.0,
       diametro: 10.0,
@@ -342,6 +440,122 @@ const orfebreriasData = [
       metal_predominante: 'Oro',
       metales: ['Oro', 'Cobre'],
     },
+  },
+];
+
+const cristaleriasData = [
+  {
+    codigo_inventario: 'CRIS-001',
+    nombre: 'Jarrón Libélulas en Cristal Opaco',
+    genero: 'Cristalería',
+    precio_venta: 62000.0,
+    alto: 32.0,
+    ancho: 18.0,
+    fecha_creacion: new Date('1900-01-01'),
+    estado: 'Disponible',
+    descripcion: 'Jarrón de cristal opalescente con motivos de libélulas en relieve, técnica pâte de verre.',
+    fotos: ['https://placehold.co/500x600/1a4a6e/white?text=Jarron+Libelulas+Cristal'],
+    detalles: { tipo_vidrio: 'Opalescente', tecnica: 'Pâte de verre', transparencia: 'Translúcido', color: 'Blanco nacarado', profundidad: 18.0, diametro: 18.0, peso: 1.2 },
+  },
+  {
+    codigo_inventario: 'CRIS-002',
+    nombre: 'Florero Camafeo Iris',
+    genero: 'Cristalería',
+    precio_venta: 87000.0,
+    alto: 45.0,
+    ancho: 22.0,
+    fecha_creacion: new Date('1895-01-01'),
+    estado: 'Disponible',
+    descripcion: 'Florero de vidrio camafeo con flores de iris talladas sobre fondo azul marino.',
+    fotos: ['https://placehold.co/500x700/0d2137/white?text=Florero+Camafeo+Iris'],
+    detalles: { tipo_vidrio: 'Camafeo', tecnica: 'Tallado y grabado al ácido', transparencia: 'Translúcido', color: 'Azul sobre blanco', profundidad: 22.0, diametro: 20.0, peso: 1.8 },
+  },
+];
+
+const textilesData = [
+  {
+    codigo_inventario: 'TEXT-001',
+    nombre: 'Tapiz Fresa y Pájaro',
+    genero: 'Textil',
+    precio_venta: 34000.0,
+    alto: 120.0,
+    ancho: 90.0,
+    fecha_creacion: new Date('1883-01-01'),
+    estado: 'Disponible',
+    descripcion: 'Tapiz tejido con motivo de fresas y aves, diseño icónico de la colección Arts and Crafts.',
+    fotos: ['https://commons.wikimedia.org/wiki/Special:FilePath/Morris_Strawberry_Thief_1883.jpg'],
+    detalles: { tipo_tejido: 'Tapiz jacquard', fibra: ['Algodón', 'Lana'], tecnica: 'Tapicería', urdimbre: 'Algodón crudo', trama: 'Lana teñida con índigo' },
+  },
+  {
+    codigo_inventario: 'TEXT-002',
+    nombre: 'Panel Bordado Acanto',
+    genero: 'Textil',
+    precio_venta: 21000.0,
+    alto: 80.0,
+    ancho: 60.0,
+    fecha_creacion: new Date('1875-01-01'),
+    estado: 'Disponible',
+    descripcion: 'Panel bordado con hojas de acanto entrelazadas sobre fondo de seda cruda.',
+    fotos: ['https://placehold.co/600x800/2e4a1e/white?text=Panel+Bordado+Acanto'],
+    detalles: { tipo_tejido: 'Bordado en seda', fibra: ['Seda', 'Hilo de oro'], tecnica: 'Bordado a aguja', urdimbre: 'Seda cruda', trama: 'Hilos de colores' },
+  },
+];
+
+const grabadosData = [
+  {
+    codigo_inventario: 'GRAB-001',
+    nombre: 'El Sueño de la Razón',
+    genero: 'Grabado',
+    precio_venta: 145000.0,
+    alto: 21.5,
+    ancho: 15.0,
+    fecha_creacion: new Date('1799-01-01'),
+    estado: 'Disponible',
+    descripcion: 'Aguafuerte y aguatinta, placa 43 de Los Caprichos. Un hombre dormido rodeado de monstruos nocturnos.',
+    fotos: ['https://commons.wikimedia.org/wiki/Special:FilePath/Goya_-_Capricho_43.jpg'],
+    detalles: { soporte: 'Papel verjurado', tecnica_grabado: 'Aguafuerte y aguatinta', tiraje: 300, num_edicion: '43/300', tinta: 'Tinta negra de imprenta' },
+  },
+  {
+    codigo_inventario: 'GRAB-002',
+    nombre: 'Saturno Devorando a su Hijo',
+    genero: 'Grabado',
+    precio_venta: 190000.0,
+    alto: 32.0,
+    ancho: 24.0,
+    fecha_creacion: new Date('1823-01-01'),
+    estado: 'Disponible',
+    descripcion: 'Litografía basada en la pintura negra de Goya, imagen perturbadora de mitología griega.',
+    fotos: ['https://placehold.co/600x800/1a0a00/white?text=Saturno+Devorando'],
+    detalles: { soporte: 'Papel litográfico', tecnica_grabado: 'Litografía', tiraje: 100, num_edicion: '12/100', tinta: 'Tinta litográfica negra' },
+  },
+];
+
+const acuarelasData = [
+  {
+    codigo_inventario: 'ACUA-001',
+    nombre: 'El Barco Azul',
+    genero: 'Acuarela',
+    precio_venta: 78000.0,
+    alto: 61.0,
+    ancho: 76.5,
+    fecha_creacion: new Date('1892-01-01'),
+    estado: 'Disponible',
+    descripcion: 'Acuarela que captura la luminosidad del agua y la serenidad de una embarcación en reposo.',
+    fotos: ['https://commons.wikimedia.org/wiki/Special:FilePath/Winslow_Homer_-_The_Blue_Boat.jpg'],
+    detalles: { soporte: 'Papel de acuarela de algodón', tecnica: 'Húmedo sobre húmedo', estilos: ['Realismo'], tematicas: ['Marina', 'Paisaje'] },
+  },
+  {
+    codigo_inventario: 'ACUA-002',
+    nombre: 'Jardín de Rosas en Provenza',
+    genero: 'Acuarela',
+    precio_venta: 95000.0,
+    alto: 55.0,
+    ancho: 70.0,
+    fecha_creacion: new Date('1908-01-01'),
+    estado: 'Disponible',
+    descripcion: 'Vibrante acuarela de un jardín mediterráneo con rosas en plena floración.',
+    fotos: ['https://commons.wikimedia.org/wiki/Special:FilePath/John_Singer_Sargent_-_Muddy_Alligators.jpg'],
+    detalles: { soporte: 'Papel de acuarela grueso', tecnica: 'Seco sobre seco', estilos: ['Impresionismo'], tematicas: ['Naturaleza', 'Jardín'] },
   },
 ];
 
@@ -429,6 +643,30 @@ async function seed() {
     asignar(orfebreriasData[1], 'René Lalique'),
   ];
 
+  // Cristalería
+  const cristaleriasConRef = [
+    asignar(cristaleriasData[0], 'René Lalique'),
+    asignar(cristaleriasData[1], 'Émile Gallé'),
+  ];
+
+  // Textil
+  const textilesConRef = [
+    asignar(textilesData[0], 'William Morris'),
+    asignar(textilesData[1], 'William Morris'),
+  ];
+
+  // Grabado
+  const grabadosConRef = [
+    asignar(grabadosData[0], 'Francisco Goya'),
+    asignar(grabadosData[1], 'Francisco Goya'),
+  ];
+
+  // Acuarela
+  const acuarelasConRef = [
+    asignar(acuarelasData[0], 'John Singer Sargent'),
+    asignar(acuarelasData[1], 'John Singer Sargent'),
+  ];
+
   // Insertar usando discriminadores
   const todas = [
     ...pinturasConRef,
@@ -436,6 +674,10 @@ async function seed() {
     ...fotografiasConRef,
     ...ceramicasConRef,
     ...orfebreriasConRef,
+    ...cristaleriasConRef,
+    ...textilesConRef,
+    ...grabadosConRef,
+    ...acuarelasConRef,
   ];
 
   for (const obra of todas) {

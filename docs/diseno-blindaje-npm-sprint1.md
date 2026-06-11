@@ -1,6 +1,6 @@
-# Diseño: Blindaje npm + Sprint 1 MongoDB (Delta)
+﻿# Diseño: Blindaje npm + Sprint 1 MongoDB (Delta)
 
-> **Proyecto**: Museo — Base de Datos 2
+> **Proyecto**: Museo - Base de Datos 2
 > **Basado en**: `docs/diseno-tecnico-sprint1-mongodb.md` (diseño existente)
 > **Propuesta**: sdd/blindaje-npm-sprint1/propose (#104)
 > **Specs**: sdd/blindaje-npm-sprint1/spec (#105)
@@ -17,10 +17,10 @@ Actualización controlada de dependencias del Backend monolítico (puerto 3000) 
 
 | Decisión | Opciones | Tradeoff | Elegido |
 |----------|----------|----------|---------|
-| Version pinning | Exacta vs caret | Exacta evita surprises pero bloquea patches de seguridad automáticos | `^` caret — seguridad sin romper compatibilidad |
-| ignore-scripts | `true` vs `false` | `true` elimina riesgo de supply chain pero rompe bcrypt (postinstall nativo) | `false` — bcrypt es crítico para auth y no tiene alternativa directa |
-| path-to-regexp fix | overrides vs esperar Express 5.x | Express podría vender su copia, overrides no siempre funcionan en transitive vendor | Overrides — única opción hasta que Express publique 5.2.2+ |
-| .npmrc / .gitignore | Raíz vs por servicio | Centralizado vs aislado | Por servicio — cada directorio es autocontenido, principio de isolación |
+| Version pinning | Exacta vs caret | Exacta evita surprises pero bloquea patches de seguridad automáticos | `^` caret - seguridad sin romper compatibilidad |
+| ignore-scripts | `true` vs `false` | `true` elimina riesgo de supply chain pero rompe bcrypt (postinstall nativo) | `false` - bcrypt es crítico para auth y no tiene alternativa directa |
+| path-to-regexp fix | overrides vs esperar Express 5.x | Express podría vender su copia, overrides no siempre funcionan en transitive vendor | Overrides - única opción hasta que Express publique 5.2.2+ |
+| .npmrc / .gitignore | Raíz vs por servicio | Centralizado vs aislado | Por servicio - cada directorio es autocontenido, principio de isolación |
 
 ### Flujo de Datos
 
@@ -43,12 +43,12 @@ npm audit (antes) → version bumps → overrides → npm install → new lockfi
 
 ### Orden de Implementación
 
-1. `Backend/package.json` — actualizar versiones + overrides
-2. `Backend/.npmrc` — crear
-3. `Backend/.gitignore` — crear
-4. `npm install` en Backend/ — regenera lockfile
-5. `npm audit --audit-level=high` — verificar 0 vulnerabilidades
-6. Smoke test — arrancar server, probar endpoints existentes
+1. `Backend/package.json` - actualizar versiones + overrides
+2. `Backend/.npmrc` - crear
+3. `Backend/.gitignore` - crear
+4. `npm install` en Backend/ - regenera lockfile
+5. `npm audit --audit-level=high` - verificar 0 vulnerabilidades
+6. Smoke test - arrancar server, probar endpoints existentes
 
 ### Rollback
 
@@ -71,7 +71,7 @@ El diseño completo del Sprint 1 está documentado en `docs/diseno-tecnico-sprin
 |----------|----------------------|-------|-------|
 | mongoose version | ^8.14.0 | ^9.6.1 | v8 EOL Feb 2026, CVE-2026-42334 NoSQL injection fixeado en v9 |
 | mysql2 version | ^3.17.2 | ^3.22.3 | Security fixes (OOB read, DoS, config injection) desde 3.19.1 |
-| path-to-regexp | Sin overrides | >=8.4.0 | CVE-2026-4926 / CVE-2026-4923 — Express 5 transitiva |
+| path-to-regexp | Sin overrides | >=8.4.0 | CVE-2026-4926 / CVE-2026-4923 - Express 5 transitiva |
 | .npmrc | No existía | `audit-level=high`, `engine-strict=true` | Consistencia con Backend |
 | .gitignore | No existía | node_modules/, .env, npm-debug.log*, .DS_Store | Consistencia con Backend |
 
@@ -91,12 +91,12 @@ Todo lo siguiente permanece **IDÉNTICO** al diseño base:
 - **Conexión DB**: `config/db.js` (Mongoose pool min 2 / max 10, retry, graceful shutdown) + `config/mysql.js` (mysql2/promise para ETL)
 - **Modelos**: `models/Artista.js` (schema con índices) + `models/Obra.js` (discriminatorKey 'genero', 5 discriminators: Pintura, Escultura, Orfebrería, Cerámica, Fotografía)
 - **API**:
-  - `GET /api/catalog` — $match + $facet para paginación con filtros (género, precio, estado)
-  - `GET /api/catalog/:id` — resolución dual ObjectId / obra_id_original con $lookup
-  - `GET /api/search?q=` — $text search con textScore y $sort
-  - `GET /health` — readyState check
-- **ETL**: `scripts/migrate.js` — 6 fases, batch 100, ordered: false
-- **Seed**: `scripts/seed.js` — 5 obras + 3 artistas sin dependencia MySQL
+  - `GET /api/catalog` - $match + $facet para paginación con filtros (género, precio, estado)
+  - `GET /api/catalog/:id` - resolución dual ObjectId / obra_id_original con $lookup
+  - `GET /api/search?q=` - $text search con textScore y $sort
+  - `GET /health` - readyState check
+- **ETL**: `scripts/migrate.js` - 6 fases, batch 100, ordered: false
+- **Seed**: `scripts/seed.js` - 5 obras + 3 artistas sin dependencia MySQL
 - **Middleware**: `errorHandler.js` + `validation.js`
 - **Frontend**: Feature flag en `auth.js`, adapters `cargarObras()` / `cargarObra()` en páginas
 - **Manejo de errores**: Tabla completa de status 400/404/503

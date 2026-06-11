@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Middleware de autenticación y autorización.
- * Módulo standalone — solo depende de jsonwebtoken (sin dependencia MySQL).
+ * Módulo standalone - solo depende de jsonwebtoken (sin dependencia MySQL).
  * Misma interfaz que el auth original: verificarToken, verificarAdmin,
  * verificarMiembro, opcionalAuth. Puede copiarse a otros servicios sin cambios.
  */
@@ -57,7 +57,7 @@ const verificarMiembro = (req, res, next) => {
 };
 
 /**
- * Auth opcional — si hay token o internal key lo verifica, si no, continúa sin usuario.
+ * Auth opcional - si hay token o internal key lo verifica, si no, continúa sin usuario.
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next

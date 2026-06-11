@@ -1,113 +1,136 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Recuperar Contraseña - Museo</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #f5f5f5; display:flex; justify-content:center; align-items:center; height:100vh; }
-        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
-        button { width: 100%; padding: 12px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight:bold; }
-        .hidden { display: none; }
-        p.pregunta { font-weight: bold; color: #34495e; margin-top: 15px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museo - recuperar acceso</title>
+  <link rel="stylesheet" href="/css/museo.css">
+  <style>
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2.2rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-md);
+      animation: fadeUp 0.4s ease;
+    }
+    .auth-card-header { text-align: center; margin-bottom: 1.8rem; }
+    .auth-card-header h2 { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 400; margin-bottom: 0.3rem; }
+    .auth-card-header p { font-size: 0.83rem; color: var(--text-light); }
+    .auth-divider { width: 32px; height: 1px; background: var(--gold); margin: 0.8rem auto 0; }
+
+    .pregunta-label { font-weight: 500; color: var(--text); font-size: 0.88rem; margin: 0.8rem 0 0.3rem; }
+    .hidden { display: none; }
+    .error-msg { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 0.6rem 0.9rem; font-size: 0.85rem; margin-top: 0.5rem; display: none; }
+    .success-msg { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: var(--radius-sm); padding: 0.6rem 0.9rem; font-size: 0.85rem; margin-top: 0.5rem; display: none; }
+    .step-footer { margin-top: 1rem; text-align: center; font-size: 0.83rem; }
+    .step-footer a { color: var(--wine); }
+    hr { border: none; border-top: 1px solid var(--border-light); margin: 1.2rem 0; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2 style="text-align:center; margin-bottom: 20px;">Recuperar Contraseña</h2>
-        
-        <div id="paso1">
-            <p>Ingresa tu correo electrónico para buscar tus preguntas de seguridad.</p>
-            <input type="email" id="email" placeholder="correo@ejemplo.com" required>
-            <button onclick="buscarPreguntas()">Siguiente</button>
-            <div style="text-align:center; margin-top:15px;"><a href="../index.html">Volver al Login</a></div>
-        </div>
 
-        <div id="paso2" class="hidden">
-            <p style="font-size:0.9rem; color:#666;">Responde tus preguntas de seguridad:</p>
-            <div id="contenedorPreguntas"></div>
-            
-            <hr style="margin: 20px 0;">
-            <p><strong>Crea tu nueva contraseña:</strong></p>
-            <input type="password" id="nuevaPass1" placeholder="Nueva Contraseña">
-            <input type="password" id="nuevaPass2" placeholder="Repite la Contraseña">
-            
-            <button onclick="recuperarPassword()" style="background: #27ae60; margin-top:15px;">Cambiar Contraseña</button>
-        </div>
+<div class="auth-card">
+  <div class="auth-card-header">
+    <h2>Recuperar acceso</h2>
+    <p>Responde tus preguntas de seguridad</p>
+    <div class="auth-divider"></div>
+  </div>
+
+  <!-- paso 1: ingresar correo -->
+  <div id="paso1">
+    <div class="form-group">
+      <label class="form-label">Correo electrónico</label>
+      <input class="form-input" type="email" id="email" placeholder="tu@correo.com" required>
     </div>
+    <button class="btn btn-wine btn-full" onclick="buscarPreguntas()">Siguiente</button>
+    <div class="error-msg" id="err1"></div>
+    <div class="step-footer"><a href="../Principal/login.html">Volver al inicio de sesión</a></div>
+  </div>
 
-    <script src="../../js/auth.js"></script>
-    <script>
-        /**
-         * Página de recuperación de contraseña.
-         * Permite al usuario ingresar su email, responder sus preguntas
-         * de seguridad y establecer una nueva contraseña.
-         *
-         * APIs utilizadas:
-         * - GET /api/usuarios/preguntas-de/{email}
-         * - POST /api/usuarios/recuperar-password-externo
-         */
-        let preguntasUsuario = [];
+  <!-- paso 2: responder preguntas y nueva contrasena -->
+  <div id="paso2" class="hidden">
+    <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:.8rem">Responde tus preguntas de seguridad:</p>
+    <div id="contenedorPreguntas"></div>
+    <hr>
+    <div class="form-group">
+      <label class="form-label">Nueva contraseña</label>
+      <input class="form-input" type="password" id="nuevaPass1" placeholder="nueva contraseña">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirmar contraseña</label>
+      <input class="form-input" type="password" id="nuevaPass2" placeholder="repite la contraseña">
+    </div>
+    <button class="btn btn-wine btn-full" onclick="recuperarPassword()">Cambiar contraseña</button>
+    <div class="error-msg" id="err2"></div>
+    <div class="success-msg" id="ok2"></div>
+  </div>
+</div>
 
-        /**
-         * Busca las preguntas de seguridad asociadas al email ingresado.
-         * Si existen, muestra el formulario para responderlas y cambiar la contraseña.
-         * @async
-         */
-        async function buscarPreguntas() {
-            const email = document.getElementById('email').value;
-            if(!email) return alert("Ingresa un correo");
+<script src="../../js/auth.js"></script>
+<script>
+  let preguntasUsuario = [];
 
-            const res = await fetch(`${API_BASE}/usuarios/preguntas-de/${email}`);
-            const data = await res.json();
+  async function buscarPreguntas() {
+    const email = document.getElementById('email').value;
+    const err = document.getElementById('err1');
+    if (!email) { err.innerText = 'ingresa tu correo'; err.style.display = 'block'; return; }
+    err.style.display = 'none';
 
-            if (res.ok) {
-                preguntasUsuario = data;
-                let html = '';
-                preguntasUsuario.forEach((p, i) => {
-                    html += `<p class="pregunta">${p.pregunta_texto}</p>
-                             <input type="text" id="ans${i}" placeholder="Tu respuesta">`;
-                });
-                document.getElementById('contenedorPreguntas').innerHTML = html;
-                document.getElementById('paso1').classList.add('hidden');
-                document.getElementById('paso2').classList.remove('hidden');
-            } else {
-                alert(data.error || "No se encontraron preguntas para este correo");
-            }
-        }
+    const res = await fetch(`${API_BASE}/usuarios/preguntas-de/${email}`);
+    const data = await res.json();
+    if (res.ok) {
+      preguntasUsuario = data;
+      let html = '';
+      preguntasUsuario.forEach((p, i) => {
+        html += `<div class="form-group">
+          <p class="pregunta-label">${p.pregunta_texto}</p>
+          <input class="form-input" type="text" id="ans${i}" placeholder="tu respuesta">
+        </div>`;
+      });
+      document.getElementById('contenedorPreguntas').innerHTML = html;
+      document.getElementById('paso1').classList.add('hidden');
+      document.getElementById('paso2').classList.remove('hidden');
+    } else {
+      err.innerText = data.error || 'no se encontro una cuenta con ese correo';
+      err.style.display = 'block';
+    }
+  }
 
-        /**
-         * Envía las respuestas de seguridad y la nueva contraseña al servidor.
-         * Si la validación es exitosa, redirige al login.
-         * @async
-         */
-        async function recuperarPassword() {
-            const email = document.getElementById('email').value;
-            const p1 = document.getElementById('nuevaPass1').value;
-            const p2 = document.getElementById('nuevaPass2').value;
+  async function recuperarPassword() {
+    const email = document.getElementById('email').value;
+    const p1 = document.getElementById('nuevaPass1').value;
+    const p2 = document.getElementById('nuevaPass2').value;
+    const err = document.getElementById('err2');
+    const ok  = document.getElementById('ok2');
+    err.style.display = 'none';
+    ok.style.display  = 'none';
 
-            if(p1 !== p2 || !p1) return alert("Las contraseñas no coinciden o están vacías");
+    if (!p1 || p1 !== p2) { err.innerText = 'las contrasenas no coinciden'; err.style.display = 'block'; return; }
 
-            const respuestas = preguntasUsuario.map((p, i) => ({
-                pregunta_id: p.pregunta_id,
-                respuesta: document.getElementById(`ans${i}`).value
-            }));
+    const respuestas = preguntasUsuario.map((p, i) => ({
+      pregunta_id: p.pregunta_id,
+      respuesta: document.getElementById(`ans${i}`).value
+    }));
 
-            const res = await fetch(`${API_BASE}/usuarios/recuperar-password-externo`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, respuestas, nuevaPassword: p1 })
-            });
-
-            const data = await res.json();
-            if(res.ok) {
-                alert("¡Contraseña recuperada exitosamente! Ahora puedes iniciar sesión.");
-                window.location.href = 'login.html';
-            } else {
-                alert("Error: " + data.error);
-            }
-        }
-    </script>
+    const res = await fetch(`${API_BASE}/usuarios/recuperar-password-externo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, respuestas, nuevaPassword: p1 })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      ok.innerText = 'contrasena actualizada. redirigiendo...';
+      ok.style.display = 'block';
+      setTimeout(() => window.location.href = '../Principal/login.html', 1500);
+    } else {
+      err.innerText = data.error || 'error al recuperar contrasena';
+      err.style.display = 'block';
+    }
+  }
+</script>
 </body>
 </html>

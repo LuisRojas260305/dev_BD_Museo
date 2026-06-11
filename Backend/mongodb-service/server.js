@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Entry point for the MongoDB microservice.
  * Sets up Express server, connects to MongoDB via Mongoose,
  * mounts the catalog API routes under /api/catalog,
@@ -23,9 +23,18 @@ app.use(require('./middleware/errorHandler'));
 const start = async () => {
   try {
     await connectDB();
+
     app.listen(PORT, () => {
       console.log(`Servicio MongoDB corriendo en puerto ${PORT}`);
     });
+
+    const Artista = require('./models/Artista');
+    const count = await Artista.countDocuments();
+    if (count === 0) {
+      console.log('MongoDB vacío - ejecutando seed automático (en background)...');
+      const { seed } = require('./scripts/seed');
+      seed().then(() => console.log('Seed completado.')).catch(err => console.error('Error en seed:', err.message));
+    }
   } catch (err) {
     console.error('Error al iniciar el servicio:', err);
     process.exit(1);

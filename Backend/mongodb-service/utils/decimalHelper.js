@@ -1,5 +1,5 @@
-/**
- * Decimal128 conversion utility — helper for converting MongoDB Decimal128
+﻿/**
+ * Decimal128 conversion utility - helper for converting MongoDB Decimal128
  * BSON values to plain JavaScript numbers throughout the application.
  * Handles both Mongoose Decimal128 instances and raw BSON Decimal128 values
  * returned by aggregation pipelines.

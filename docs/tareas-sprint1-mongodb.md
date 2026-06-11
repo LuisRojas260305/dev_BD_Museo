@@ -1,7 +1,7 @@
-# Plan de Tareas — Sprint 1: Servicio MongoDB
+﻿# Plan de Tareas - Sprint 1: Servicio MongoDB
 
-> **Proyecto**: Museo — Base de Datos 2
-> **Fecha**: 21 de mayo de 2026 — Planificación pre-implementación
+> **Proyecto**: Museo - Base de Datos 2
+> **Fecha**: 21 de mayo de 2026 - Planificación pre-implementación
 > **Implementación**: Mañana (22 de mayo)
 > **Basado en**: docs/diseno-tecnico-sprint1-mongodb.md
 
@@ -10,24 +10,24 @@
 ## Orden de Ejecución
 
 ```
-TASK-1 ─── TASK-2 ─── TASK-3 ─── TASK-4 ─── TASK-5
+TASK-1 --- TASK-2 --- TASK-3 --- TASK-4 --- TASK-5
                                     │
-TASK-9 ◄────────────────────────────┤
-TASK-10 ◄── TASK-1                  │
-TASK-11 ◄── TASK-1                  │
+TASK-9 ◄----------------------------┤
+TASK-10 ◄-- TASK-1                  │
+TASK-11 ◄-- TASK-1                  │
                                     │
-TASK-6  ◄───────────────────────────┤
-TASK-7  ◄───────────────────────────┤
-TASK-8  ◄───────────────────────────┤
+TASK-6  ◄---------------------------┤
+TASK-7  ◄---------------------------┤
+TASK-8  ◄---------------------------┤
                                     │
-TASK-12 ◄── TASK-3 + TASK-4        │
-TASK-13 ◄── TASK-5                  │
+TASK-12 ◄-- TASK-3 + TASK-4        │
+TASK-13 ◄-- TASK-5                  │
                                     │
-TASK-14 ◄── TASK-9                  │
-TASK-15 ◄── TASK-14 + TASK-6        │
-TASK-16 ◄── TASK-14 + TASK-7        │
+TASK-14 ◄-- TASK-9                  │
+TASK-15 ◄-- TASK-14 + TASK-6        │
+TASK-16 ◄-- TASK-14 + TASK-7        │
                                     │
-TASK-17 ◄── ALL ABOVE               │
+TASK-17 ◄-- ALL ABOVE               │
 ```
 
 ---
@@ -107,8 +107,8 @@ TASK-17 ◄── ALL ABOVE               │
 
 ## Group 3: API Layer
 
-### TASK-6: GET /api/catalog — listado con filtros + paginación $facet
-**Archivos**: `routes/catalog.routes.js` (crear), `controllers/catalog.controller.js` (crear — getCatalog)
+### TASK-6: GET /api/catalog - listado con filtros + paginación $facet
+**Archivos**: `routes/catalog.routes.js` (crear), `controllers/catalog.controller.js` (crear - getCatalog)
 **Dependencias**: TASK-5
 **Esfuerzo**: Grande
 
@@ -120,8 +120,8 @@ TASK-17 ◄── ALL ABOVE               │
 
 ---
 
-### TASK-7: GET /api/catalog/:id — detalle con resolución dual de ID
-**Archivos**: `controllers/catalog.controller.js` (modificar — getCatalogById)
+### TASK-7: GET /api/catalog/:id - detalle con resolución dual de ID
+**Archivos**: `controllers/catalog.controller.js` (modificar - getCatalogById)
 **Dependencias**: TASK-5
 **Esfuerzo**: Medio
 
@@ -132,8 +132,8 @@ TASK-17 ◄── ALL ABOVE               │
 
 ---
 
-### TASK-8: GET /api/catalog/search — búsqueda full-text con ranking
-**Archivos**: `controllers/catalog.controller.js` (modificar — searchCatalog)
+### TASK-8: GET /api/catalog/search - búsqueda full-text con ranking
+**Archivos**: `controllers/catalog.controller.js` (modificar - searchCatalog)
 **Dependencias**: TASK-5
 **Esfuerzo**: Medio
 
@@ -145,8 +145,8 @@ TASK-17 ◄── ALL ABOVE               │
 
 ---
 
-### TASK-9: GET /api/catalog/health — health check
-**Archivos**: `controllers/catalog.controller.js` (modificar — healthCheck)
+### TASK-9: GET /api/catalog/health - health check
+**Archivos**: `controllers/catalog.controller.js` (modificar - healthCheck)
 **Dependencias**: TASK-2
 **Esfuerzo**: Pequeño
 
@@ -311,4 +311,4 @@ TASK-17 ◄── ALL ABOVE               │
 
 ---
 
-> **Total**: 17 tareas — 4 pequeñas, 4 medianas, 3 grandes (models, API, ETL) + frontend + testing
+> **Total**: 17 tareas - 4 pequeñas, 4 medianas, 3 grandes (models, API, ETL) + frontend + testing

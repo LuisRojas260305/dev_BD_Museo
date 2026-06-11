@@ -1,4 +1,4 @@
-# Diseño Técnico: Sprint 2 — Cassandra Auditoría
+﻿# Diseño Técnico: Sprint 2 - Cassandra Auditoría
 
 ## 1. Instalación de Cassandra (PC local)
 
@@ -36,25 +36,25 @@ DROP KEYSPACE test;
 
 ```
 Backend/cassandra-service/
-├── package.json
-├── .env
-├── server.js                # Entry point (Express 5, puerto 3002)
-├── config/
-│   └── cassandra.js         # Client de conexión (cassandra-driver)
-├── models/
-│   ├── eventos.js           # Queries prepared para eventos_auditoria
-│   └── resumenes.js         # Queries prepared para resumen_eventos
-├── routes/
-│   └── auditoria.routes.js  # POST/GET eventos, GET reportes
-├── controllers/
-│   └── auditoria.controller.js
-├── middleware/
-│   ├── authMiddleware.js    # Copia exacta de shared/authMiddleware.js
-│   └── errorHandler.js      # Mismo patrón que mongodb-service
-├── scripts/
-│   └── schema.cql           # DDL completo del keyspace y tablas
-├── init-db.js               # Script para bootstrap del schema desde Node
-└── test-smoke.sh            # Smoke test con curl
+├-- package.json
+├-- .env
+├-- server.js                # Entry point (Express 5, puerto 3002)
+├-- config/
+│   └-- cassandra.js         # Client de conexión (cassandra-driver)
+├-- models/
+│   ├-- eventos.js           # Queries prepared para eventos_auditoria
+│   └-- resumenes.js         # Queries prepared para resumen_eventos
+├-- routes/
+│   └-- auditoria.routes.js  # POST/GET eventos, GET reportes
+├-- controllers/
+│   └-- auditoria.controller.js
+├-- middleware/
+│   ├-- authMiddleware.js    # Copia exacta de shared/authMiddleware.js
+│   └-- errorHandler.js      # Mismo patrón que mongodb-service
+├-- scripts/
+│   └-- schema.cql           # DDL completo del keyspace y tablas
+├-- init-db.js               # Script para bootstrap del schema desde Node
+└-- test-smoke.sh            # Smoke test con curl
 ```
 
 **Patrón**: Sigue exactamente la misma estructura que `mongodb-service/`. El `authMiddleware.js` se copia literal de `shared/authMiddleware.js` (está diseñado para ser copiado sin cambios).
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS eventos_auditoria (
 ) WITH CLUSTERING ORDER BY (timestamp DESC, id DESC);
 
 -- Tabla de resúmenes agregados (contadores)
--- Partition: tipo_evento — permite query por tipo
+-- Partition: tipo_evento - permite query por tipo
 CREATE TABLE IF NOT EXISTS resumen_eventos (
     tipo_evento TEXT,    -- partition key
     fecha       DATE,    -- clustering key
@@ -129,7 +129,7 @@ async function connect() {
         console.log('Conectado a Cassandra');
     } catch (err) {
         console.error('Error conectando a Cassandra:', err.message);
-        // No salir — el servicio puede operar sin Cassandra
+        // No salir - el servicio puede operar sin Cassandra
     }
 }
 
@@ -141,7 +141,7 @@ module.exports = { client, connect, getClient };
 **Detalles clave**:
 - `prepare: true` por defecto en `queryOptions` para que todos los statements sean **prepared** automáticamente.
 - `consistency: LOCAL_ONE` para máxima velocidad en escrituras (single node dev).
-- `connect()` NO hace `process.exit(1)` si falla — el microservicio arranca igual y devuelve 503 cuando Cassandra está caído.
+- `connect()` NO hace `process.exit(1)` si falla - el microservicio arranca igual y devuelve 503 cuando Cassandra está caído.
 
 ---
 
@@ -440,7 +440,7 @@ module.exports = { auditar };
 
 | Archivo | Función | Evento | Metadata |
 |---------|---------|--------|----------|
-| `controllers/Usuario/usuarioController.js:login` | login exitoso (L93) | `login_exitoso` | — |
+| `controllers/Usuario/usuarioController.js:login` | login exitoso (L93) | `login_exitoso` | - |
 | `controllers/Usuario/usuarioController.js:login` | login fallido (L83, L89) | `login_fallido` | `{intentos_seguidos}` |
 | `controllers/Compra/ventaController.js:reservarObra` | obra reservada (L43) | `solicitud_compra` | `{obra_id, precio, solicitud_id}` |
 | `controllers/Compra/ventaController.js:concretarVenta` | venta concretada (L107) | `compra_aceptada` | `{admin_id, solicitud_id}` |
@@ -475,15 +475,15 @@ module.exports = { auditar };
 
 | Paso | Tarea | Depende de |
 |------|-------|-----------|
-| 1 | Instalar Cassandra 5.0 + JDK 17 + verificar nodetool | — |
-| 2 | Crear estructura `Backend/cassandra-service/` (package.json, .env, server.js) | — |
+| 1 | Instalar Cassandra 5.0 + JDK 17 + verificar nodetool | - |
+| 2 | Crear estructura `Backend/cassandra-service/` (package.json, .env, server.js) | - |
 | 3 | Ejecutar `schema.cql` contra Cassandra | Paso 1 |
 | 4 | Implementar `config/cassandra.js` + `init-db.js` | Paso 2 |
 | 5 | Implementar modelos: `eventos.js`, `resumenes.js` | Paso 4 |
 | 6 | Implementar `routes/auditoria.routes.js` + `controllers/auditoria.controller.js` | Paso 5 |
 | 7 | Agregar `middleware/authMiddleware.js` + `errorHandler.js` | Paso 2 |
 | 8 | Crear `test-smoke.sh` y probar endpoints | Paso 6 |
-| 9 | Agregar `services/auditoriaHelper.js` en el monolito | — |
+| 9 | Agregar `services/auditoriaHelper.js` en el monolito | - |
 | 10 | Integrar llamadas en `usuarioController.js` (login) | Paso 9 |
 | 11 | Integrar llamadas en `ventaController.js` | Paso 9 |
 | 12 | Integrar llamadas en `obraController.js` | Paso 9 |

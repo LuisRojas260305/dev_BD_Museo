@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-# Smoke test para Sprint 1 — Servicio MongoDB
+﻿#!/usr/bin/env bash
+# Smoke test para Sprint 1 - Servicio MongoDB
 # Requiere: servidor corriendo en puerto 3001 con seed data
 set -e
 

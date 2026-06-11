@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Routes for catalog operations.
  *
  * Proxies catalog requests to the mongodb-service (MongoDB).
@@ -18,7 +18,7 @@ const { opcionalAuth, verificarToken, verificarAdmin } = require('../shared/auth
 const { addView } = require('../shared/sslContext');
 const { logEvent } = require('../shared/sslLogger');
 
-// Multer — in-memory photo upload, max 5 MB
+// Multer - in-memory photo upload, max 5 MB
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 },
@@ -268,7 +268,7 @@ router.get('/:id', async (req, res, next) => {
     try {
         const data = await catalogProxy.getCatalogById(req.params.id, req.query);
 
-        // SSL — register artwork view
+        // SSL - register artwork view
         const sslId = req.headers['x-ssl-id'] || req.ssl?.ssl_id;
         if (sslId) {
             const ctx = addView(sslId, req.params.id, 'detalle');
@@ -380,6 +380,14 @@ router.put('/obras/:id', verificarToken, verificarAdmin, upload.single('foto'), 
 router.delete('/obras/:id', verificarToken, verificarAdmin, async (req, res, next) => {
     try {
         const { id } = req.params;
+        const { pool } = require('../config/database');
+        const [rows] = await pool.query('SELECT COUNT(*) as count FROM Venta WHERE obra_id = ?', [id]);
+        if (rows[0].count > 0) {
+            return res.status(409).json({
+                success: false,
+                error: `No se puede eliminar: la obra tiene ${rows[0].count} venta(s) registrada(s).`
+            });
+        }
         const obra = await catalogProxy.deleteObra(id);
         res.json(obra);
     } catch (err) {

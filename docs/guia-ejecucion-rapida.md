@@ -1,4 +1,4 @@
-# 🚀 Guía Rápida de Ejecución — dev_BD_Museo
+﻿# 🚀 Guía Rápida de Ejecución - dev_BD_Museo
 
 > Proyecto de gestión museística con arquitectura políglota (MySQL + MongoDB)
 
@@ -48,7 +48,7 @@ node app.js
 ### 3. MongoDB → puerto `27017`
 
 ```bash
-# Arranque manual (NO con systemd — crashea con SEGV)
+# Arranque manual (NO con systemd - crashea con SEGV)
 mongod --dbpath Backend/mongodb-service/data \
        --logpath Backend/mongodb-service/data/mongod.log \
        --fork --port 27017 --nounixsocket
@@ -116,9 +116,9 @@ El frontend detecta automáticamente si el microservicio MongoDB está disponibl
 |---|----------|-----------|
 | 1 | Backend MySQL depende del CWD para `.env` | Ejecutar `node app.js` desde `Backend/` |
 | 2 | `.env.example` de Backend/ incompleto (falta `JWT_SECRET`) | Usar el `.env` real como referencia |
-| 3 | Búsqueda `$text` con acentos — "Dalí" no funciona | Buscar sin acentos: "Dali" |
+| 3 | Búsqueda `$text` con acentos - "Dalí" no funciona | Buscar sin acentos: "Dali" |
 | 4 | `detalle.html` no chequea MongoDB si llegás directo a la URL | Navegar desde `index.html` |
-| 5 | CRUD del monolito sin auth — rutas POST/PUT/DELETE son públicas | Solo compras y facturación tienen JWT |
+| 5 | CRUD del monolito sin auth - rutas POST/PUT/DELETE son públicas | Solo compras y facturación tienen JWT |
 
 ---
 

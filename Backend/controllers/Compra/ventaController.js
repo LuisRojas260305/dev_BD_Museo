@@ -1,4 +1,4 @@
-const { pool } = require('../../config/database');
+﻿const { pool } = require('../../config/database');
 const crypto = require('crypto');
 const axios = require('axios');
 const { auditar } = require('../../services/auditoriaHelper');
@@ -85,7 +85,7 @@ const concretarVenta = async (req, res) => {
     const { direccion_envio } = req.body;
     const admin_id = req.usuario.usuario_id;
 
-    // Obtener la venta (con datos denormalizados — sin JOIN a Obra/Artista)
+    // Obtener la venta (con datos denormalizados - sin JOIN a Obra/Artista)
     const [venta] = await connection.query(
       'SELECT * FROM Venta WHERE venta_id = ?',
       [id]
@@ -117,6 +117,15 @@ const concretarVenta = async (req, res) => {
     );
 
     await connection.commit();
+
+    // Actualizar estado en MongoDB a Vendida
+    try {
+      await axios.put(`${CATALOG_URL}/${venta[0].obra_id}`,
+        { estado: 'Vendida' },
+        { headers: { 'x-internal-key': INTERNAL_KEY }, timeout: 5000 }
+      );
+    } catch (_) {}
+
     auditar('compra_aceptada', req.usuario.email, 'info', {
       venta_id: id,
       admin_id,
@@ -180,7 +189,7 @@ const cancelarVenta = async (req, res) => {
   }
 };
 
-// Listar ventas (admin) — usa columnas denormalizadas, sin JOIN a Obra/Artista
+// Listar ventas (admin) - usa columnas denormalizadas, sin JOIN a Obra/Artista
 const getVentas = async (req, res) => {
     try {
         const { estado } = req.query;
@@ -201,7 +210,7 @@ const getVentas = async (req, res) => {
     }
 };
 
-// Obtener todas las facturas (solo admin) — usa columnas denormalizadas
+// Obtener todas las facturas (solo admin) - usa columnas denormalizadas
 const getFacturas = async (req, res) => {
   try {
     const [rows] = await pool.query(`

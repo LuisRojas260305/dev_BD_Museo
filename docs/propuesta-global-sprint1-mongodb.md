@@ -1,8 +1,8 @@
-# Propuesta Global — Sprint 1: Servicio MongoDB
+﻿# Propuesta Global - Sprint 1: Servicio MongoDB
 
-> **Proyecto**: Museo — Base de Datos 2 (Arquitectura Políglota)
+> **Proyecto**: Museo - Base de Datos 2 (Arquitectura Políglota)
 > **Fecha**: 21 de mayo de 2026
-> **Autor**: Equipo SBDII — Sprint 1
+> **Autor**: Equipo SBDII - Sprint 1
 >
 > Esta propuesta fusiona el enfoque de arquitectura de microservicios (propuesta del orquestador)
 > con el diseño detallado del modelo de datos documental del documento `X.docx` (propuesta del compañero).
@@ -23,7 +23,7 @@ Arquitectura políglota de 4 microservicios alrededor del core transaccional MyS
 
 ---
 
-## 2. Intent — Por Qué MongoDB
+## 2. Intent - Por Qué MongoDB
 
 MongoDB resuelve el problema central del catálogo de obras: **atributos heterogéneos por género**.
 Con MySQL necesitamos 5 subtablas con herencia table-per-type + JOINs (Pintura, Escultura, Orfebrería,
@@ -45,7 +45,7 @@ Esto elimina JOINs, simplifica las consultas de filtrado combinado
 
 ---
 
-## 3. Justificación del Modelo Documental — Embedding vs Referencias
+## 3. Justificación del Modelo Documental - Embedding vs Referencias
 
 ### Polimorfismo estructural
 
@@ -81,7 +81,7 @@ para actualizar info maestra sin modificar cada obra.
 
 ---
 
-## 4. Scope — Sprint 1
+## 4. Scope - Sprint 1
 
 ### In Scope
 
@@ -110,23 +110,23 @@ para actualizar info maestra sin modificar cada obra.
 
 ```
 Backend/mongodb-service/
-├── package.json
-├── .env
-├── server.js                # Express app, puerto 3001
-├── config/
-│   └── db.js               # Conexión Mongoose
-├── models/
-│   ├── Artista.js           # Schema artista
-│   └── Obra.js              # Schema base + discriminators por género
-├── routes/
-│   └── catalog.routes.js
-├── controllers/
-│   └── catalog.controller.js  # Aggregation pipelines
-├── scripts/
-│   ├── migrate.js           # ETL batch MySQL → MongoDB
-│   └── seed.js              # Bootstrap datos de ejemplo
-└── middleware/
-    └── errorHandler.js
+├-- package.json
+├-- .env
+├-- server.js                # Express app, puerto 3001
+├-- config/
+│   └-- db.js               # Conexión Mongoose
+├-- models/
+│   ├-- Artista.js           # Schema artista
+│   └-- Obra.js              # Schema base + discriminators por género
+├-- routes/
+│   └-- catalog.routes.js
+├-- controllers/
+│   └-- catalog.controller.js  # Aggregation pipelines
+├-- scripts/
+│   ├-- migrate.js           # ETL batch MySQL → MongoDB
+│   └-- seed.js              # Bootstrap datos de ejemplo
+└-- middleware/
+    └-- errorHandler.js
 ```
 
 ### API Endpoints
@@ -134,9 +134,9 @@ Backend/mongodb-service/
 | Endpoint | Query Params | Descripción |
 |----------|-------------|-------------|
 | `GET /api/catalog` | `genero`, `precio_min`, `precio_max`, `estado`, `page`, `limit` | Listado con filtros + `$facet` pagination |
-| `GET /api/catalog/:id` | — | Detalle completo con campos del género |
+| `GET /api/catalog/:id` | - | Detalle completo con campos del género |
 | `GET /api/catalog/search` | `q`, `genero`, `precio_min`, `precio_max` | Búsqueda `$text` + filtros |
-| `GET /api/catalog/health` | — | `{ status: "ok", mongodb: "connected" }` |
+| `GET /api/catalog/health` | - | `{ status: "ok", mongodb: "connected" }` |
 
 ### Feature Flag (Frontend)
 
@@ -216,7 +216,7 @@ const baseURL = health?.ok ? MONGODB_URL : MYSQL_URL;
 - `{ genero: 1, precio_venta: 1 }`
 - `{ estado: 1, precio_venta: 1 }`
 - `{ "detalles.estilos": 1 }`
-- `{ nombre: "text", descripcion: "text" }` — `$text` index
+- `{ nombre: "text", descripcion: "text" }` - `$text` index
 - `{ codigo_inventario: 1 }`
 
 ---

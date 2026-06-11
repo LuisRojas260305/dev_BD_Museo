@@ -87,6 +87,19 @@ CREATE TABLE Factura (
     FOREIGN KEY (admin_id) REFERENCES Administrador(usuario_id) ON DELETE RESTRICT
 );
 
+-- Reseñas de visitantes sobre obras (obra_id es ObjectId de MongoDB)
+CREATE TABLE Resena (
+    resena_id  INT PRIMARY KEY AUTO_INCREMENT,
+    obra_id    VARCHAR(255) NOT NULL,
+    usuario_id INT NOT NULL,
+    rating     TINYINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comentario TEXT,
+    fecha      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_resena (obra_id, usuario_id),
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(usuario_id) ON DELETE CASCADE,
+    INDEX idx_resena_obra (obra_id)
+);
+
 -- Tabla Multimedia para almacenar fotos binarias (asociadas a obras/artistas en MongoDB)
 CREATE TABLE Multimedia (
     multimedia_id INT PRIMARY KEY AUTO_INCREMENT,

@@ -1,5 +1,5 @@
-/**
- * Authentication middleware — canonical copy of shared/authMiddleware.js.
+﻿/**
+ * Authentication middleware - canonical copy of shared/authMiddleware.js.
  * Provides JWT-based token verification, role-based authorization (admin/member),
  * optional auth for public endpoints, and internal API key support
  * for service-to-service communication (monolith → microservices).
@@ -39,7 +39,7 @@ const verificarMiembro = (req, res, next) => {
     next();
 };
 
-// Auth opcional — si hay token o internal key lo verifica, si no, continúa sin usuario.
+// Auth opcional - si hay token o internal key lo verifica, si no, continúa sin usuario.
 const opcionalAuth = (req, res, next) => {
     const internalKey = req.header('x-internal-key');
     if (internalKey && internalKey === process.env.INTERNAL_API_KEY) {

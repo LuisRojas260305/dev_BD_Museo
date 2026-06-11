@@ -1,6 +1,6 @@
-# Diseño Técnico — Sprint 1: Servicio MongoDB
+﻿# Diseño Técnico - Sprint 1: Servicio MongoDB
 
-> **Proyecto**: Museo — Base de Datos 2
+> **Proyecto**: Museo - Base de Datos 2
 > **Fecha**: 21 de mayo de 2026
 > **Basado en**: docs/propuesta-global-sprint1-mongodb.md, docs/decisiones/decisiones-clave-sprint1.md
 
@@ -10,27 +10,27 @@
 
 ```
 Backend/mongodb-service/
-├── package.json                    # Dependencias: express, mongoose, dotenv, cors, mysql2
-├── .env                            # MONGODB_URI, PORT, MYSQL_*
-├── server.js                       # Entry point: Express + Mongoose + rutas
-├── config/
-│   ├── db.js                       # Conexión Mongoose con pool y retry
-│   └── mysql.js                    # Pool mysql2/promise para ETL
-├── models/
-│   ├── Artista.js                  # Schema artista con índices
-│   └── Obra.js                     # Schema BASE + 5 discriminators por género
-├── routes/
-│   └── catalog.routes.js           # 4 rutas REST
-├── controllers/
-│   └── catalog.controller.js       # 4 controladores con Aggregation Framework
-├── middleware/
-│   ├── errorHandler.js             # Global error handler
-│   └── validation.js               # Validación de query params
-├── scripts/
-│   ├── migrate.js                  # ETL MySQL → MongoDB
-│   └── seed.js                     # Bootstrap datos de ejemplo
-└── utils/
-    └── fieldMapper.js              # Helper transformación campos MongoDB → frontend
+├-- package.json                    # Dependencias: express, mongoose, dotenv, cors, mysql2
+├-- .env                            # MONGODB_URI, PORT, MYSQL_*
+├-- server.js                       # Entry point: Express + Mongoose + rutas
+├-- config/
+│   ├-- db.js                       # Conexión Mongoose con pool y retry
+│   └-- mysql.js                    # Pool mysql2/promise para ETL
+├-- models/
+│   ├-- Artista.js                  # Schema artista con índices
+│   └-- Obra.js                     # Schema BASE + 5 discriminators por género
+├-- routes/
+│   └-- catalog.routes.js           # 4 rutas REST
+├-- controllers/
+│   └-- catalog.controller.js       # 4 controladores con Aggregation Framework
+├-- middleware/
+│   ├-- errorHandler.js             # Global error handler
+│   └-- validation.js               # Validación de query params
+├-- scripts/
+│   ├-- migrate.js                  # ETL MySQL → MongoDB
+│   └-- seed.js                     # Bootstrap datos de ejemplo
+└-- utils/
+    └-- fieldMapper.js              # Helper transformación campos MongoDB → frontend
 ```
 
 ---
@@ -242,7 +242,7 @@ module.exports = Obra;
 
 ## D. Controladores
 
-### `getCatalog` — Listado con filtros + paginación
+### `getCatalog` - Listado con filtros + paginación
 
 ```
 INPUT: req.query { genero, precio_min, precio_max, estado, page, limit }
@@ -253,7 +253,7 @@ INPUT: req.query { genero, precio_min, precio_max, estado, page, limit }
 4. Response: { success: true, data: [...], total: N, page: N, limit: N }
 ```
 
-### `getCatalogById` — Detalle con resolución dual de ID
+### `getCatalogById` - Detalle con resolución dual de ID
 
 ```
 INPUT: req.params.id
@@ -264,7 +264,7 @@ INPUT: req.params.id
 4. $lookup a artistas para datos completos del artista
 ```
 
-### `searchCatalog` — Búsqueda full-text
+### `searchCatalog` - Búsqueda full-text
 
 ```
 INPUT: req.query { q, genero, precio_min, precio_max }
@@ -275,7 +275,7 @@ INPUT: req.query { q, genero, precio_min, precio_max }
 4. $sort: { relevancia: -1 }, $limit: 20
 ```
 
-### `healthCheck` — Estado del servicio
+### `healthCheck` - Estado del servicio
 
 ```
 INPUT: req, res

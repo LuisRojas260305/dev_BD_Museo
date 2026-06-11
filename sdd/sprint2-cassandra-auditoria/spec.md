@@ -1,6 +1,6 @@
-# Full Spec: Cassandra Audit Service
+﻿# Full Spec: Cassandra Audit Service
 
-> Sprint 2 — Microservicio de auditoría con Apache Cassandra
+> Sprint 2 - Microservicio de auditoría con Apache Cassandra
 > Persistencia: Engram (topic_key: `sdd/sprint2-cassandra-auditoria/spec`)
 
 ---
@@ -13,7 +13,7 @@ Microservicio de auditoría con Cassandra para registro inmutable de eventos del
 
 ## Installation Requirements
 
-### Cassandra 5.0 (PC Local — NO Docker)
+### Cassandra 5.0 (PC Local - NO Docker)
 
 **Requisitos previos**:
 - OpenJDK 17+ (JDK 25 instalado → compatible con `JAVA_HOME` apuntando a JDK 17)
@@ -21,14 +21,14 @@ Microservicio de auditoría con Cassandra para registro inmutable de eventos del
 - Si hay múltiples JDK: `export JAVA_HOME=/usr/lib/jvm/java-17-openjdk`
 - Si no está JDK 17: `yay -S jdk17-openjdk`
 
-**Opción A — AUR**:
+**Opción A - AUR**:
 ```bash
 yay -S cassandra
 sudo systemctl start cassandra
 nodetool status  # debe mostrar UN
 ```
 
-**Opción B — Tarball**:
+**Opción B - Tarball**:
 ```bash
 curl -OL https://downloads.apache.org/cassandra/5.0.8/apache-cassandra-5.0.8-bin.tar.gz
 tar -xzf apache-cassandra-5.0.8-bin.tar.gz
@@ -57,7 +57,7 @@ npm install express cors dotenv jsonwebtoken cassandra-driver axios
 
 ## Requirements
 
-### R1: Esquema Cassandra — eventos_auditoria
+### R1: Esquema Cassandra - eventos_auditoria
 
 The system MUST store every event as an immutable row.
 
@@ -67,8 +67,8 @@ Tabla: `eventos_auditoria`
 | `mes` | TEXT | Partition key (formato YYYY-MM) |
 | `timestamp` | TIMESTAMP | Clustering key DESC |
 | `id` | TIMEUUID | Clustering key |
-| `tipo_evento` | TEXT | — |
-| `usuario` | TEXT | — |
+| `tipo_evento` | TEXT | - |
+| `usuario` | TEXT | - |
 | `severidad` | TEXT | info \| warning \| critical |
 | `metadata` | TEXT | JSON serializado |
 
@@ -93,7 +93,7 @@ Tabla: `eventos_auditoria`
 - THEN el servicio MUST ejecutar N queries (una por mes) y combinar resultados
 - AND el cliente NO debe estar al tanto de esta partición
 
-### R2: Esquema Cassandra — resumen_eventos
+### R2: Esquema Cassandra - resumen_eventos
 
 The system MUST maintain a daily event aggregation table for reports.
 
@@ -119,7 +119,7 @@ Tabla: `resumen_eventos`
 - THEN devuelve la fila agregada
 - AND no requiere ALLOW FILTERING
 
-### R3: API — POST /api/auditoria/eventos
+### R3: API - POST /api/auditoria/eventos
 
 The system MUST accept event writes. Requires `verificarToken` middleware.
 
@@ -151,7 +151,7 @@ The system MUST accept event writes. Requires `verificarToken` middleware.
 - WHEN POST /api/auditoria/eventos
 - THEN responde 400 Bad Request
 
-### R4: API — GET /api/auditoria/eventos
+### R4: API - GET /api/auditoria/eventos
 
 The system MUST support filtered querying of events. Requires `verificarAdmin`.
 
@@ -184,7 +184,7 @@ Query params: `tipo` (obligatorio), `desde` (opcional, ISO), `hasta` (opcional, 
 - WHEN GET /api/auditoria/eventos
 - THEN responde 403 Forbidden
 
-### R5: API — GET /api/auditoria/reportes
+### R5: API - GET /api/auditoria/reportes
 
 The system MUST return aggregated reports from `resumen_eventos`. Requires `verificarAdmin`.
 
@@ -291,7 +291,7 @@ The system MUST expose an internal helper function `auditar(tipo, usuario, sever
 | ID | Regla |
 |----|-------|
 | R7.1 | KEYSPACE: `museo_auditoria`, SimpleStrategy, replication_factor=1 (dev) |
-| R7.2 | MUST NOT usar ALLOW FILTERING en queries — todas usan partition key + clustering |
+| R7.2 | MUST NOT usar ALLOW FILTERING en queries - todas usan partition key + clustering |
 | R7.3 | Escritura requiere `verificarToken`, lectura requiere `verificarAdmin` |
 | R7.4 | `solicitud_id` como UUID en metadata para correlacionar flujo de compra |
 | R7.5 | Stacktrace en `error_sistema` truncado a 1000 caracteres máximo |
@@ -304,7 +304,7 @@ The system MUST expose an internal helper function `auditar(tipo, usuario, sever
 
 | Tipo | Cuándo | Severidad | Metadata |
 |------|--------|-----------|----------|
-| `login_exitoso` | Login exitoso | info | — |
+| `login_exitoso` | Login exitoso | info | - |
 | `login_fallido` | Login fallido | warning | `intentos_seguidos` |
 | `solicitud_compra` | Usuario solicita comprar obra 🟡 | info | `obra_id`, `precio` |
 | `compra_aceptada` | Admin acepta solicitud ✅ | info | `admin_id`, `solicitud_id` |

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Routes for user management.
  *
  * Handles public user operations (registration, login, password recovery),
@@ -54,7 +54,7 @@ router.get('/preguntas-de/:email', usuarioController.obtenerPreguntasUsuario);
 router.post('/recuperar-password-externo', usuarioController.recuperarPasswordExterno);
 
 // ---------------------------------------------------------------------------
-// Authenticated routes (JWT required — user's own profile)
+// Authenticated routes (JWT required - user's own profile)
 // ---------------------------------------------------------------------------
 
 /**

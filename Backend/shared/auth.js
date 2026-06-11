@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Middleware de autenticación y autorización.
  * Soporta JWT (Bearer token) e internal API key para comunicación service-to-service.
  * Provee verificación de token, roles (admin/miembro) y autenticación opcional.
@@ -57,7 +57,7 @@ const verificarMiembro = (req, res, next) => {
 };
 
 /**
- * Autenticación opcional — si hay token o internal key lo verifica,
+ * Autenticación opcional - si hay token o internal key lo verifica,
  * si no, continúa sin inyectar req.usuario.
  * @param {import('express').Request} req
  * @param {import('express').Response} res

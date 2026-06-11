@@ -1,327 +1,400 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Museo de Arte Contemporáneo - Artista</title>
-    <style>
-        /* Estilos reutilizados (similar a detalle.html) */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            line-height: 1.5;
-        }
-        header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .Titulo {
-            text-decoration: none;
-            color: white;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museo - artista</title>
+  <link rel="stylesheet" href="/css/museo.css">
+  <style>
+    .page-wrap { max-width: 1200px; margin: 0 auto; padding: 2rem; }
 
-        .logo h1 {
-            font-size: 1.5rem;
-            font-weight: 400;
-        }
-        .auth-links a {
-            color: white;
-            text-decoration: none;
-            margin-left: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 30px;
-            transition: background-color 0.3s;
-            cursor: pointer;
-        }
-        .auth-links .login-btn { background-color: #3498db; }
-        .auth-links .logout-btn { background-color: #e67e22; }
-        .auth-links .register-btn { background-color: #2ecc71; }
-        .auth-links a:hover { opacity: 0.8; }
-        .back-link {
-            margin: 1rem 2rem;
-        }
-        .back-link a {
-            background-color: #192542;
-            color: white;
-            margin-left: 1rem;
-            padding: 0.3rem 1rem;
-            border-bottom-left-radius: 30px;
-            border-top-left-radius: 30px;
-            text-decoration: none;
-            font-size: 1.1rem;
-        }
-        .back-link a:hover {
-             box-shadow: #152779 0px 0px 5px;
-        }
-        .artist-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .artist-header {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        .artist-photo {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            overflow: hidden;
-            background-color: #ddd;
-        }
-        .artist-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .artist-hero {
+      display: flex;
+      gap: 2.5rem;
+      align-items: flex-start;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.45s ease;
+    }
 
+    .artist-photo {
+      flex-shrink: 0;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--warm-white);
+      box-shadow: 0 0 0 4px var(--surface), 0 0 0 7px var(--border), var(--shadow-md);
+    }
+    .artist-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .artist-photo:hover img { transform: scale(1.07); }
 
-        .artist-info h2 {
-            font-size: 2.5rem;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-        .artist-info p {
-            font-size: 1.2rem;
-            color: #555;
-            margin-bottom: 0.5rem;
-        }
-        .artist-bio {
-            margin-top: 2rem;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #444;
-        }
-        .obras-title {
-            font-size: 1.8rem;
-            margin: 2rem 0 1rem;
-            color: #2c3e50;
-        }
-        .obras-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-        .obra-card {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .obra-card:hover {
-            transform: translateY(-5px);
-        }
-        .obra-image {
-            height: 150px;
-            overflow: hidden;
-            background-color: #ccc;
-        }
-        .obra-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .obra-info {
-            padding: 1rem;
-        }
-        .obra-info h4 {
-            margin-bottom: 0.3rem;
-            color: #2c3e50;
-        }
-        .obra-info p {
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .obra-info a {
-            text-decoration: none;
-            color: inherit;
-        }
-        .not-found {
-            text-align: center;
-            padding: 3rem;
-            font-size: 1.5rem;
-            color: #777;
-        }
+    .artist-info { padding-top: 0.5rem; }
+    .artist-info h2 {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      line-height: 1.1;
+    }
+    .artist-info h2 + .artist-accent {
+      width: 30px;
+      height: 2px;
+      background: var(--logo-accent);
+      border-radius: 2px;
+      margin-bottom: 0.5rem;
+    }
 
-        .a-obras{
-            text-decoration: none;
-        }
+    .artist-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.7rem 0 1rem;
+      align-items: center;
+    }
 
-        footer {
-            background-color: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 1rem;
-            margin-top: 2rem;
-        }
-    </style>
+    .artist-meta-item {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .artist-meta-item strong { color: var(--text); font-weight: 500; }
+
+    /* Bandera de nacionalidad */
+    .artist-flag-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0.8rem 0;
+    }
+    .artist-flag {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--border-light);
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+      background: var(--warm-white);
+    }
+    .artist-flag img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .artist-flag-name {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .artist-bio {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow);
+    }
+    .artist-bio h3 {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.8rem;
+    }
+    .artist-bio p {
+      font-size: 0.92rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+
+    .obras-section h3 {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 1.2rem;
+    }
+
+    .obras-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.3rem;
+    }
+
+    .obra-mini {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      text-decoration: none;
+      display: block;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      animation: fadeUp 0.4s ease both;
+    }
+    .obra-mini:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .obra-mini img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      background: var(--warm-white);
+      display: block;
+      transition: transform 0.35s ease;
+    }
+    .obra-mini:hover img { transform: scale(1.05); }
+    .obra-mini-wrap { overflow: hidden; height: 150px; position: relative; }
+    .mini-status {
+      position: absolute;
+      top: 0.45rem;
+      left: 0.45rem;
+      z-index: 2;
+    }
+
+    .obra-mini-body { padding: 0.8rem 0.9rem; }
+    .obra-mini-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+      font-family: var(--font-serif);
+    }
+    .obra-mini-price {
+      font-size: 0.88rem;
+      color: var(--wine);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums lining-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      letter-spacing: -0.01em;
+    }
+
+    .not-found {
+      text-align: center;
+      padding: 4rem;
+      color: var(--text-light);
+      font-size: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .artist-hero { flex-direction: column; align-items: center; text-align: center; }
+      .artist-meta { justify-content: center; }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <h1><a class="Titulo" href="../index.html">🎨 Museo de Arte Contemporáneo</a></h1>
+
+<header class="m-header">
+  <a class="m-logo" href="../index.html"><img src="/img/logo.png" alt="Museo de arte contemporáneo"></a>
+  <nav class="m-nav" id="authLinks"></nav>
+</header>
+
+<div class="page-wrap">
+  <a class="back-link" href="../index.html">Volver al catálogo</a>
+  <main id="artistMain"></main>
+</div>
+
+<footer class="m-footer">
+  <span>&copy; 2026 Museo de arte contemporáneo</span>
+  <a class="footer-github" href="https://github.com/LuisRojas260305/dev_BD_Museo/" target="_blank" aria-label="Repositorio en GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.93.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg></a>
+</footer>
+
+<script src="../../js/auth.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const artistaId = urlParams.get('id');
+
+  function updateAuthButtons() {
+    const loggedIn = isLoggedIn();
+    const user = getUser();
+    const nav = document.getElementById('authLinks');
+    if (loggedIn) {
+      nav.innerHTML = `
+        <a href="../Perfiles/perfil.html" class="btn-secondary">Mi perfil</a>
+        <a class="btn-primary" style="cursor:pointer" onclick="logout()">Salir</a>
+      `;
+    } else {
+      nav.innerHTML = `
+        <a class="btn-secondary" href="login.html">Iniciar sesión</a>
+        <a class="btn-primary" href="registro.html">Registrarse</a>
+      `;
+    }
+  }
+
+  async function cargarArtista() {
+    try {
+      const resArtista = await fetch(`${API_BASE}/catalogo/artistas/${artistaId}`);
+      if (!resArtista.ok) throw new Error('Artista no encontrado.');
+      const jsonArtista = await resArtista.json();
+      const artista = jsonArtista.data;
+
+      const resObras = await fetch(`${API_BASE}/catalogo?artista_id=${artistaId}`);
+      const jsonObras = await resObras.json();
+      const obras = jsonObras.data || [];
+
+      renderizar(artista, obras);
+    } catch (error) {
+      document.getElementById('artistMain').innerHTML =
+        `<div class="not-found">${error.message}</div>`;
+    }
+  }
+
+  const PAISES = {
+    'italiana': 'it', 'italiano': 'it',
+    'francesa': 'fr', 'francés': 'fr', 'frances': 'fr',
+    'española': 'es', 'español': 'es', 'espanola': 'es', 'espanol': 'es',
+    'mexicana': 'mx', 'mexicano': 'mx',
+    'colombiana': 'co', 'colombiano': 'co',
+    'venezolana': 've', 'venezolano': 've',
+    'argentina': 'ar', 'argentino': 'ar',
+    'brasileña': 'br', 'brasileño': 'br', 'brasilena': 'br',
+    'chilena': 'cl', 'chileno': 'cl',
+    'alemana': 'de', 'alemán': 'de', 'aleman': 'de',
+    'japonesa': 'jp', 'japonés': 'jp',
+    'china': 'cn', 'chino': 'cn',
+    'inglesa': 'gb', 'inglés': 'gb', 'británica': 'gb', 'britanica': 'gb',
+    'estadounidense': 'us', 'americana': 'us', 'americano': 'us',
+    'peruana': 'pe', 'peruano': 'pe',
+    'ecuatoriana': 'ec', 'ecuatoriano': 'ec',
+    'boliviana': 'bo', 'boliviano': 'bo',
+    'uruguaya': 'uy', 'uruguayo': 'uy',
+    'paraguaya': 'py', 'paraguayo': 'py',
+    'cubana': 'cu', 'cubano': 'cu',
+    'portuguesa': 'pt', 'portugués': 'pt',
+    'holandesa': 'nl', 'neerlandesa': 'nl',
+    'belga': 'be',
+    'suiza': 'ch', 'suizo': 'ch',
+    'austriaca': 'at', 'austriaco': 'at',
+    'rusa': 'ru', 'ruso': 'ru',
+    'coreana': 'kr', 'coreano': 'kr',
+    'canadiense': 'ca',
+    'australiana': 'au', 'australiano': 'au',
+    'griega': 'gr', 'griego': 'gr',
+    'turca': 'tr', 'turco': 'tr',
+    'iraní': 'ir', 'irani': 'ir',
+    'egipcia': 'eg', 'egipcio': 'eg',
+    'nigeriana': 'ng', 'nigeriano': 'ng',
+    'sueca': 'se', 'sueco': 'se',
+    'noruega': 'no', 'noruego': 'no',
+    'danesa': 'dk', 'danés': 'dk',
+    'finlandesa': 'fi', 'finlandés': 'fi',
+    'polaca': 'pl', 'polaco': 'pl',
+  };
+
+  function obtenerCodigoPais(nacionalidad) {
+    if (!nacionalidad) return null;
+    const norm = nacionalidad.toLowerCase().trim()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '');
+    return PAISES[norm] || PAISES[nacionalidad.toLowerCase().trim()] || null;
+  }
+
+  function renderizar(artista, obras) {
+    const fotoUrl = artista.fotos && artista.fotos.length > 0
+      ? artista.fotos[0]
+      : 'https://via.placeholder.com/200x200?text=sin+foto';
+
+    const formatearFecha = f => f ? f.split('T')[0] : 'desconocida';
+
+    const formatearGeneros = g => {
+      if (!g) return '';
+      if (Array.isArray(g)) return g.join(', ');
+      if (typeof g === 'string') {
+        try { const p = JSON.parse(g); return Array.isArray(p) ? p.join(', ') : g; }
+        catch { return g; }
+      }
+      return String(g);
+    };
+
+    let obrasHTML = '';
+    obras.forEach((obra, i) => {
+      const obraId = obra.obra_id || obra.obra_id_original || obra._id;
+      const foto = obra.fotos && obra.fotos.length > 0
+        ? obra.fotos[0]
+        : 'https://via.placeholder.com/200x150?text=sin+imagen';
+      const precio = typeof obra.precio_venta === 'object'
+        ? (Number(obra.precio_venta._serialized) || 0)
+        : (obra.precio_venta || 0);
+      let chipClass = 'chip-disponible', chipText = 'Disponible';
+      if (obra.estado === 'Reservada') { chipClass = 'chip-reservada'; chipText = 'Reservada'; }
+      else if (obra.estado === 'Vendida') { chipClass = 'chip-vendida'; chipText = 'Vendida'; }
+      obrasHTML += `
+        <a class="obra-mini" href="detalle.html?id=${obraId}" style="animation-delay:${i*0.05}s">
+          <div class="obra-mini-wrap">
+            <img src="${foto}" alt="${obra.nombre}"
+              loading="lazy" decoding="async"
+              onerror="this.src='https://placehold.co/480x360/f5f1e8/9c8a7a?text=sin+imagen'">
+            <span class="status-chip ${chipClass} mini-status">${chipText}</span>
+          </div>
+          <div class="obra-mini-body">
+            <div class="obra-mini-title">${obra.nombre}</div>
+            <div class="obra-mini-price">${Number(precio).toLocaleString()} $</div>
+          </div>
+        </a>
+      `;
+    });
+
+    const generos = formatearGeneros(artista.generos_artisticos);
+    const codigoPais = obtenerCodigoPais(artista.nacionalidad);
+
+    const flagHTML = artista.nacionalidad ? `
+      <div class="artist-flag-wrap">
+        <div class="artist-flag">
+          <img src="https://flagcdn.com/w80/${codigoPais || 'un'}.png"
+            alt="${artista.nacionalidad}"
+            onerror="this.parentElement.style.display='none'">
         </div>
-        <div class="auth-links" id="authLinks"></div>
-    </header>
+        <div class="artist-flag-name">${artista.nacionalidad}</div>
+      </div>` : '';
 
-    <div class="back-link">
-        <a href="../index.html">&larr; Volver al catálogo</a>
-    </div>
+    document.getElementById('artistMain').innerHTML = `
+      <div class="artist-hero">
+        <div class="artist-photo">
+          <img src="${fotoUrl}" alt="${artista.nombre} ${artista.apellido || ''}"
+            onerror="this.src='https://via.placeholder.com/200x200?text=sin+foto'">
+        </div>
+        <div class="artist-info">
+          <h2>${artista.nombre} ${artista.apellido || ''}</h2>
+          <div class="artist-accent"></div>
+          <div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;margin:0.5rem 0 0.8rem">
+            ${flagHTML}
+            <div>
+              ${generos ? `<div class="artist-meta">${generos.split(',').map(g => `<span class="badge badge-wine">${g.trim()}</span>`).join('')}</div>` : ''}
+              ${artista.fecha_nacimiento ? `<div class="artist-meta-item" style="margin-top:0.3rem"><strong>Nacimiento:</strong> ${formatearFecha(artista.fecha_nacimiento)}</div>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <main id="artistMain" class="artist-container">
-    </main>
+      ${artista.biografia ? `
+        <div class="artist-bio">
+          <h3>Biografía</h3>
+          <p>${artista.biografia}</p>
+        </div>
+      ` : ''}
 
-    <footer>
-        <p>&copy; 2026 Museo de Arte Contemporáneo - Proyecto Final</p>
-    </footer>
-    <script src="../../js/auth.js"></script>
-    <script>
-        /**
-         * Página de detalle de un artista.
-         * Muestra su foto, datos biográficos, fecha de nacimiento, nacionalidad,
-         * géneros artísticos y la lista de sus obras disponibles.
-         *
-         * APIs utilizadas:
-         * - GET /api/catalogo/artistas/{id}
-         * - GET /api/catalogo?artista_id={id}
-         */
-        const urlParams = new URLSearchParams(window.location.search);
-        const artistaId = urlParams.get('id');
-
-        /**
-         * Carga los datos del artista y sus obras desde el catálogo.
-         * @async
-         */
-        async function cargarArtista() {
-            try {
-                // Usar SOLO MongoDB via proxy — sin MySQL
-                const resArtista = await fetch(`${API_BASE}/catalogo/artistas/${artistaId}`);
-                if (!resArtista.ok) throw new Error('Artista no encontrado');
-                const jsonArtista = await resArtista.json();
-                const artista = jsonArtista.data;
-
-                const resObras = await fetch(`${API_BASE}/catalogo?artista_id=${artistaId}`);
-                const jsonObras = await resObras.json();
-                const obras = jsonObras.data || [];
-
-                renderizar(artista, obras);
-            } catch (error) {
-                document.getElementById('artistMain').innerHTML = `<div class="not-found">${error.message}</div>`;
-            }
+      <div class="obras-section">
+        <h3>Obras en la colección</h3>
+        ${obras.length
+          ? `<div class="obras-grid stagger">${obrasHTML}</div>`
+          : `<p style="color:var(--text-light)">No hay obras de este artista en la colección.</p>`
         }
+      </div>
+    `;
+  }
 
-        /**
-         * Renderiza la página de detalle del artista: foto, datos biográficos,
-         * nacionalidad, géneros, fecha de nacimiento, y parrilla de sus obras.
-         *
-         * @param {Object} artista - Datos del artista desde la API.
-         * @param {Array} obras - Lista de obras del artista.
-         */
-        function renderizar(artista, obras) {
-            const fotoArtistaUrl = artista.fotos && artista.fotos.length > 0
-                ? artista.fotos[0]
-                : 'https://via.placeholder.com/200x200?text=Sin+imagen';
-
-            /**
-             * Formatea una fecha ISO a YYYY-MM-DD.
-             * @param {string} fechaISO - Fecha en formato ISO (ej: 1475-03-06T04:27:44.000Z).
-             * @returns {string} Fecha formateada o 'Desconocida'.
-             */
-            const formatearFecha = (fechaISO) => {
-                if (!fechaISO) return 'Desconocida';
-                return fechaISO.split('T')[0];
-            };
-
-            let obrasHTML = '';
-            obras.forEach(obra => {
-                const obraId = obra.obra_id || obra.obra_id_original || obra._id;
-                const fotoObraUrl = obra.fotos && obra.fotos.length > 0
-                    ? obra.fotos[0]
-                    : 'https://via.placeholder.com/200x150?text=Sin+imagen';
-                obrasHTML += `
-                    <div class="obra-card">
-                        <a class="a-obras" href="detalle.html?id=${obraId}">
-                            <div class="obra-image">
-                                <img src="${fotoObraUrl}" 
-                                    alt="${obra.nombre}"
-                                    onerror="this.onerror=null; this.src='https://via.placeholder.com/200x150?text=Sin+imagen';"
-                                    style="width:100%; height:100%; object-fit:cover;">
-                            </div>
-                            <div class="obra-info">
-                                <h4>${obra.nombre}</h4>
-                                <p>$${Number(obra.precio_venta).toLocaleString()}</p>
-                            </div>
-                        </a>
-                    </div>
-                `;
-            });
-
-            /**
-             * Convierte la lista de géneros artísticos a un string plano.
-             * Maneja arrays, strings JSON y valores planos.
-             * @param {Array|string} generos - Lista de géneros artísticos.
-             * @returns {string} Géneros formateados como texto.
-             */
-            const formatearGeneros = (generos) => {
-                if (!generos) return '';
-                if (Array.isArray(generos)) return generos.join(', ');
-                // Si por algún motivo es un string con formato de array, intentamos limpiarlo
-                if (typeof generos === 'string') {
-                    try {
-                        const parsed = JSON.parse(generos);
-                        return Array.isArray(parsed) ? parsed.join(', ') : generos;
-                    } catch { return generos; }
-                }
-                return String(generos);
-            };
-
-            const main = document.getElementById('artistMain');
-            main.innerHTML = `
-                <div class="artist-header">
-                    <div class="artist-photo">
-                        <img src="${fotoArtistaUrl}" 
-                            alt="${artista.nombre} ${artista.apellido || ''}"
-                            onerror="this.onerror=null; this.src='https://via.placeholder.com/200x200?text=Sin+imagen';"
-                            style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
-                    </div>
-                    <div class="artist-info">
-                        <h2>${artista.nombre} ${artista.apellido || ''}</h2>
-                        <p><strong>Nacionalidad:</strong> ${artista.nacionalidad || 'Desconocida'}</p>
-                        <p><strong>Géneros artísticos:</strong> ${formatearGeneros(artista.generos_artisticos)}</p>
-                        <p><strong>Fecha de nacimiento:</strong> ${formatearFecha(artista.fecha_nacimiento)}</p>
-                    </div>
-                </div>
-                <div class="artist-bio">
-                    <h3>Biografía</h3>
-                    <p>${artista.biografia || 'Sin biografía disponible.'}</p>
-                </div>
-                <h3 class="obras-title">Obras de ${artista.nombre}</h3>
-                <div class="obras-grid">${obrasHTML || '<p>No hay obras de este artista.</p>'}</div>
-            `;
-        }
-        cargarArtista();
-    </script>
+  updateAuthButtons();
+  cargarArtista();
+</script>
 </body>
 </html>

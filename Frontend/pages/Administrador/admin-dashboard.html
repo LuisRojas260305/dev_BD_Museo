@@ -1,116 +1,354 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Panel de Administración</title>
-    <style>
-       * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            line-height: 1.5;
-        }
-        header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .logo h1 { font-size:1.5rem; }
-        .user-info { display:flex; align-items:center; gap:1rem; }
-        .logout-btn { background:#e67e22; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer; text-decoration:none; }
-        .container { max-width:1200px; margin:2rem auto; padding:0 2rem; }
-        h2 { color:#2c3e50; margin-bottom:2rem; }
-        .menu-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:2rem; }
-        .menu-card { background:white; border-radius:8px; padding:1.5rem; box-shadow:0 4px 6px rgba(0,0,0,0.1); transition:transform 0.3s; }
-        .menu-card:hover { transform:translateY(-5px); }
-        .menu-card h3 { color:#2c3e50; margin-bottom:1rem; border-bottom:2px solid #3498db; padding-bottom:0.5rem; }
-        .menu-card ul { list-style:none; }
-        .menu-card li { margin:0.8rem 0; }
-        .menu-card a { color:#3498db; text-decoration:none; font-size:1.1rem; }
-        .menu-card a:hover { text-decoration:underline; }
-        .Nav{
-            text-decoration: none;
-            color: whitesmoke;
-        }
-        footer { background:#2c3e50; color:white; text-align:center; padding:1rem; margin-top:2rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museo - Panel de administración</title>
+  <link rel="stylesheet" href="/css/museo.css">
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page-wrap { max-width: 1140px; margin: 0 auto; padding: 2.5rem 1.5rem; flex: 1; }
+
+    /* ---- Banner de bienvenida ---- */
+    .dash-banner {
+      background: linear-gradient(135deg, #2a0f1a 0%, #6d2b3d 60%, #8c3a52 100%);
+      border-radius: var(--radius-lg);
+      padding: 2rem 2.5rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      animation: fadeUp 0.35s ease;
+      box-shadow: 0 8px 32px rgba(109, 43, 61, 0.28);
+      position: relative;
+      overflow: hidden;
+    }
+    .dash-banner::before {
+      content: '';
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      pointer-events: none;
+    }
+    .dash-banner::after {
+      content: '';
+      position: absolute;
+      right: 60px;
+      bottom: -60px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.03);
+      pointer-events: none;
+    }
+    .dash-banner-text { position: relative; }
+    .dash-banner-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245,241,232,0.55);
+      margin-bottom: 0.35rem;
+    }
+    .dash-banner-title {
+      font-family: var(--font-serif);
+      font-size: 1.9rem;
+      font-weight: 500;
+      color: #f5f1e8;
+      line-height: 1.2;
+      margin-bottom: 0.3rem;
+    }
+    .dash-banner-sub {
+      font-size: 0.85rem;
+      color: rgba(245,241,232,0.55);
+    }
+    .dash-banner-badge {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--radius-md);
+      padding: 0.8rem 1.3rem;
+      text-align: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .dash-banner-badge-label {
+      font-size: 0.7rem;
+      color: rgba(245,241,232,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.2rem;
+    }
+    .dash-banner-badge-value {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      color: #f5f1e8;
+      font-weight: 500;
+    }
+
+    /* ---- Sección de módulos ---- */
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .menu-card {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-top: 3px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1.6rem 1.6rem 1.4rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      animation: fadeUp 0.4s ease both;
+      cursor: default;
+    }
+    .menu-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-top-color: var(--wine);
+    }
+
+    .menu-card-head {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .menu-card-icon {
+      width: 46px;
+      height: 46px;
+      background: var(--wine-tint);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wine);
+      flex-shrink: 0;
+      transition: background 0.22s ease, color 0.22s ease;
+    }
+    .menu-card-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .menu-card:hover .menu-card-icon {
+      background: var(--wine);
+      color: #fff;
+    }
+    .menu-card-head-text h3 {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 0.15rem;
+    }
+    .menu-card-head-text span {
+      font-size: 0.76rem;
+      color: var(--text-light);
+    }
+
+    .menu-card ul { list-style: none; }
+    .menu-card li { margin: 0.2rem 0; }
+    .menu-card a {
+      color: var(--text-muted);
+      font-size: 0.87rem;
+      font-weight: 400;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      transition: all 0.18s;
+    }
+    .menu-card a::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: background 0.18s;
+    }
+    .menu-card a:hover {
+      color: var(--wine);
+      background: var(--wine-tint);
+    }
+    .menu-card a:hover::before { background: var(--wine); }
+
+    /* ---- Banner Cassandra ---- */
+    .cassandra-banner {
+      background: #1c1714;
+      border-radius: var(--radius-md);
+      padding: 1.2rem 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+      animation: fadeUp 0.4s 0.25s ease both;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .cassandra-banner:hover { opacity: 0.88; transform: translateY(-2px); }
+    .cassandra-banner-left { display: flex; align-items: center; gap: 1rem; }
+    .cassandra-banner-dot { display: none; }
+    .cassandra-banner strong { color: #f5f1e8; font-size: 0.9rem; font-weight: 500; display: block; }
+    .cassandra-banner span { color: rgba(245,241,232,0.45); font-size: 0.8rem; }
+    .cassandra-banner-arrow {
+      color: var(--logo-accent);
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 640px) {
+      .menu-grid { grid-template-columns: 1fr; }
+      .dash-banner { flex-direction: column; align-items: flex-start; }
+      .dash-banner-badge { display: none; }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo"><h1><a class="Nav" href="admin-dashboard.html">🎨 Admin - Panel</a></h1></div>
-        <div class="user-info">
-            <span id="bienvenida"></span>
-            <a href="../index.html" class="logout-btn" onclick="logout()">Cerrar sesión</a>
-        </div>
-    </header>
 
-    <div class="container">
-        <h2>Panel de Control</h2>
-        <div class="menu-grid">
-            <div class="menu-card">
-                <h3>Gestión de Datos (CRUD)</h3>
-                <ul>
-                    <li><a href="Gestion de datos/gestion-obras.html">Obras</a></li>
-                    <li><a href="Gestion de datos/gestion-artistas.html">Artistas</a></li>
-                    <li><a href="Gestion de datos/gestion-generos.html">Géneros</a></li>
-                    <li><a href="Gestion de datos/gestion-empleados.html">Empleados</a></li>
-                </ul>
-            </div>
-            <div class="menu-card">
-                <h3>Facturación</h3>
-                <ul>
-                    <li><a href="Facturacion/gestion-reservas.html">Gestionar reservas</a></li>
-                    <li><a href="Facturacion/listado-facturas.html">Listado de facturas</a></li>
-                </ul>
-            </div>
-            <div class="menu-card">
-                <h3>Consultas</h3>
-                <ul>
-                    <li><a href="Consultas/consulta-obras-vendidas.html">Obras vendidas por período</a></li>
-                    <li><a href="Consultas/resumen-facturacion.html">Resumen de facturación</a></li>
-                    <li><a href="Consultas/resumen-membresias.html">Resumen de membresías</a></li>
-                </ul>
-            </div>
-            <div class="menu-card">
-                <h3>Auditoría</h3>
-                <ul>
-                    <li><a href="Gestion de datos/gestion-eventos.html">Eventos de auditoría</a></li>
-                </ul>
-            </div>
-            <div class="menu-card">
-                <h3>Otras opciones</h3>
-                <ul>
-                    <li><a href="../index.html">Ver sitio público</a></li>
-                </ul>
-            </div>
+<header class="m-header">
+  <a class="m-logo" href="admin-dashboard.html"><img src="/img/logo.png" alt="Museo de arte contemporáneo"></a>
+  <nav class="m-nav">
+    <a href="../index.html" class="btn-secondary">Ver sitio</a>
+    <a class="btn-primary" style="cursor:pointer" onclick="logout()">Salir</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+
+  <div class="dash-banner">
+    <div class="dash-banner-text">
+      <div class="dash-banner-eyebrow">Panel de administración</div>
+      <h2 class="dash-banner-title" id="bienvenidaTitle">Bienvenido</h2>
+      <p class="dash-banner-sub">Museo de arte contemporáneo</p>
+    </div>
+    <div class="dash-banner-badge">
+      <div class="dash-banner-badge-label">Rol</div>
+      <div class="dash-banner-badge-value">Administrador</div>
+    </div>
+  </div>
+
+  <div class="section-label">Módulos del sistema</div>
+
+  <div class="menu-grid">
+    <div class="menu-card" style="animation-delay:.04s">
+      <div class="menu-card-head">
+        <div class="menu-card-icon">
+          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v4c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 14v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4"/></svg>
         </div>
+        <div class="menu-card-head-text">
+          <h3>Gestión de datos</h3>
+          <span>Catálogo y colección</span>
+        </div>
+      </div>
+      <ul>
+        <li><a href="Gestion de datos/gestion-obras.html">Obras del catálogo</a></li>
+        <li><a href="Gestion de datos/gestion-artistas.html">Artistas</a></li>
+        <li><a href="Gestion de datos/gestion-generos.html">Géneros artísticos</a></li>
+        <li><a href="Gestion de datos/gestion-empleados.html">Empleados y usuarios</a></li>
+      </ul>
     </div>
 
-    <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
+    <div class="menu-card" style="animation-delay:.08s">
+      <div class="menu-card-head">
+        <div class="menu-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
+        </div>
+        <div class="menu-card-head-text">
+          <h3>Facturación</h3>
+          <span>Ventas y reservas</span>
+        </div>
+      </div>
+      <ul>
+        <li><a href="Facturacion/gestion-reservas.html">Gestionar reservas</a></li>
+        <li><a href="Facturacion/listado-facturas.html">Listado de facturas</a></li>
+      </ul>
+    </div>
 
-    <script src="../../js/auth.js"></script>
-    <script>
-        // Panel de Administración — Landing page del dashboard del admin.
-        // API: auth.js (getUser para verificar sesión, logout para cierre de sesión).
-        const user = getUser();
-        if (!user || user.tipo !== 'administrador') {
-            alert('Acceso no autorizado');
-            window.location.href = '../index.html';
-        }
-        document.getElementById('bienvenida').innerText = `Bienvenido, ${user.nombre}`;
-    </script>
+    <div class="menu-card" style="animation-delay:.12s">
+      <div class="menu-card-head">
+        <div class="menu-card-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="menu-card-head-text">
+          <h3>Consultas</h3>
+          <span>Reportes y estadísticas</span>
+        </div>
+      </div>
+      <ul>
+        <li><a href="Consultas/consulta-obras-vendidas.html">Obras vendidas por período</a></li>
+        <li><a href="Consultas/resumen-facturacion.html">Resumen de facturación</a></li>
+        <li><a href="Consultas/resumen-membresias.html">Resumen de membresías</a></li>
+      </ul>
+    </div>
+
+    <div class="menu-card" style="animation-delay:.16s">
+      <div class="menu-card-head">
+        <div class="menu-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="menu-card-head-text">
+          <h3>Auditoría</h3>
+          <span>Logs y trazabilidad</span>
+        </div>
+      </div>
+      <ul>
+        <li><a href="Gestion de datos/gestion-eventos.html">Eventos de auditoría</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <a href="http://localhost:3002/admin" target="_blank" class="cassandra-banner">
+    <div class="cassandra-banner-left">
+      <div>
+        <strong>Auditoría Cassandra en tiempo real</strong>
+        <span>Logins, compras, eventos admin y sistema</span>
+      </div>
+    </div>
+    <span class="cassandra-banner-arrow">&#8594;</span>
+  </a>
+
+</div>
+
+<footer class="m-footer">
+  <span>&copy; 2026 Museo de arte contemporáneo</span>
+  <a class="footer-github" href="https://github.com/LuisRojas260305/dev_BD_Museo/" target="_blank" aria-label="Repositorio en GitHub">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.93.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+  </a>
+</footer>
+
+<script src="../../js/auth.js"></script>
+<script>
+  const user = getUser();
+  if (!user || user.tipo !== 'administrador') {
+    alert('Acceso no autorizado');
+    window.location.href = '../index.html';
+  }
+  document.getElementById('bienvenidaTitle').innerText = 'Hola, ' + user.nombre;
+</script>
 </body>
 </html>

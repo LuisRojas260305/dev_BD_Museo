@@ -1,4 +1,4 @@
-# Decisiones Clave — Sprint 1 (MongoDB)
+﻿# Decisiones Clave - Sprint 1 (MongoDB)
 
 > Registro de decisiones arquitectónicas y técnicas del Sprint 1.
 > Formato: ADR (Architecture Decision Record) ligero.
@@ -84,7 +84,7 @@ la colección `artistas`.
 
 **Estado**: Aceptada ✅  
 **Contexto**: Hay datos existentes en MySQL que deben migrarse a MongoDB.
-No hay writes concurrentes — la migración es única.  
+No hay writes concurrentes - la migración es única.  
 **Decisión**: Script Node.js independiente `scripts/migrate.js` que:
 1. Lee MySQL con `mysql2/promise`
 2. Arma los documentos con la estructura MongoDB

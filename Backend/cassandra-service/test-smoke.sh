@@ -1,5 +1,5 @@
-#!/bin/bash
-# Smoke test para Sprint 2 — Cassandra Auditoría
+﻿#!/bin/bash
+# Smoke test para Sprint 2 - Cassandra Auditoría
 # Requiere: curl, jq (opcional)
 # Uso: ./test-smoke.sh [email] [password]
 
@@ -30,7 +30,7 @@ check() {
 }
 
 echo "=========================================="
-echo " Smoke Test: Sprint 2 — Cassandra Auditoría"
+echo " Smoke Test: Sprint 2 - Cassandra Auditoría"
 echo "=========================================="
 echo ""
 

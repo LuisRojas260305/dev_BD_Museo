@@ -1,4 +1,4 @@
-// Script de setup para desarrollo
+﻿// Script de setup para desarrollo
 // Crea: admin real, artistas con foto, obras con foto, épocas faltantes
 // Ejecutar: node scripts/setup-dev.js (desde Backend/)
 const path = require('path');
@@ -49,7 +49,7 @@ async function setup() {
     try {
         console.log('🔧 Iniciando setup de desarrollo...\n');
 
-        // ── 1. Admin con contraseña real ──
+        // -- 1. Admin con contraseña real --
         console.log('📧 Creando admin: admin@museo.com / admin123');
         const hash = await bcrypt.hash('admin123', 10);
 
@@ -65,7 +65,7 @@ async function setup() {
         await conn.query('INSERT INTO Administrador (usuario_id) VALUES (?)', [adminResult.insertId]);
         console.log(`   ✅ Admin creado con ID ${adminResult.insertId}\n`);
 
-        // ── 2. Artistas ──
+        // -- 2. Artistas --
         const placeholderFoto = generarPlaceholderJPEG();
 
         const artistas = [
@@ -99,7 +99,7 @@ async function setup() {
         }
         console.log('   ✅ Géneros asignados a artistas\n');
 
-        // ── 3. Obras ──
+        // -- 3. Obras --
         console.log('🖼️  Creando obras con fotos...');
         const obras = [
             { nombre: 'La Gioconda', artista: 0, genero: 1, epoca: 1, precio: 850000, anio: 1506, estado: 'Disponible', soporte: 1 },
@@ -154,7 +154,7 @@ async function setup() {
                     break;
             }
 
-            console.log(`   ✅ ${obra.nombre} (ID: ${obraId}) — $${obra.precio.toLocaleString()}`);
+            console.log(`   ✅ ${obra.nombre} (ID: ${obraId}) - $${obra.precio.toLocaleString()}`);
         }
 
         console.log('\n✅ Setup completado exitosamente!');

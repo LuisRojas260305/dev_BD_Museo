@@ -1,5 +1,5 @@
-/**
- * Genero model — Represents an artwork genre (e.g., Pintura, Escultura).
+﻿/**
+ * Genero model - Represents an artwork genre (e.g., Pintura, Escultura).
  * Used as a reference collection for genre categorization.
  */
 const mongoose = require('mongoose');

@@ -1,4 +1,4 @@
-// Tests unitarios SSL — Session Context Layer
+﻿// Tests unitarios SSL - Session Context Layer
 // Ejecutar: node --test Backend/shared/__tests__/sslContext.test.js
 const { describe, it, before, after, afterEach } = require('node:test');
 const assert = require('node:assert');
@@ -6,7 +6,7 @@ const { createContext, getContext, addView, expiro } = require('../sslContext');
 
 const TTL_CORTO = 1; // 1 segundo para tests de expiración
 
-describe('SSL — Session Context Layer', () => {
+describe('SSL - Session Context Layer', () => {
     describe('createContext', () => {
         it('debe crear un contexto con ssl_id UUID', () => {
             const ctx = createContext();

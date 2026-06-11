@@ -13,10 +13,11 @@
 const validateCatalogQuery = (req, res, next) => {
   const { page, limit, precio_min, precio_max, genero, estado } = req.query;
 
-  if (genero && !['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía'].includes(genero)) {
+  const GENEROS_VALIDOS = ['Pintura', 'Escultura', 'Orfebrería', 'Cerámica', 'Fotografía', 'Cristalería', 'Textil', 'Grabado', 'Acuarela'];
+  if (genero && !GENEROS_VALIDOS.includes(genero)) {
     return res.status(400).json({
       success: false,
-      error: 'Género inválido. Valores: Pintura, Escultura, Orfebrería, Cerámica, Fotografía',
+      error: 'Género inválido. Valores: ' + GENEROS_VALIDOS.join(', '),
     });
   }
 
@@ -34,10 +35,10 @@ const validateCatalogQuery = (req, res, next) => {
     });
   }
 
-  if (limit && (isNaN(limit) || parseInt(limit) < 1 || parseInt(limit) > 100)) {
+  if (limit && (isNaN(limit) || parseInt(limit) < 1 || parseInt(limit) > 200)) {
     return res.status(400).json({
       success: false,
-      error: 'limit debe estar entre 1 y 100',
+      error: 'limit debe estar entre 1 y 200',
     });
   }
 

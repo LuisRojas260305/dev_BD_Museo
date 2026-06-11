@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Proxy HTTP hacia el microservicio mongodb-service para el catálogo de obras.
  * Usa axios para redirigir requests y pasa x-internal-key para autenticación
  * service-to-service.
@@ -58,7 +58,7 @@ const createSslContext = async () => {
     return response.data;
 };
 
-// Artistas — proxy a mongodb-service
+// Artistas - proxy a mongodb-service
 
 /**
  * Obtiene el listado de artistas con filtros opcionales.

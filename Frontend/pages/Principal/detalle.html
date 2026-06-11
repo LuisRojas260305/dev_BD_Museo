@@ -1,479 +1,551 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Detalle de Obra</title>
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museo - detalle de obra</title>
+  <link rel="stylesheet" href="/css/museo.css">
+  <style>
+    .page-wrap { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem 0; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            line-height: 1.5;
-        }
-        header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .logo h1 { font-size:1.5rem; font-weight:400; }
-        .auth-links a { 
-            color:white; 
-            text-decoration:none;
-             margin-left:1rem; 
-             padding:0.5rem 1rem; 
-             border-radius:30px; 
-             transition:all 0.2s; 
-            }
-        .login-btn { background:#3b82f6; }
-        .logout-btn { background:#f97316; }
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      margin: 1rem 0 2rem;
+      animation: fadeUp 0.45s ease;
+    }
 
-        .register-btn { background:#10b981; }
-        .auth-links a:hover { 
-            box-shadow: #152779 0px 0px 5px;
-        }
-        .back-link { margin:1.5rem 2rem; }
-        .back-link a {
-            background-color: #192542;
-            color: white;
-            margin-left: 1rem;
-            padding: 0.3rem 1rem;
-            border-bottom-left-radius: 30px;
-            border-top-left-radius: 30px;
-            text-decoration: none;
-            font-size: 1.1rem;
-        }
-        .back-link a:hover {
-             box-shadow: #152779 0px 0px 5px;
-        }
-        .detail-container {
-            max-width:1200px;
-            margin:2rem auto;
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:2.5rem;
-            background:white;
-            border-radius:24px;
-            padding:2rem;
-            box-shadow:0 20px 40px -15px rgba(0,0,0,0.15);
-        }
-        .detail-image {
-            height:450px;
-            border-radius:20px;
-            overflow:hidden;
-            background:#e2e8f0;
-            box-shadow:0 10px 20px -5px rgba(0,0,0,0.1);
-        }
-        .detail-image img {
-            width:100%;
-            height:100%;
-            object-fit:cover;
-            transition:transform 0.5s;
-        }
-        .detail-image:hover img { transform:scale(1.02); }
-        .detail-info {
-            display:flex;
-            flex-direction:column;
-        }
-        .detail-info h2 {
-            font-size:2.5rem;
-            color:#0f172a;
-            line-height:1.2;
-            margin-bottom:0.5rem;
-        }
-        .detail-artist {
-            font-size:1.3rem;
-            color:#334155;
-            margin-bottom:0.5rem;
-        }
-        .detail-artist a {
-            color:#3b82f6;
-            text-decoration:none;
-            font-weight:600;
-        }
-        .detail-artist a:hover { text-decoration:underline; }
-        .detail-genre {
-            display:inline-block;
-            background:#f1f5f9;
-            color:#475569;
-            padding:0.3rem 1rem;
-            border-radius:30px;
-            font-size:0.9rem;
-            font-weight:500;
-            margin:0.5rem 0 1rem;
-            align-self:flex-start;
-        }
-        .detail-description {
-            font-size:1.1rem;
-            line-height:1.6;
-            color:#334155;
-            margin:1rem 0;
-        }
-        .meta-grid {
-            display:grid;
-            grid-template-columns:repeat(2,1fr);
-            gap:1rem;
-            background:#f8fafc;
-            padding:1rem;
-            border-radius:16px;
-            margin:1rem 0;
-        }
-        .meta-item {
-            display:flex;
-            flex-direction:column;
-        }
-        .meta-label {
-            font-size:0.9rem;
-            color:#64748b;
-            text-transform:uppercase;
-            letter-spacing:0.5px;
-        }
-        .meta-value {
-            font-size:1.2rem;
-            font-weight:600;
-            color:#0f172a;
-        }
-        .detail-price {
-            font-size:2.5rem;
-            font-weight:700;
-            color:#10b981;
-            margin:1rem 0;
-        }
-        .detail-status {
-            font-size:1rem;
-            padding:0.4rem 1.2rem;
-            border-radius:30px;
-            display:inline-block;
-            font-weight:600;
-            align-self:flex-start;
-        }
-        .status-disponible { background:#d1fae5; color:#065f46; }
-        .status-vendido { background:#fee2e2; color:#991b1b; }
-        .status-reservado { background:#fef3c7; color:#92400e; }
-        .detail-features {
-            background:#f1f5f9;
-            border-radius:20px;
-            padding:1.5rem;
-            margin:1.5rem 0;
-        }
-        .detail-features h3 {
-            font-size:1.4rem;
-            color:#0f172a;
-            margin-bottom:1rem;
-            display:flex;
-            align-items:center;
-            gap:0.5rem;
-        }
-        .feature-grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-            gap:0.8rem;
-        }
-        .feature-item {
-            background:white;
-            border-radius:12px;
-            padding:0.8rem;
-            box-shadow:0 2px 5px rgba(0,0,0,0.03);
-        }
-        .feature-label {
-            font-size:0.8rem;
-            color:#64748b;
-            text-transform:uppercase;
-            letter-spacing:0.3px;
-        }
-        .feature-value {
-            font-size:1.1rem;
-            font-weight:600;
-            color:#0f172a;
-            word-break:break-word;
-        }
-        .btn-comprar {
-            background:#10b981;
-            color:white;
-            border:none;
-            padding:1rem 2rem;
-            font-size:1.3rem;
-            border-radius:40px;
-            cursor:pointer;
-            width:100%;
-            font-weight:600;
-            transition:all 0.2s;
-            box-shadow:0 10px 15px -5px rgba(16,185,129,0.4);
-            margin-top:auto;
-        }
-        .btn-comprar:hover:not(:disabled) { background:#059669; transform:scale(1.02); }
-        .btn-comprar:disabled { background:#94a3b8; box-shadow:none; cursor:not-allowed; }
-        .not-found {
-            text-align:center;
-            padding:4rem;
-            font-size:1.5rem;
-            color:#64748b;
-        }
-        footer {
-            background:#1e293b;
-            color:white;
-            text-align:center;
-            padding:1.5rem;
-            margin-top:3rem;
-        }
-        @media (max-width:768px) {
-            .detail-container { grid-template-columns:1fr; }
-            .meta-grid { grid-template-columns:1fr; }
-        }
-    </style>
+    .detail-image-wrap {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--warm-white);
+      height: 440px;
+      box-shadow: var(--shadow);
+    }
+    .detail-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .detail-image-wrap:hover img { transform: scale(1.02); }
+
+    .detail-info { display: flex; flex-direction: column; gap: 0.8rem; }
+
+    .detail-title {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .detail-title-accent {
+      width: 32px;
+      height: 2px;
+      background: var(--logo-accent);
+      border-radius: 2px;
+    }
+
+    .detail-artist {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .detail-artist a { color: var(--wine); font-weight: 500; }
+    .detail-artist a:hover { color: var(--wine-dark); }
+
+    .detail-description {
+      font-size: 0.92rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      padding: 1rem 0;
+      border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+    }
+    .meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
+    .meta-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-light);
+    }
+    .meta-value { font-size: 0.95rem; font-weight: 500; color: var(--text); }
+
+    .detail-price {
+      font-family: var(--font-sans);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--wine);
+      font-variant-numeric: tabular-nums lining-nums;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      letter-spacing: -0.02em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.75rem 0.3rem 0.55rem;
+      border-radius: 100px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+      white-space: nowrap;
+      align-self: flex-start;
+    }
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-disponible { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .status-disponible::before { background: #22c55e; }
+    .status-vendido    { background: var(--wine-tint); color: var(--wine-dark); border: 1px solid rgba(109,43,61,0.25); }
+    .status-vendido::before    { background: var(--wine); }
+    .status-reservado  { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+    .status-reservado::before  { background: #f97316; }
+
+    .visits-count {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .features-section {
+      background: var(--warm-white);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      margin: 0.5rem 0;
+    }
+    .features-section h3 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      margin-bottom: 0.8rem;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.6rem;
+    }
+    .feature-item {
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--border-light);
+    }
+    .feature-label { font-size: 0.72rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.04em; }
+    .feature-value { font-size: 0.92rem; font-weight: 500; color: var(--text); margin-top: 0.15rem; word-break: break-word; }
+
+    .btn-comprar {
+      background: var(--wine);
+      color: white;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      width: 100%;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      letter-spacing: 0.02em;
+      transition: background 0.25s ease, transform 0.2s ease;
+      margin-top: auto;
+    }
+    .btn-comprar:hover:not(:disabled) { background: var(--wine-dark); transform: translateY(-1px); }
+    .btn-comprar:disabled { background: var(--beige); color: var(--text-light); cursor: not-allowed; }
+
+    .not-found {
+      text-align: center;
+      padding: 4rem;
+      color: var(--text-light);
+    }
+
+    /* Resenas */
+    .resenas-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 3rem;
+      animation: fadeUp 0.4s ease both;
+    }
+    .resenas-header {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .rating-summary {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      background: var(--warm-white);
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-light);
+    }
+    .rating-big { font-size: 2.5rem; font-weight: 700; color: var(--gold); font-family: var(--font-serif); }
+    .stars-display { font-size: 1.2rem; color: var(--gold); }
+    .rating-count { font-size: 0.82rem; color: var(--text-muted); }
+
+    .resena-form {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .resena-form h4 { font-family: var(--font-serif); font-size: 1rem; font-weight: 500; margin-bottom: 0.8rem; color: var(--text); }
+    .star-picker { display: flex; gap: 0.3rem; margin-bottom: 0.8rem; }
+    .star-picker span {
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--beige);
+      transition: color 0.15s;
+      user-select: none;
+    }
+    .star-picker span.active { color: var(--gold); }
+    .resena-form textarea {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      resize: vertical;
+      min-height: 70px;
+      font-family: var(--font-sans);
+      color: var(--text);
+      background: var(--cream);
+    }
+    .resena-form textarea:focus { outline: none; border-color: var(--wine); }
+    .btn-resena {
+      margin-top: 0.6rem;
+      background: var(--wine);
+      color: white;
+      border: none;
+      padding: 0.5rem 1.3rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: var(--font-sans);
+      transition: background 0.2s ease;
+    }
+    .btn-resena:hover { background: var(--wine-dark); }
+
+    .resena-card {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.2rem;
+      margin-bottom: 0.7rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .resena-card:hover {
+      border-color: var(--border);
+      box-shadow: var(--shadow);
+    }
+    .resena-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem; }
+    .resena-autor { font-weight: 600; color: var(--text); font-size: 0.9rem; }
+    .resena-stars { color: var(--gold); }
+    .resena-fecha { color: var(--text-light); font-size: 0.78rem; }
+    .resena-texto { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.3rem; }
+    .login-hint { color: var(--text-light); font-size: 0.88rem; }
+    .login-hint a { color: var(--wine); }
+
+    @media (max-width: 768px) {
+      .detail-layout { grid-template-columns: 1fr; }
+      .meta-grid { grid-template-columns: 1fr; }
+      .page-wrap, .resenas-wrap { padding-left: 1rem; padding-right: 1rem; }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo"><h1><a class="Nav" href="../index.html" style="text-decoration:none; color:white;">🎨 Museo de Arte Contemporáneo</a></h1></div>
-        <div class="auth-links" id="authLinks"></div>
-    </header>
 
-    <div class="back-link"><a href="../index.html">&larr; Volver al catálogo</a></div>
+<header class="m-header">
+  <a class="m-logo" href="../index.html"><img src="/img/logo.png" alt="Museo de arte contemporáneo"></a>
+  <nav class="m-nav" id="authLinks"></nav>
+</header>
 
-    <main id="detailMain"></main>
+<div class="page-wrap">
+  <a class="back-link" href="../index.html">Volver al catálogo</a>
+  <div id="detailMain"></div>
+</div>
 
-    <footer><p>&copy; 2026 Museo de Arte Contemporáneo</p></footer>
+<section class="resenas-wrap" id="resenasSection" style="display:none">
+  <h3 class="resenas-header">Reseñas</h3>
+  <div class="rating-summary" id="ratingSummary"></div>
+  <div id="resenaFormContainer"></div>
+  <div id="resenasList"></div>
+</section>
 
-    <script src="../../js/auth.js"></script>
-    <script>
-        /**
-         * Página de detalle de una obra individual.
-         * Muestra información completa, características específicas del género,
-         * estado de disponibilidad y botón de compra para miembros.
-         *
-         * APIs utilizadas:
-         * - GET /api/catalogo/{id}
-         */
-        const urlParams = new URLSearchParams(window.location.search);
-        const obraId = urlParams.get('id');
+<footer class="m-footer">
+  <span>&copy; 2026 Museo de arte contemporáneo</span>
+  <a class="footer-github" href="https://github.com/LuisRojas260305/dev_BD_Museo/" target="_blank" aria-label="Repositorio en GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.93.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg></a>
+</footer>
 
-        /**
-         * Actualiza los botones de autenticación en el header.
-         * Muestra el nombre del usuario si está logueado, o botones de
-         * inicio de sesión / registro si es invitado.
-         */
-        function updateAuthButtons() {
-            const loggedIn = isLoggedIn();
-            const user = getUser();
-            const authLinksDiv = document.getElementById('authLinks');
-            if (loggedIn) {
-                authLinksDiv.innerHTML = `
-                    <span style="color:white;">${user.nombre}</span>
-                    <a href="../Perfiles/perfil.html" style="color:white;">Mi perfil</a>
-                    <a class="logout-btn" onclick="logout()" href="../index.html">Cerrar sesión</a>
-                `;
-            } else {
-                authLinksDiv.innerHTML = `
-                    <a class="login-btn" href="login.html">Iniciar sesión</a>
-                    <a class="register-btn" href="registro.html">Registrarse</a>
-                `;
-            }
-        }
+<script src="../../js/auth.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const obraId = urlParams.get('id');
 
-        /**
-         * Carga los datos de una obra desde el catálogo por su ID.
-         * Normaliza campos como precio_venta, alto, ancho (pueden venir
-         * como Decimal128 de MongoDB) y renderiza la vista.
-         * @async
-         */
-        async function cargarObra() {
-            let obra;
-            try {
-                // Usar SOLO MongoDB via proxy — sin fallback MySQL
-                const res = await fetch(`${API_BASE}/catalogo/${obraId}`);
-                if (!res.ok) throw new Error('No encontrada');
-                const json = await res.json();
-                obra = json.data;
-                obra.obra_id = obra.obra_id || obra.obra_id_original || obra._id;
-                obra.precio_venta = typeof obra.precio_venta === 'object'
-                    ? (Number(obra.precio_venta._serialized) || 0)
-                    : (obra.precio_venta || 0);
-                obra.alto = typeof obra.alto === 'object'
-                    ? (Number(obra.alto._serialized) || 0)
-                    : (obra.alto || 0);
-                obra.ancho = typeof obra.ancho === 'object'
-                    ? (Number(obra.ancho._serialized) || 0)
-                    : (obra.ancho || 0);
+  function updateAuthButtons() {
+    const loggedIn = isLoggedIn();
+    const user = getUser();
+    const nav = document.getElementById('authLinks');
+    if (loggedIn) {
+      nav.innerHTML = `
+        <a href="../Perfiles/perfil.html" class="btn-secondary">Mi perfil</a>
+        <a class="btn-primary" style="cursor:pointer" onclick="logout()">Salir</a>
+      `;
+    } else {
+      nav.innerHTML = `
+        <a class="btn-secondary" href="login.html">Iniciar sesión</a>
+        <a class="btn-primary" href="registro.html">Registrarse</a>
+      `;
+    }
+  }
 
-                render(obra);
-            } catch (error) {
-                document.getElementById('detailMain').innerHTML = '<div class="not-found">Obra no encontrada</div>';
-            }
-        }
+  async function cargarObra() {
+    let obra;
+    try {
+      const res = await fetch(`${API_BASE}/catalogo/${obraId}`);
+      if (!res.ok) throw new Error('no encontrada');
+      const json = await res.json();
+      obra = json.data;
+      obra.obra_id = obra.obra_id || obra.obra_id_original || obra._id;
+      obra.precio_venta = typeof obra.precio_venta === 'object'
+        ? (Number(obra.precio_venta._serialized) || 0) : (obra.precio_venta || 0);
+      obra.alto = typeof obra.alto === 'object'
+        ? (Number(obra.alto._serialized) || 0) : (obra.alto || 0);
+      obra.ancho = typeof obra.ancho === 'object'
+        ? (Number(obra.ancho._serialized) || 0) : (obra.ancho || 0);
+      render(obra);
+      cargarResenas(obra._id);
+      registrarYMostrarVisitas(obra._id);
+    } catch (error) {
+      document.getElementById('detailMain').innerHTML = '<div class="not-found">Obra no encontrada</div>';
+    }
+  }
 
-        /**
-         * Renderiza la vista completa de detalle de la obra: imagen, metadatos,
-         * precio, estado, características específicas del género y botón de compra.
-         *
-         * @param {Object} obra - Datos de la obra obtenidos del catálogo.
-         * @param {string} obra.nombre - Nombre de la obra.
-         * @param {string} obra.descripcion - Descripción de la obra.
-         * @param {number} obra.precio_venta - Precio de venta.
-         * @param {string} obra.estado - Estado (1=Disponible, 2=Reservado, 3=Vendido o texto).
-         * @param {Object} obra.detalles - Características específicas según el género.
-         * @param {Array} obra.fotos - URLs de las imágenes.
-         */
-        function render(obra) {
-            // Mapeo de posibles valores numéricos de estado a texto
-            const mapaEstados = {
-                1: 'Disponible',
-                2: 'Reservado',
-                3: 'Vendido'
-            };
-            const estadoTexto = mapaEstados[obra.estado] || obra.estado || 'Desconocido';
+  function render(obra) {
+    // MongoDB guarda el estado como string: 'Disponible', 'Reservada', 'Vendida'
+    const estadoTexto = obra.estado || 'Desconocido';
+    const user = getUser();
 
-            const main = document.getElementById('detailMain');
-            const user = getUser();
+    const puedeComprar = (estadoTexto === 'Disponible') && user &&
+      (user.tipo === 'miembro' || user.tipo === 'administrador');
 
-            // Determinar si el usuario puede comprar
-            const puedeComprar = (estadoTexto === 'Disponible') && user && (user.tipo === 'miembro' || user.tipo === 'administrador');
+    const botonCompra = puedeComprar
+      ? `<button class="btn-comprar" onclick="window.location.href='confirmar-compra.html?id=${obra.obra_id}'">Solicitar compra</button>`
+      : (estadoTexto !== 'Disponible'
+          ? `<button class="btn-comprar" disabled>No disponible</button>`
+          : `<button class="btn-comprar" onclick="alert('Debes ser miembro para comprar'); window.location.href='login.html';">Iniciar sesión como miembro</button>`);
 
-            // Construir botón de compra según el estado y el tipo de usuario
-            const botonCompra = puedeComprar 
-                ? `<button class="btn-comprar" onclick="window.location.href='confirmar-compra.html?id=${obra.obra_id}'">Comprar</button>`
-                : (estadoTexto !== 'Disponible' 
-                    ? `<button class="btn-comprar" disabled>No disponible</button>`
-                    : `<button class="btn-comprar" onclick="alert('Debes ser miembro para comprar'); window.location.href='login.html';">Iniciar sesión como miembro</button>`);
+    const nombresLegibles = {
+      soporte_nombre: 'soporte', estilos: 'estilos', tematicas: 'temáticas',
+      tipo_nombre: 'tipo', peso: 'peso (kg)', profundidad: 'profundidad (cm)',
+      materiales: 'materiales', tecnicas: 'técnicas',
+      tiraje: 'tiraje', obturacion: 'obturación', apertura: 'apertura',
+      iso: 'iso', resolucion: 'resolución', fecha_captura: 'fecha de captura',
+      impresion_nombre: 'impresión', camara_nombre: 'cámara',
+      tecnica_fotografica_nombre: 'técnica',
+      diametro: 'diámetro (cm)', funcionalidad: 'funcionalidad',
+      coccion_nombre: 'cocción', arcilla_nombre: 'arcilla',
+      modelado_nombre: 'modelado', esmaltado_nombre: 'esmaltado',
+      pieza_nombre: 'pieza', metal_predominante_nombre: 'metal predominante',
+      otros_metales: 'otros metales', alto: 'alto (cm)', ancho: 'ancho (cm)'
+    };
 
-            // Mapa de nombres legibles para características (igual que tenías)
-            const nombresLegibles = {
-                // Pintura
-                soporte_nombre: 'Soporte',
-                estilos: 'Estilos',
-                tematicas: 'Temáticas',
-                // Escultura
-                tipo_nombre: 'Tipo',
-                peso: 'Peso (kg)',
-                profundidad: 'Profundidad (cm)',
-                materiales: 'Materiales',
-                tecnicas: 'Técnicas',
-                // Fotografía
-                tiraje: 'Tiraje',
-                obturacion: 'Obturación',
-                apertura: 'Apertura',
-                iso: 'ISO',
-                resolucion: 'Resolución',
-                fecha_captura: 'Fecha de captura',
-                impresion_nombre: 'Impresión',
-                camara_nombre: 'Cámara',
-                tecnica_fotografica_nombre: 'Técnica',
-                // Cerámica
-                diametro: 'Diámetro (cm)',
-                funcionalidad: 'Funcionalidad',
-                coccion_nombre: 'Cocción',
-                arcilla_nombre: 'Arcilla',
-                modelado_nombre: 'Modelado',
-                esmaltado_nombre: 'Esmaltado',
-                // Orfebrería
-                pieza_nombre: 'Pieza',
-                metal_predominante_nombre: 'Metal predominante',
-                otros_metales: 'Otros metales',
-                // comunes
-                alto: 'Alto (cm)',
-                ancho: 'Ancho (cm)'
-            };
+    let featuresHTML = '';
+    if (obra.detalles && Object.keys(obra.detalles).length > 0) {
+      const excluir = ['obra_id','soporte_id','tipo_id','impresion_id','camara_id',
+        'tecnica_id','coccion_id','arcilla_id','modelado_id','esmaltado_id','pieza_id','metal_predominante_id'];
+      const items = Object.entries(obra.detalles)
+        .filter(([k, v]) => !excluir.includes(k) && v && v.toString().trim() !== '')
+        .map(([k, v]) => ({
+          label: nombresLegibles[k] || k.replace(/_/g, ' '),
+          value: Array.isArray(v) ? v.join(', ') : v
+        }));
+      if (items.length > 0) {
+        featuresHTML = `
+          <div class="features-section">
+            <h3>Características</h3>
+            <div class="feature-grid">
+              ${items.map(it => `
+                <div class="feature-item">
+                  <div class="feature-label">${it.label}</div>
+                  <div class="feature-value">${it.value}</div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+      }
+    }
 
-            // Construir características específicas del género
-            let featuresHTML = '';
-            if (obra.detalles && Object.keys(obra.detalles).length > 0) {
-                const excluir = ['obra_id', 'soporte_id', 'tipo_id', 'impresion_id', 'camara_id', 'tecnica_id', 'coccion_id', 'arcilla_id', 'modelado_id', 'esmaltado_id', 'pieza_id', 'metal_predominante_id'];
-                const items = Object.entries(obra.detalles)
-                    .filter(([key, value]) => !excluir.includes(key) && value && value.toString().trim() !== '')
-                    .map(([key, value]) => {
-                        // Formatear arrays
-                        if (Array.isArray(value)) {
-                            value = value.join(', ');
-                        }
-                        // Traducir clave
-                        const label = nombresLegibles[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        return { label, value };
-                    });
+    const estadoClase = {
+      'Disponible': 'status-disponible',
+      'Vendida':    'status-vendido',
+      'Reservada':  'status-reservado'
+    }[estadoTexto] || '';
 
-                if (items.length > 0) {
-                    featuresHTML = `
-                        <div class="detail-features">
-                            <h3>📋 Características</h3>
-                            <div class="feature-grid">
-                                ${items.map(item => `
-                                    <div class="feature-item">
-                                        <div class="feature-label">${item.label}</div>
-                                        <div class="feature-value">${item.value}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-            }
+    const imagenUrl = obra.fotos && obra.fotos.length > 0
+      ? obra.fotos[0]
+      : 'https://via.placeholder.com/600x400?text=sin+imagen';
 
-            const estadoClase = {
-                'Disponible': 'status-disponible',
-                'Vendido': 'status-vendido',
-                'Reservado': 'status-reservado'
-            }[estadoTexto] || '';
+    const metaItems = [];
+    if (obra.fecha_creacion) metaItems.push({ label: 'fecha', value: obra.fecha_creacion.split('T')[0] });
+    if (obra.alto && obra.ancho) metaItems.push({ label: 'dimensiones', value: `${obra.alto} x ${obra.ancho} cm` });
+    else if (obra.alto) metaItems.push({ label: 'alto', value: `${obra.alto} cm` });
+    else if (obra.ancho) metaItems.push({ label: 'ancho', value: `${obra.ancho} cm` });
 
-            // URL de la imagen — desde fotos[0] de MongoDB (Multimedia table via /api/multimedia/{id})
-            const imagenUrl = obra.fotos && obra.fotos.length > 0
-                ? obra.fotos[0]
-                : 'https://via.placeholder.com/600x400?text=Sin+imagen';
+    const metaHTML = metaItems.length > 0 ? `
+      <div class="meta-grid">
+        ${metaItems.map(m => `
+          <div class="meta-item">
+            <span class="meta-label">${m.label}</span>
+            <span class="meta-value">${m.value}</span>
+          </div>`).join('')}
+      </div>` : '';
 
-            // Metadatos comunes (fecha y dimensiones)
-            const metaItems = [];
-            if (obra.fecha_creacion) metaItems.push({ label: 'Fecha creación', value: obra.fecha_creacion.split('T')[0] });
-            if (obra.alto && obra.ancho) metaItems.push({ label: 'Dimensiones', value: `${obra.alto} x ${obra.ancho} cm` });
-            else if (obra.alto) metaItems.push({ label: 'Alto', value: `${obra.alto} cm` });
-            else if (obra.ancho) metaItems.push({ label: 'Ancho', value: `${obra.ancho} cm` });
+    document.getElementById('detailMain').innerHTML = `
+      <div class="detail-layout">
+        <div class="detail-image-wrap">
+          <img src="${imagenUrl}" alt="${obra.nombre}"
+            decoding="async"
+            onerror="this.src='https://placehold.co/480x360/f5f1e8/9c8a7a?text=sin+imagen'">
+        </div>
+        <div class="detail-info">
+          <h2 class="detail-title">${obra.nombre}</h2>
+          <div class="detail-title-accent"></div>
+          <p class="detail-artist">por ${obra.artista_id
+            ? `<a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a>`
+            : '<span>Artista desconocido</span>'}</p>
+          <span class="badge badge-muted" style="align-self:flex-start">${obra.genero_nombre || ''}</span>
+          ${obra.descripcion ? `<p class="detail-description">${obra.descripcion}</p>` : ''}
+          ${metaHTML}
+          <div class="detail-price">${Number(obra.precio_venta).toLocaleString()} $</div>
+          <div class="status-badge ${estadoClase}">${estadoTexto}</div>
+          <div class="visits-count" id="visitasCount">Cargando visitas...</div>
+          ${featuresHTML}
+          ${botonCompra}
+        </div>
+      </div>
+    `;
+  }
 
-            const metaHTML = metaItems.length > 0 ? `
-                <div class="meta-grid">
-                    ${metaItems.map(m => `
-                        <div class="meta-item">
-                            <span class="meta-label">${m.label}</span>
-                            <span class="meta-value">${m.value}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            ` : '';
+  updateAuthButtons();
+  cargarObra();
 
-            const precioFormateado = Number(obra.precio_venta).toLocaleString();
+  const API_RESENAS = 'http://localhost:3000/api/resenas';
+  let obraIdGlobal = null;
+  let ratingSeleccionado = 0;
 
-            main.innerHTML = `
-                <div class="detail-container">
-                    <div class="detail-image">
-                        <img src="${imagenUrl}" 
-                            alt="${obra.nombre}" 
-                            onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Sin+imagen';">
-                    </div>
-                    <div class="detail-info">
-                        <h2>${obra.nombre}</h2>
-                        <p class="detail-artist">Artista: ${obra.artista_id ? `<a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a>` : '<span>Desconocido</span>'}</p>
-                        <span class="detail-genre">${obra.genero_nombre}</span>
-                        <p class="detail-description">${obra.descripcion || ''}</p>
-                        ${metaHTML}
-                        <div class="detail-price">$${precioFormateado}</div>
-                        <div class="detail-status ${estadoClase}">${estadoTexto}</div>
-                        ${featuresHTML}
-                        ${botonCompra}
-                    </div>
-                </div>
-            `;
-        }
+  function estrellas(n, total = 5) {
+    let s = '';
+    for (let i = 1; i <= total; i++) s += i <= n ? '★' : '☆';
+    return s;
+  }
 
-        updateAuthButtons();
-        cargarObra();
-    </script>
+  async function cargarResenas(obra_id) {
+    obraIdGlobal = obra_id;
+    const section = document.getElementById('resenasSection');
+    section.style.display = 'block';
+
+    const r = await fetch(`${API_RESENAS}/${obra_id}`);
+    const d = await r.json();
+
+    document.getElementById('ratingSummary').innerHTML = `
+      <div class="rating-big">${d.promedio || '-'}</div>
+      <div>
+        <div class="stars-display">${estrellas(Math.round(d.promedio))}</div>
+        <div class="rating-count">${d.total} reseña${d.total !== 1 ? 's' : ''}</div>
+      </div>`;
+
+    const user = getUser ? getUser() : null;
+    const formContainer = document.getElementById('resenaFormContainer');
+    if (user) {
+      formContainer.innerHTML = `
+        <div class="resena-form">
+          <h4>Tu reseña</h4>
+          <div class="star-picker" id="starPicker">
+            ${[1,2,3,4,5].map(i => `<span data-v="${i}" onclick="selStar(${i})">&#9733;</span>`).join('')}
+          </div>
+          <textarea id="resenaComentario" placeholder="Escribe tu opinión (opcional)..."></textarea>
+          <button class="btn-resena" onclick="enviarResena()">Publicar reseña</button>
+        </div>`;
+    } else {
+      formContainer.innerHTML = `<p class="login-hint"><a href="login.html">Inicia sesión</a> para dejar una reseña.</p>`;
+
+    }
+
+    const lista = document.getElementById('resenasList');
+    if (!d.resenas || d.resenas.length === 0) {
+      lista.innerHTML = '<p class="login-hint">Sin reseñas aún.</p>';
+
+      return;
+    }
+    lista.innerHTML = d.resenas.map(r => `
+      <div class="resena-card">
+        <div class="resena-header">
+          <span class="resena-autor">${r.nombre} ${r.apellido || ''}</span>
+          <span class="resena-stars">${estrellas(r.rating)}</span>
+        </div>
+        <div class="resena-fecha">${new Date(r.fecha).toLocaleDateString('es-ES')}</div>
+        ${r.comentario ? `<div class="resena-texto">${r.comentario}</div>` : ''}
+      </div>`).join('');
+  }
+
+  window.selStar = function(n) {
+    ratingSeleccionado = n;
+    document.querySelectorAll('#starPicker span').forEach(s => {
+      s.classList.toggle('active', parseInt(s.dataset.v) <= n);
+    });
+  };
+
+  async function registrarYMostrarVisitas(obra_id) {
+    try {
+      await fetch(`http://localhost:3000/api/visitas/${obra_id}`, { method: 'POST' });
+      const r = await fetch(`http://localhost:3000/api/visitas/${obra_id}`);
+      const d = await r.json();
+      const el = document.getElementById('visitasCount');
+      if (el) el.textContent = `${d.total} vista${d.total !== 1 ? 's' : ''}`;
+    } catch {}
+  }
+
+  window.enviarResena = async function() {
+    if (!ratingSeleccionado) return alert('Selecciona una puntuación.');
+    const comentario = document.getElementById('resenaComentario').value.trim();
+    const token = localStorage.getItem('token');
+    const r = await fetch(API_RESENAS, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ obra_id: obraIdGlobal, rating: ratingSeleccionado, comentario })
+    });
+    const d = await r.json();
+    if (d.success) {
+      ratingSeleccionado = 0;
+      cargarResenas(obraIdGlobal);
+    } else {
+      alert('Error: ' + d.error);
+    }
+  };
+</script>
 </body>
 </html>

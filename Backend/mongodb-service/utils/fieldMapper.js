@@ -1,5 +1,5 @@
-/**
- * Field mapper utility — transforms raw MongoDB artwork documents into the
+﻿/**
+ * Field mapper utility - transforms raw MongoDB artwork documents into the
  * frontend-friendly response format. Resolves artist names from both embedded
  * and populated artist data, and normalizes Decimal128 values to plain numbers.
  */
@@ -7,8 +7,8 @@ const { convertDecimal128 } = require('./decimalHelper');
 
 /**
  * Resuelve el nombre completo del artista desde:
- * 1. obra.artista (embebido) — usado por aggregation vía $lookup
- * 2. obra.artista_id (populado vía .populate('artista_id')) — usado por getCatalogById
+ * 1. obra.artista (embebido) - usado por aggregation vía $lookup
+ * 2. obra.artista_id (populado vía .populate('artista_id')) - usado por getCatalogById
  */
 function resolveArtistaNombre(obra) {
   if (obra.artista) {

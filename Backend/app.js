@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Archivo principal de entrada del backend del Museo.
  * Configura Express con CORS, middlewares, enrutamiento y manejo global de errores.
  * Inicia el servidor tras verificar la conexión a la base de datos.
@@ -13,7 +13,7 @@ const { auditar } = require('./services/auditoriaHelper');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CORS — permitir todos los orígenes (desarrollo)
+// CORS - permitir todos los orígenes (desarrollo)
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -32,14 +32,20 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/usuarios', require('./routes/Usuario/usuarios'));
 app.use('/api/preguntas-seguridad', require('./routes/Usuario/preguntas'));
 
-// Catálogo público — proxy a mongodb-service
+// Catálogo público - proxy a mongodb-service
 app.use('/api/catalogo', require('./routes/catalogo.routes'));
 
-// Multimedia — servir fotos desde MySQL
+// Multimedia - servir fotos desde MySQL
 app.use('/api/multimedia', require('./routes/multimedia.routes'));
 
-// Eventos — proxy a cassandra-service
+// Eventos - proxy a cassandra-service
 app.use('/api/eventos', require('./routes/eventos.routes'));
+
+// Reseñas de obras
+app.use('/api/resenas', require('./routes/resenas.routes'));
+
+// Visitas a obras (contador en Cassandra)
+app.use('/api/visitas', require('./routes/visitas.routes'));
 
 // Ventas
 app.use('/api/ventas', require('./routes/Compra/ventas'));
@@ -49,7 +55,9 @@ app.use('/api/reportes', require('./routes/Compra/reportes'));
 // Frontend estático
 const frontendPath = path.resolve(__dirname, '../Frontend/pages');
 app.use(express.static(frontendPath));
-app.use('/js', express.static(path.resolve(__dirname, '../Frontend/js')));
+app.use('/js',  express.static(path.resolve(__dirname, '../Frontend/js')));
+app.use('/css', express.static(path.resolve(__dirname, '../Frontend/css')));
+app.use('/img', express.static(path.resolve(__dirname, '../Frontend/img')));
 
 // Página principal
 app.get('/', (req, res) => {

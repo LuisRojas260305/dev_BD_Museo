@@ -1,4 +1,4 @@
-# Registro de Cambios — Sprint 1: Blindaje npm + MongoDB Service
+﻿# Registro de Cambios - Sprint 1: Blindaje npm + MongoDB Service
 
 ## Contexto
 
@@ -8,7 +8,7 @@ solo-lectura + blindaje de dependencias npm.
 
 ---
 
-## Fase 1 — Blindaje npm (Seguridad)
+## Fase 1 - Blindaje npm (Seguridad)
 
 ### Cambios
 | Archivo | Cambio |
@@ -24,11 +24,11 @@ solo-lectura + blindaje de dependencias npm.
 - `.npmrc` bloquea instalación si hay vulnerabilidades high+.
 
 ### Errores y solución
-Ninguno — actualización directa, `npm install` exitoso, `npm audit` 0 vulnerabilidades.
+Ninguno - actualización directa, `npm install` exitoso, `npm audit` 0 vulnerabilidades.
 
 ---
 
-## Fase 2 — MongoDB Service (Sprint 1)
+## Fase 2 - MongoDB Service (Sprint 1)
 
 ### Cambios estructurales
 | Archivo | Propósito |
