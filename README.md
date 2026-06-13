@@ -1,5 +1,19 @@
 # Museo de Arte Contemporáneo
 
+## Grupo 3
+
+| Integrante | C.I. |
+|------------|------|
+| Miguel Rivas | 19.505.397 |
+| Luis Rojas | 30.931.891 |
+| Daniel Reyna | 29.989.066 |
+| Paola Peña | 31.152.816 |
+| Keibel Guilarte | 28.726.605 |
+
+**Commit Sprint 3 (Neo4j):** https://github.com/LuisRojas260305/dev_BD_Museo/commit/56699cc
+
+---
+
 Sistema de gestión museística con arquitectura de microservicios y tres bases de datos, desarrollado para la materia **Bases de Datos II (SBDII)**.
 
 | Base de Datos | Rol | Puerto |
