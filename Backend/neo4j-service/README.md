@@ -1,5 +1,19 @@
 # Sprint 3: Redes de Conocimiento y Recomendaciones (Neo4j)
 
+## Grupo 3
+
+| Integrante | C.I. |
+|------------|------|
+| Miguel Rivas | 19.505.397 |
+| Luis Rojas | 30.931.891 |
+| Daniel Reyna | 29.989.066 |
+| Paola Peña | 31.152.816 |
+| Keibel Guilarte | 28.726.605 |
+
+**Commit Sprint 3 (Neo4j):** https://github.com/LuisRojas260305/dev_BD_Museo/commit/56699cc
+
+---
+
 Plataforma Políglota para el Museo de Arte Contemporáneo
 Sistemas de Bases de Datos II
 
