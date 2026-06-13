@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Archivo principal de entrada del backend del Museo.
  * Configura Express con CORS, middlewares, enrutamiento y manejo global de errores.
  * Inicia el servidor tras verificar la conexión a la base de datos.
@@ -46,6 +46,9 @@ app.use('/api/resenas', require('./routes/resenas.routes'));
 
 // Visitas a obras (contador en Cassandra)
 app.use('/api/visitas', require('./routes/visitas.routes'));
+
+// Recomendaciones - proxy a neo4j-service (grafo de conocimiento)
+app.use('/api/recomendaciones', require('./routes/recomendaciones.routes'));
 
 // Ventas
 app.use('/api/ventas', require('./routes/Compra/ventas'));

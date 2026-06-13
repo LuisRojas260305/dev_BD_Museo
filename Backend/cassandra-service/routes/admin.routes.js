@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const router  = express.Router();
 const { getClient } = require('../config/cassandra');
 const { topObras }  = require('../models/visitas');

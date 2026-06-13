@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 /**
  * Smoke Test - Verifica que todo el sistema funcione end-to-end.
  *

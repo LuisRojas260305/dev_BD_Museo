@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Proxy HTTP hacia el microservicio mongodb-service para el catálogo de obras.
  * Usa axios para redirigir requests y pasa x-internal-key para autenticación
  * service-to-service.

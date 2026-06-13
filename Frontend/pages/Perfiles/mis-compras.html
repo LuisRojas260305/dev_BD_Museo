@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museo - mis compras</title>
+  <link rel="stylesheet" href="/css/museo.css">
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page-wrap { max-width: 920px; margin: 0 auto; padding: 2rem 1.5rem; flex: 1; width: 100%; }
+
+    .compras-header { margin-bottom: 1.6rem; animation: fadeUp 0.4s ease; }
+    .compras-header h2 {
+      font-family: var(--font-serif);
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .compras-header p { font-size: 0.88rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+    /* Resumen */
+    .resumen-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.6rem; }
+    .resumen-box {
+      flex: 0 1 340px; min-width: 220px;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1.2rem 1.5rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+      animation: fadeUp 0.4s ease both;
+    }
+    .resumen-box .num { font-size: 2rem; font-weight: 700; color: var(--wine); line-height: 1; font-variant-numeric: tabular-nums; }
+    .resumen-box .lbl { font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.4rem; }
+
+    /* Filtros por estado */
+    .filtros {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1.3rem;
+      animation: fadeUp 0.4s ease both;
+    }
+    .filtro-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 100px;
+      padding: 0.4rem 0.95rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .filtro-btn:hover { border-color: var(--wine); color: var(--wine); }
+    .filtro-btn.active { background: var(--wine); border-color: var(--wine); color: #fff; }
+    .filtro-num {
+      font-size: 0.72rem; font-weight: 700;
+      background: var(--warm-white); color: var(--text-muted);
+      border-radius: 100px; padding: 0.05rem 0.45rem;
+      min-width: 1.4em; text-align: center;
+    }
+    .filtro-btn.active .filtro-num { background: rgba(255,255,255,0.22); color: #fff; }
+
+    /* Lista de compras */
+    .compra-card {
+      display: flex;
+      gap: 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 0.9rem;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      animation: fadeUp 0.4s ease both;
+    }
+    .compra-card:hover { border-color: var(--border); box-shadow: 0 8px 24px rgba(109,43,61,0.1); transform: translateY(-2px); }
+    .compra-thumb {
+      width: 96px; height: 96px; flex-shrink: 0;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      background: var(--warm-white);
+      border: 1px solid var(--border-light);
+    }
+    .compra-body { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+    .compra-title {
+      font-family: var(--font-serif); font-size: 1.1rem; font-weight: 600; color: var(--text);
+      line-height: 1.25;
+    }
+    .compra-title a { color: inherit; text-decoration: none; transition: color 0.18s; }
+    .compra-title a:hover { color: var(--wine); }
+    .compra-artist { font-size: 0.84rem; color: var(--text-light); }
+    .compra-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; margin-top: 0.45rem; font-size: 0.8rem; color: var(--text-muted); }
+    .compra-meta b { color: var(--text); font-weight: 600; }
+    .compra-side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 0.4rem; flex-shrink: 0; }
+    .compra-precio { font-size: 1.15rem; font-weight: 700; color: var(--wine); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .compra-total { font-size: 0.74rem; color: var(--text-muted); }
+
+    .estado-chip {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.22rem 0.65rem; border-radius: 100px;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .estado-chip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .estado-vendida   { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .estado-vendida::before   { background: #22c55e; }
+    .estado-reservada { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+    .estado-reservada::before { background: #f97316; }
+    .estado-cancelada { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .estado-cancelada::before { background: #ef4444; }
+
+    .empty-state {
+      text-align: center; padding: 4rem 1.5rem;
+      background: var(--surface); border: 1px dashed var(--border);
+      border-radius: var(--radius-md); color: var(--text-light);
+      animation: fadeUp 0.4s ease;
+    }
+    .empty-state h3 { font-family: var(--font-serif); font-size: 1.2rem; color: var(--text); margin-bottom: 0.5rem; font-weight: 500; }
+    .empty-state a { color: var(--wine); }
+
+    .loading { text-align: center; padding: 3rem; color: var(--text-light); }
+
+    @media (max-width: 640px) {
+      .compra-card { flex-wrap: wrap; }
+      .compra-side { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; border-top: 1px solid var(--border-light); padding-top: 0.6rem; }
+      .page-wrap { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="m-header">
+  <a class="m-logo" href="../index.html"><img src="/img/logo.png" alt="Museo de arte contemporáneo"></a>
+  <nav class="m-nav">
+    <a href="perfil.html" class="btn-secondary">Mi perfil</a>
+    <a href="../index.html" class="btn-ghost">Catálogo</a>
+    <a class="btn-primary" style="cursor:pointer" onclick="logout()">Salir</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <div class="compras-header">
+    <a class="back-link" href="perfil.html">Volver a mi perfil</a>
+    <h2>Mis compras</h2>
+    <p>Historial de obras que has reservado y adquirido en el museo</p>
+  </div>
+
+  <div class="resumen-row" id="resumen" style="display:none">
+    <div class="resumen-box" style="animation-delay:.04s"><div class="num" id="r-invertido">0 $</div><div class="lbl">Total invertido</div></div>
+  </div>
+
+  <div class="filtros" id="filtros" style="display:none">
+    <button class="filtro-btn active" data-estado="todas" onclick="setFiltro('todas')">Todas <span class="filtro-num" id="f-todas">0</span></button>
+    <button class="filtro-btn" data-estado="vendida" onclick="setFiltro('vendida')">Adquiridas <span class="filtro-num" id="f-vendida">0</span></button>
+    <button class="filtro-btn" data-estado="reservada" onclick="setFiltro('reservada')">Reservadas <span class="filtro-num" id="f-reservada">0</span></button>
+    <button class="filtro-btn" data-estado="cancelada" onclick="setFiltro('cancelada')">Canceladas <span class="filtro-num" id="f-cancelada">0</span></button>
+  </div>
+
+  <div id="lista"><div class="loading">Cargando tus compras...</div></div>
+</div>
+
+<footer class="m-footer">
+  <span>&copy; 2026 Museo de arte contemporáneo</span>
+  <a class="footer-github" href="https://github.com/LuisRojas260305/dev_BD_Museo/" target="_blank" aria-label="Repositorio en GitHub"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.93.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg></a>
+</footer>
+
+<script src="../../js/auth.js"></script>
+<script>
+  // Sin sesión -> al login
+  if (!isLoggedIn()) location.href = '../Principal/login.html';
+
+  // Placeholder local (SVG data-URI) tintado por género, sin servicios externos.
+  const PH_PALETA = {
+    'Pintura':['#e8dccb','#d8c3a5','#8a6d4b'],'Escultura':['#e3e0db','#cfcabf','#6f6a60'],
+    'Orfebrería':['#efe4c6','#e0cf9a','#9c7d3c'],'Cerámica':['#ecd9c9','#dcbfa6','#9a6a4b'],
+    'Fotografía':['#dadde0','#bcc2c7','#5b626a'],'Cristalería':['#d8e6e6','#b6d2d2','#4f7e7e'],
+    'Textil':['#e7d8da','#d3b3b8','#8c5b63'],'Grabado':['#ddd9d2','#c2bcb1','#6a6358'],
+    'Acuarela':['#dde6ec','#bcd0dd','#5a7d92'],
+  };
+  function placeholderObra(texto, genero) {
+    const t = String(texto || 'Museo').replace(/[<>&]/g, '').slice(0, 16);
+    const p = PH_PALETA[genero] || ['#efe9df','#e2d9cb','#9c8a7a'];
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>
+      <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${p[0]}'/><stop offset='1' stop-color='${p[1]}'/></linearGradient></defs>
+      <rect width='200' height='200' fill='url(#g)'/>
+      <circle cx='100' cy='80' r='26' fill='none' stroke='${p[2]}' stroke-width='2' stroke-opacity='.7'/>
+      <path d='M89 80l9 9 18-20' fill='none' stroke='${p[2]}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='.7'/>
+      <text x='100' y='140' font-family='Georgia,serif' font-size='17' fill='${p[2]}' text-anchor='middle'>${t}</text>
+    </svg>`;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
+  const ESTADO = {
+    vendida:   { clase: 'estado-vendida',   texto: 'Adquirida' },
+    reservada: { clase: 'estado-reservada', texto: 'Reservada' },
+    cancelada: { clase: 'estado-cancelada', texto: 'Cancelada' },
+  };
+
+  function fmtMoneda(n) { return (Number(n) || 0).toLocaleString('es') + ' $'; }
+  function fmtFecha(f) { return f ? new Date(f).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }) : '—'; }
+
+  // Anima un número del 0 al valor final con easing (efecto de incremento).
+  // fmt opcional formatea cada paso (ej. moneda).
+  function animarNumero(el, destino, opts = {}) {
+    if (!el) return;
+    const dur = opts.duracion || 1100;
+    const fmt = opts.fmt || (v => Math.round(v).toLocaleString('es'));
+    const ini = performance.now();
+    function paso(t) {
+      const p = Math.min((t - ini) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      el.textContent = fmt(destino * ease);
+      if (p < 1) requestAnimationFrame(paso);
+      else el.textContent = fmt(destino);
+    }
+    requestAnimationFrame(paso);
+  }
+
+  let todasLasCompras = [];
+  let filtroActual = 'todas';
+
+  // Pinta la lista aplicando el filtro de estado actual.
+  function renderLista() {
+    const lista = document.getElementById('lista');
+    const compras = filtroActual === 'todas'
+      ? todasLasCompras
+      : todasLasCompras.filter(c => c.estado === filtroActual);
+
+    if (!compras.length) {
+      const etiqueta = { vendida: 'adquiridas', reservada: 'reservadas', cancelada: 'canceladas' }[filtroActual] || '';
+      lista.innerHTML = `<div class="empty-state"><h3>Sin compras ${etiqueta}</h3><p>No tienes compras en este estado.</p></div>`;
+      return;
+    }
+
+    lista.innerHTML = '';
+    compras.forEach((c, i) => {
+      const est = ESTADO[c.estado] || { clase: 'estado-reservada', texto: c.estado };
+      const fecha = c.estado === 'vendida' ? c.fecha_venta : c.fecha_reserva;
+      const card = document.createElement('div');
+      card.className = 'compra-card';
+      card.style.animationDelay = (i % 12 * 0.03) + 's';
+      const img = c._foto || placeholderObra(c.obra_nombre, c._genero || '');
+      card.innerHTML = `
+        <img class="compra-thumb" data-obra="${c.obra_id}" src="${img}" alt="${c.obra_nombre}">
+        <div class="compra-body">
+          <div class="compra-title"><a href="../Principal/detalle.html?id=${c.obra_id}">${c.obra_nombre || 'Obra'}</a></div>
+          <div class="compra-artist">${c.artista_nombre || 'Artista desconocido'}</div>
+          <div class="compra-meta">
+            <span>Fecha: <b>${fmtFecha(fecha)}</b></span>
+            ${c.factura_id ? `<span>Factura: <b>#${c.factura_id}</b></span>` : ''}
+            ${c.direccion_envio ? `<span>Envío: <b>${c.direccion_envio}</b></span>` : ''}
+          </div>
+        </div>
+        <div class="compra-side">
+          <span class="estado-chip ${est.clase}">${est.texto}</span>
+          <div style="text-align:right">
+            <div class="compra-precio">${fmtMoneda(c.precio_venta)}</div>
+            ${c.total ? `<div class="compra-total">Total con IVA: ${fmtMoneda(c.total)}</div>` : ''}
+          </div>
+        </div>
+      `;
+      lista.appendChild(card);
+    });
+  }
+
+  // Cambia el filtro activo y vuelve a pintar.
+  function setFiltro(estado) {
+    filtroActual = estado;
+    document.querySelectorAll('.filtro-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.estado === estado);
+    });
+    renderLista();
+  }
+
+  async function cargarCompras() {
+    try {
+      const res = await authFetch(`${API_BASE}/ventas/mis-compras`);
+      if (!res.ok) throw new Error('No se pudieron cargar las compras');
+      todasLasCompras = await res.json();
+    } catch (e) {
+      document.getElementById('lista').innerHTML =
+        `<div class="empty-state"><h3>No se pudo cargar</h3><p>${e.message}. Asegúrate de ser miembro.</p></div>`;
+      return;
+    }
+
+    if (!todasLasCompras.length) {
+      document.getElementById('lista').innerHTML = `
+        <div class="empty-state">
+          <h3>Aún no tienes compras</h3>
+          <p>Explora el <a href="../index.html">catálogo</a> y reserva tu primera obra.</p>
+        </div>`;
+      return;
+    }
+
+    // Resumen
+    const vendidas = todasLasCompras.filter(c => c.estado === 'vendida').length;
+    const reservadas = todasLasCompras.filter(c => c.estado === 'reservada').length;
+    const canceladas = todasLasCompras.filter(c => c.estado === 'cancelada').length;
+    const invertido = todasLasCompras.filter(c => c.estado === 'vendida')
+      .reduce((s, c) => s + (Number(c.total) || Number(c.precio_venta) || 0), 0);
+    document.getElementById('resumen').style.display = 'flex';
+    // Animación de incremento en el total invertido
+    animarNumero(document.getElementById('r-invertido'), invertido, { duracion: 1300, fmt: v => fmtMoneda(Math.round(v)) });
+
+    // Contadores de los filtros
+    document.getElementById('f-todas').textContent = todasLasCompras.length;
+    document.getElementById('f-vendida').textContent = vendidas;
+    document.getElementById('f-reservada').textContent = reservadas;
+    document.getElementById('f-cancelada').textContent = canceladas;
+    document.getElementById('filtros').style.display = 'flex';
+
+    renderLista();
+
+    // Enriquecer cada compra con la foto real del catálogo (se cachea en el
+    // objeto y se aplica a la miniatura si está visible con el filtro actual).
+    todasLasCompras.forEach(async (c) => {
+      try {
+        const r = await fetch(`${API_BASE}/catalogo/${c.obra_id}`);
+        if (!r.ok) return;
+        const o = (await r.json()).data;
+        if (!o) return;
+        c._genero = o.genero_nombre || o.genero || '';
+        c._foto = (o.fotos && o.fotos.length && !/placehold\.co|via\.placeholder|placeholder\.com/i.test(o.fotos[0]))
+          ? o.fotos[0] : placeholderObra(c.obra_nombre, c._genero);
+        const img = document.querySelector(`.compra-thumb[data-obra="${c.obra_id}"]`);
+        if (img) {
+          img.src = c._foto;
+          img.onerror = () => { img.onerror = null; img.src = placeholderObra(c.obra_nombre, c._genero); };
+        }
+      } catch (_) {}
+    });
+  }
+
+  cargarCompras();
+</script>
+</body>
+</html>

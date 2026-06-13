@@ -21,6 +21,7 @@ require('dotenv').config();
 const mongoose  = require('mongoose');
 const mysql     = require('mysql2/promise');
 const cassandra = require(require('path').resolve(__dirname, '../../cassandra-service/node_modules/cassandra-driver'));
+const neo4j     = require(require('path').resolve(__dirname, '../../neo4j-service/node_modules/neo4j-driver'));
 
 // ---- Parametros del benchmark (iguales para las 3 BDs) ---------------------
 const N           = Number(process.env.BENCH_N)    || 5000;  // registros a insertar
@@ -284,6 +285,85 @@ async function benchmarkCassandra() {
 }
 
 // ============================================================================
+//  Neo4j  (driver nativo Bolt, mismo dataset y mismas 5 operaciones)
+// ----------------------------------------------------------------------------
+//  Estructura identica: nodos (:BenchItem {categoria, id, valor, creado}) con
+//  indice compuesto (categoria, id). Las operaciones se expresan en Cypher de
+//  forma idiomatica. Usa una etiqueta propia (BenchItem) para NO tocar el grafo
+//  de recomendaciones; al terminar elimina esos nodos.
+// ============================================================================
+async function benchmarkNeo4j() {
+  console.log('\n+----- Neo4j (recomendaciones) ----------------------+');
+  const driver = neo4j.driver(
+    process.env.NEO4J_URI || 'bolt://localhost:7687',
+    neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'museo2026'),
+    { disableLosslessIntegers: true }
+  );
+  try {
+    await driver.verifyConnectivity();
+  } catch {
+    console.log('| SKIP: Neo4j no disponible (puerto 7687 cerrado)     |');
+    console.log('| Inicia Neo4j antes de ejecutar el benchmark.        |');
+    console.log('+-----------------------------------------------------+');
+    await driver.close().catch(() => {});
+    return null;
+  }
+
+  const db = process.env.NEO4J_DATABASE || 'neo4j';
+  const exec = (cypher, params = {}) => driver.executeQuery(cypher, params, { database: db });
+
+  // Estructura identica: indice compuesto (categoria, id). Limpieza previa.
+  await exec('MATCH (n:BenchItem) DETACH DELETE n');
+  await exec('CREATE INDEX bench_cat_id IF NOT EXISTS FOR (n:BenchItem) ON (n.categoria, n.id)');
+
+  const times = [];
+  let t;
+
+  // 1. WRITE
+  t = Date.now();
+  await correrConcurrencia(DATASET, CONCURRENCY, (it) =>
+    exec('CREATE (n:BenchItem {categoria:$categoria, id:$id, valor:$valor, creado:$creado})',
+      { categoria: it.categoria, id: it.id, valor: it.valor, creado: it.creado.toISOString() }));
+  times.push(Date.now() - t);
+  console.log(`| WRITE  ${N} inserts            -> [${fmt(times[0])}]`);
+
+  // 2. POINT READ
+  t = Date.now();
+  await correrConcurrencia(POINT_KEYS, CONCURRENCY, (k) =>
+    exec('MATCH (n:BenchItem {categoria:$categoria, id:$id}) RETURN n', { categoria: k.categoria, id: k.id }));
+  times.push(Date.now() - t);
+  console.log(`| POINT READ x${POINT_READS}             -> [${fmt(times[1])}]`);
+
+  // 3. PARTITION READ
+  t = Date.now();
+  const part = await exec('MATCH (n:BenchItem {categoria:$categoria}) RETURN n', { categoria: CAT_OBJETIVO });
+  times.push(Date.now() - t);
+  console.log(`| PARTITION READ               -> ${part.records.length} filas  [${fmt(times[2])}]`);
+
+  // 4. RANGE READ
+  t = Date.now();
+  const rng = await exec(
+    'MATCH (n:BenchItem) WHERE n.categoria = $categoria AND n.id >= $lo AND n.id <= $hi RETURN n',
+    { categoria: CAT_OBJETIVO, lo: RANGE_LO, hi: RANGE_HI });
+  times.push(Date.now() - t);
+  console.log(`| RANGE READ                   -> ${rng.records.length} filas   [${fmt(times[3])}]`);
+
+  // 5. COUNT por particion
+  t = Date.now();
+  for (let c = 0; c < CATEGORIAS; c++) {
+    await exec('MATCH (n:BenchItem {categoria:$categoria}) RETURN count(n) AS n', { categoria: c });
+  }
+  times.push(Date.now() - t);
+  console.log(`| COUNT por particion x${CATEGORIAS}      -> [${fmt(times[4])}]`);
+
+  // Limpieza: no dejar los nodos de benchmark en el grafo de recomendaciones
+  await exec('MATCH (n:BenchItem) DETACH DELETE n');
+  console.log('+---------------------------------------------------+');
+  await driver.close();
+  return times;
+}
+
+// ============================================================================
 //  Tabla comparativa por operacion
 // ============================================================================
 function imprimirComparativa(resultados) {
@@ -325,8 +405,8 @@ function imprimirRanking(resultados) {
 
   if (bds.length === 0) return;
   const maxAvg = bds[bds.length - 1].avg || 1;
-  const medallas = ['1er lugar', '2do lugar', '3er lugar'];
-  const trofeos  = ['[GANADOR]', '[2do]    ', '[3ro]    '];
+  const medallas = ['1er lugar', '2do lugar', '3er lugar', '4to lugar'];
+  const trofeos  = ['[GANADOR]', '[2do]    ', '[3ro]    ', '[4to]    '];
 
   console.log('\n+============================================================+');
   console.log('|         RANKING FINAL - PROMEDIO DE LAS 5 OPERACIONES     |');
@@ -360,7 +440,7 @@ function imprimirRanking(resultados) {
 // ============================================================================
 async function main() {
   console.log('+============================================================+');
-  console.log('|   BENCHMARK JUSTO - mismo dataset, mismas queries, 3 BDs   |');
+  console.log('|   BENCHMARK JUSTO - mismo dataset, mismas queries, 4 BDs   |');
   console.log(`|   N=${N} registros | concurrencia=${CONCURRENCY} | ${CATEGORIAS} particiones`.padEnd(60) + ' |');
   console.log('+============================================================+');
 
@@ -368,12 +448,14 @@ async function main() {
     { nombre: 'MySQL',     times: null },
     { nombre: 'MongoDB',   times: null },
     { nombre: 'Cassandra', times: null },
+    { nombre: 'Neo4j',     times: null },
   ];
 
   try {
     resultados[0].times = await benchmarkMySQL();
     resultados[1].times = await benchmarkMongoDB();
     resultados[2].times = await benchmarkCassandra();
+    resultados[3].times = await benchmarkNeo4j();
   } catch (e) {
     console.error('\nError en benchmark:', e.message);
   } finally {

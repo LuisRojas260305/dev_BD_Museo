@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Routes for catalog operations.
  *
  * Proxies catalog requests to the mongodb-service (MongoDB).

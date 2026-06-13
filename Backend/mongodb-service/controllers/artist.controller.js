@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Artist controller - CRUD operations for museum artists (artistas).
  */
 const Artista = require('../models/Artista');

@@ -1,7 +1,8 @@
-﻿const { pool } = require('../../config/database');
+const { pool } = require('../../config/database');
 const crypto = require('crypto');
 const axios = require('axios');
 const { auditar } = require('../../services/auditoriaHelper');
+const { registrarCompra } = require('../../services/recomendacionHelper');
 
 const CATALOG_URL = process.env.CATALOG_URL || 'http://localhost:3001/api/catalog';
 const INTERNAL_KEY = process.env.INTERNAL_API_KEY || 'museo_internal_key_2026';
@@ -118,12 +119,38 @@ const concretarVenta = async (req, res) => {
 
     await connection.commit();
 
-    // Actualizar estado en MongoDB a Vendida
+    // Actualizar estado en MongoDB a Vendida y capturar el género de la obra
+    let generoObra = '';
     try {
+      const obraRes = await axios.get(`${CATALOG_URL}/${venta[0].obra_id}`,
+        { headers: { 'x-internal-key': INTERNAL_KEY }, timeout: 5000 }
+      );
+      generoObra = obraRes.data?.data?.genero || '';
       await axios.put(`${CATALOG_URL}/${venta[0].obra_id}`,
         { estado: 'Vendida' },
         { headers: { 'x-internal-key': INTERNAL_KEY }, timeout: 5000 }
       );
+    } catch (_) {}
+
+    // Notificar al grafo Neo4j (asíncrono, consistencia eventual):
+    // (Comprador)-[:COMPRÓ]->(Obra). No bloquea la respuesta de la venta.
+    try {
+      const [comprador] = await pool.query(
+        'SELECT nombre, apellido, email FROM Usuario WHERE usuario_id = ?',
+        [venta[0].comprador_id]
+      );
+      const c = comprador[0] || {};
+      registrarCompra({
+        usuario_id: venta[0].comprador_id,
+        comprador_nombre: `${c.nombre || ''} ${c.apellido || ''}`.trim(),
+        comprador_email: c.email || '',
+        obra_id: venta[0].obra_id,
+        obra_nombre: venta[0].obra_nombre,
+        genero: generoObra,
+        precio: precio,
+        venta_id: id,
+        fecha: new Date().toISOString(),
+      });
     } catch (_) {}
 
     auditar('compra_aceptada', req.usuario.email, 'info', {
@@ -227,6 +254,27 @@ const getFacturas = async (req, res) => {
   }
 };
 
+// Listar las compras del usuario autenticado (miembro)
+// Usa columnas denormalizadas de Venta; agrega el total de la factura si existe.
+const getMisCompras = async (req, res) => {
+  try {
+    const comprador_id = req.usuario.usuario_id;
+    const [rows] = await pool.query(
+      `SELECT v.venta_id, v.obra_id, v.obra_nombre, v.artista_nombre,
+              v.precio_venta, v.estado, v.fecha_reserva, v.fecha_venta,
+              f.factura_id, f.total, f.iva, f.direccion_envio, f.fecha_emision
+       FROM Venta v
+       LEFT JOIN Factura f ON f.venta_id = v.venta_id
+       WHERE v.comprador_id = ?
+       ORDER BY COALESCE(v.fecha_venta, v.fecha_reserva) DESC`,
+      [comprador_id]
+    );
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Obtener una factura por ID (solo admin)
 const getFacturaById = async (req, res) => {
   try {
@@ -251,6 +299,7 @@ module.exports = {
   concretarVenta,
   cancelarVenta,
   getVentas,
+  getMisCompras,
   getFacturas,
   getFacturaById
 };

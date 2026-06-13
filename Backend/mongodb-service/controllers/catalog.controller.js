@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Catalog controller - handles CRUD operations for museum artworks (obras).
  * Includes catalog listing with filtering/pagination, search via text index,
  * single-work detail with SSL view tracking, health check, and SSL context creation.

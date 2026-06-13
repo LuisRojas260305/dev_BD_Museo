@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Artista model - Represents an artist (author of one or more artworks).
  * Includes a virtual 'nombreCompleto' field and automatic Decimal128 conversion.
  */

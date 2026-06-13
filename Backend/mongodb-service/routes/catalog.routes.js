@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Catalog route definitions - maps URL paths to controller functions.
  * Public endpoints use opcionalAuth (identifies user if session exists, allows anonymous access).
  * Admin CRUD endpoints require verified JWT token + admin role via verificarToken + verificarAdmin.

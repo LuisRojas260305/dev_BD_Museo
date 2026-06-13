@@ -126,6 +126,13 @@
     <div id="userData"></div>
   </div>
 
+  <!-- Mis compras (solo para miembros) -->
+  <div id="misComprasSection" class="profile-section" style="display:none;animation-delay:.06s">
+    <div class="section-heading">Mis compras</div>
+    <p class="section-note">Consulta el historial de obras que has reservado y adquirido.</p>
+    <a href="mis-compras.html" class="btn btn-wine btn-section">Ver mis compras</a>
+  </div>
+
   <!-- Activar membresia (solo para tipo usuario) -->
   <div id="activarMembresiaSection" class="profile-section" style="display:none;animation-delay:.08s">
     <div class="section-heading">Activar membresía</div>
@@ -216,6 +223,8 @@
         ${codigoHTML}
       `;
       document.getElementById('activarMembresiaSection').style.display = user.tipo === 'usuario' ? 'block' : 'none';
+      const misCompras = document.getElementById('misComprasSection');
+      if (misCompras) misCompras.style.display = user.tipo === 'miembro' ? 'block' : 'none';
       const adminSection = document.getElementById('adminSection');
       if (adminSection) adminSection.style.display = user.tipo === 'administrador' ? 'block' : 'none';
     }

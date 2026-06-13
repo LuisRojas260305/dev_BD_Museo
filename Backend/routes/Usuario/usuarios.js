@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Routes for user management.
  *
  * Handles public user operations (registration, login, password recovery),

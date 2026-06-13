@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Genre controller - CRUD operations for artwork genres (géneros).
  */
 const Genero = require('../models/Genero');

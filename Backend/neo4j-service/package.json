@@ -1,0 +1,20 @@
+{
+  "name": "neo4j-recomendaciones-service",
+  "version": "1.0.0",
+  "description": "Microservicio de redes de conocimiento y recomendaciones con Neo4j",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "jsonwebtoken": "^9.0.2",
+    "neo4j-driver": "^5.28.1",
+    "mysql2": "^3.22.3",
+    "axios": "^1.16.1"
+  }
+}

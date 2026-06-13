@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Authentication middleware - canonical copy of shared/authMiddleware.js.
  * Provides JWT-based token verification, role-based authorization (admin/member),
  * optional auth for public endpoints, and internal API key support

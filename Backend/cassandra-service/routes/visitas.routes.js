@@ -1,4 +1,4 @@
-﻿const router = require('express').Router();
+const router = require('express').Router();
 const { registrarVisita, obtenerVisitasObra, topObras } = require('../models/visitas');
 
 // POST /api/visitas/:obra_id - registrar una visita

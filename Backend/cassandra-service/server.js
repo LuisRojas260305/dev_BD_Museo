@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Servicio de auditoría - Cassandra.
  * Punto de entrada del microservicio. Configura Express con CORS, JSON,
  * expone el health check, monta las rutas de auditoría y el manejador de errores.

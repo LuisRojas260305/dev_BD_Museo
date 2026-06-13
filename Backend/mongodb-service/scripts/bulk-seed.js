@@ -1,4 +1,4 @@
-﻿// Generador de datos masivos para las 3 BDs
+// Generador de datos masivos para las 3 BDs
 // Inspirado en el dataset del Metropolitan Museum of Art (Kaggle - open access)
 // Produce: 60 artistas, 500 obras en MongoDB | 200 usuarios + 300 ventas en MySQL | 2000 eventos + 1000 visitas en Cassandra
 

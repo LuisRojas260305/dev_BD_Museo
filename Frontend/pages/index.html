@@ -207,6 +207,122 @@
       font-size: 0.95rem;
     }
 
+    /* ---- Recomendaciones (Neo4j) ---- */
+    .reco-section {
+      position: relative;
+      background:
+        radial-gradient(120% 80% at 100% 0%, rgba(109,43,61,0.06), transparent 60%),
+        linear-gradient(180deg, var(--surface), var(--cream));
+      border-top: 1px solid var(--border-light);
+      padding-bottom: 2.4rem;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease;
+    }
+    .reco-head {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.8rem 2rem 0.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .reco-head h2 {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      color: var(--text);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.12;
+    }
+    .reco-head p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+      max-width: 60ch;
+    }
+    /* Carrusel: 4 obras visibles, el resto se ve desplazandose */
+    .reco-carousel {
+      position: relative;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.4rem 2rem 0.4rem;
+    }
+    .reco-track {
+      display: flex;
+      gap: 1.8rem;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      padding: 0.3rem 0.2rem 0.6rem;
+    }
+    .reco-track::-webkit-scrollbar { display: none; }
+    /* Cada tarjeta ocupa 1/4 del ancho visible (4 a la vista) */
+    .reco-track .obra-card {
+      flex: 0 0 calc((100% - 3 * 1.8rem) / 4);
+      scroll-snap-align: start;
+    }
+    /* La tarjeta recomendada lleva un acento sutil de color vino */
+    .reco-track .obra-card { border-color: rgba(109,43,61,0.16); }
+    .reco-track .obra-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--wine), var(--gold, #c89b3c));
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 3;
+    }
+    .reco-track .obra-card:hover::before { opacity: 1; }
+    .reco-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--wine);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(28,23,20,0.16);
+      transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+      z-index: 4;
+    }
+    .reco-arrow:hover { background: var(--wine); color: #fff; transform: translateY(-50%) scale(1.08); }
+    .reco-arrow.show { display: flex; }
+    .reco-arrow.reco-prev { left: 0.4rem; }
+    .reco-arrow.reco-next { right: 0.4rem; }
+    .reco-arrow svg { display: block; }
+    /* Chip de motivo dentro de la tarjeta */
+    .reco-motivo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.7rem;
+      color: var(--wine);
+      background: var(--wine-tint, rgba(109,43,61,0.08));
+      border-radius: 100px;
+      padding: 0.15rem 0.6rem;
+      align-self: flex-start;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .reco-empty-fade { /* tarjetas entran con un leve retardo escalonado */ }
+    @media (max-width: 768px) {
+      .reco-head { padding: 2rem 1rem 0.2rem; }
+      .reco-head h2 { font-size: 1.6rem; }
+      .reco-carousel { padding: 1.2rem 1rem 0.4rem; }
+      .reco-track .obra-card { flex: 0 0 80%; }
+    }
+
     /* scroll-to-top */
     #scrollTop {
       position: fixed;
@@ -281,6 +397,24 @@
   <span class="pag-info" id="pag-info"></span>
   <button id="pag-next">Siguiente &#8594;</button>
 </div>
+
+<section class="reco-section" id="recoSection" style="display:none">
+  <div class="reco-head">
+    <div>
+      <h2 id="recoTitle">Recomendado para ti</h2>
+      <p id="recoSubtitle">Una selección a partir de lo que has adquirido</p>
+    </div>
+  </div>
+  <div class="reco-carousel">
+    <button class="reco-arrow reco-prev" id="recoPrev" aria-label="Anterior">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="reco-track" id="recoTrack"></div>
+    <button class="reco-arrow reco-next" id="recoNext" aria-label="Mostrar más">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+</section>
 
 <button id="scrollTop" aria-label="Volver arriba">
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -394,6 +528,86 @@
     document.getElementById('pag-next').disabled = _paginaActual >= _totalPaginas;
   }
 
+  // Paleta museística suave por género (placeholder local, sin servicios externos).
+  const PH_PALETA = {
+    'Pintura':     ['#e8dccb', '#d8c3a5', '#8a6d4b'],
+    'Escultura':   ['#e3e0db', '#cfcabf', '#6f6a60'],
+    'Orfebrería':  ['#efe4c6', '#e0cf9a', '#9c7d3c'],
+    'Cerámica':    ['#ecd9c9', '#dcbfa6', '#9a6a4b'],
+    'Fotografía':  ['#dadde0', '#bcc2c7', '#5b626a'],
+    'Cristalería': ['#d8e6e6', '#b6d2d2', '#4f7e7e'],
+    'Textil':      ['#e7d8da', '#d3b3b8', '#8c5b63'],
+    'Grabado':     ['#ddd9d2', '#c2bcb1', '#6a6358'],
+    'Acuarela':    ['#dde6ec', '#bcd0dd', '#5a7d92'],
+  };
+  // Placeholder local (SVG data-URI) tintado según el género. Siempre se ve bien.
+  function placeholderObra(texto, genero) {
+    const t = String(texto || 'Museo').replace(/[<>&]/g, '').slice(0, 18);
+    const pal = PH_PALETA[genero] || ['#efe9df', '#e2d9cb', '#9c8a7a'];
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='480' height='360'>
+      <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+        <stop offset='0' stop-color='${pal[0]}'/><stop offset='1' stop-color='${pal[1]}'/>
+      </linearGradient></defs>
+      <rect width='480' height='360' fill='url(#g)'/>
+      <rect x='26' y='26' width='428' height='308' fill='none' stroke='${pal[2]}' stroke-opacity='0.35' stroke-width='1.5'/>
+      <circle cx='240' cy='150' r='42' fill='none' stroke='${pal[2]}' stroke-width='2.5' stroke-opacity='0.7'/>
+      <path d='M222 150l13 13 26-30' fill='none' stroke='${pal[2]}' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.7'/>
+      <text x='240' y='244' font-family='Georgia,serif' font-size='25' fill='${pal[2]}' text-anchor='middle'>${t}</text>
+    </svg>`;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
+  // Construye el elemento de tarjeta de una obra (reutilizado por el catálogo
+  // y por la sección de recomendaciones).
+  function construirObraCard(obra, i) {
+    const artistaNombre = obra.artista_nombre || obra.artista || 'Desconocido';
+    const artistaId     = obra.artista_id || obra.artista_id_original;
+    const generoNombre  = obra.genero_nombre || obra.genero || '';
+    const obraId        = obra.obra_id || obra.obra_id_original || obra._id;
+    const precio        = typeof obra.precio_venta === 'object'
+      ? (Number(obra.precio_venta._serialized) || 0)
+      : (Number(obra.precio_venta != null ? obra.precio_venta : obra.precio) || 0);
+    const ph            = placeholderObra(generoNombre || obra.nombre, generoNombre);
+    // Si no hay foto, o es un placeholder externo (placehold.co del seed), usa
+    // el placeholder local elegante en vez de depender de un servicio externo.
+    const fotoCruda     = obra.fotos && obra.fotos.length > 0 ? obra.fotos[0] : '';
+    const esExterno     = /placehold\.co|via\.placeholder|placeholder\.com/i.test(fotoCruda);
+    const imagenUrl     = (fotoCruda && !esExterno) ? fotoCruda : ph;
+
+    let chipClass = 'chip-disponible', chipText = 'Disponible';
+    if (obra.estado === 'Reservada') { chipClass = 'chip-reservada'; chipText = 'Reservada'; }
+    else if (obra.estado === 'Vendida') { chipClass = 'chip-vendida'; chipText = 'Vendida'; }
+
+    const card = document.createElement('div');
+    card.className = 'obra-card';
+    card.style.animationDelay = (i % 10 * 0.04) + 's';
+    card.innerHTML = `
+      <a href="Principal/detalle.html?id=${obraId}" class="obra-card-img-wrap">
+        <img class="obra-card-img" src="${imagenUrl}"
+          alt="${obra.nombre}"
+          loading="lazy" decoding="async"
+          onerror="this.onerror=null;this.src='${ph}'">
+        <span class="status-chip ${chipClass} obra-status">${chipText}</span>
+      </a>
+      <div class="obra-card-body">
+        <div class="obra-card-title">
+          <a href="Principal/detalle.html?id=${obraId}">${obra.nombre}</a>
+        </div>
+        <div class="obra-card-artist">
+          ${artistaId
+            ? `<a href="Principal/artista.html?id=${artistaId}">${artistaNombre}</a>`
+            : `<span>${artistaNombre}</span>`}
+        </div>
+        ${obra.motivo ? `<div class="reco-motivo">${obra.motivo}</div>` : ''}
+        <div class="obra-card-footer">
+          <span class="badge badge-muted">${generoNombre}</span>
+          <span class="obra-card-price">${precio.toLocaleString()} $</span>
+        </div>
+      </div>
+    `;
+    return card;
+  }
+
   function renderObras(obras) {
     const gallery = document.getElementById('gallery');
     gallery.innerHTML = '';
@@ -401,53 +615,136 @@
       gallery.innerHTML = '<div class="no-results">No se encontraron obras con esos filtros.</div>';
       return;
     }
-    obras.forEach((obra, i) => {
-      const artistaNombre = obra.artista_nombre || 'Desconocido';
-      const artistaId     = obra.artista_id || obra.artista_id_original;
-      const generoNombre  = obra.genero_nombre || obra.genero || '';
-      const obraId        = obra.obra_id || obra.obra_id_original || obra._id;
-      const precio        = typeof obra.precio_venta === 'object'
-        ? (Number(obra.precio_venta._serialized) || 0)
-        : (obra.precio_venta || 0);
-      const imagenUrl     = obra.fotos && obra.fotos.length > 0
-        ? obra.fotos[0]
-        : 'https://via.placeholder.com/300x200?text=sin+imagen';
+    obras.forEach((obra, i) => gallery.appendChild(construirObraCard(obra, i)));
+  }
 
-      let chipClass = 'chip-disponible', chipText = 'Disponible';
-      if (obra.estado === 'Reservada') { chipClass = 'chip-reservada'; chipText = 'Reservada'; }
-      else if (obra.estado === 'Vendida') { chipClass = 'chip-vendida'; chipText = 'Vendida'; }
+  // Carga recomendaciones personalizadas desde el grafo Neo4j. Solo se muestra
+  // la sección si el usuario está autenticado y tiene compras que generan
+  // sugerencias (de lo contrario el endpoint devuelve una lista vacía).
+  // Muestra/oculta las flechas del carrusel segun la posicion de scroll.
+  function actualizarFlechasReco() {
+    const track = document.getElementById('recoTrack');
+    const prev  = document.getElementById('recoPrev');
+    const next  = document.getElementById('recoNext');
+    const hayMas = track.scrollWidth - track.clientWidth > 4; // hay contenido oculto
+    prev.classList.toggle('show', hayMas && track.scrollLeft > 4);
+    next.classList.toggle('show', hayMas && track.scrollLeft < track.scrollWidth - track.clientWidth - 4);
+  }
 
-      const card = document.createElement('div');
-      card.className = 'obra-card';
-      card.style.animationDelay = (i % 10 * 0.04) + 's';
-      card.innerHTML = `
-        <a href="Principal/detalle.html?id=${obraId}" class="obra-card-img-wrap">
-          <img class="obra-card-img" src="${imagenUrl}"
-            alt="${obra.nombre}"
-            loading="lazy" decoding="async"
-            onerror="this.src='https://placehold.co/480x360/f5f1e8/9c8a7a?text=sin+imagen'">
-          <span class="status-chip ${chipClass} obra-status">${chipText}</span>
-        </a>
-        <div class="obra-card-body">
-          <div class="obra-card-title">
-            <a href="Principal/detalle.html?id=${obraId}">${obra.nombre}</a>
-          </div>
-          <div class="obra-card-artist">
-            ${artistaId
-              ? `<a href="Principal/artista.html?id=${artistaId}">${artistaNombre}</a>`
-              : `<span>${artistaNombre}</span>`}
-          </div>
-          <div class="obra-card-footer">
-            <span class="badge badge-muted">${generoNombre}</span>
-            <span class="obra-card-price">${precio.toLocaleString()} $</span>
-          </div>
-        </div>
-      `;
-      gallery.appendChild(card);
-    });
+  function desplazarReco(dir) {
+    const track = document.getElementById('recoTrack');
+    // Avanza ~4 tarjetas (el ancho visible) en la direccion indicada.
+    track.scrollBy({ left: dir * track.clientWidth, behavior: 'smooth' });
+  }
+
+  const elegir = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  // Compone titulo y subtitulo vivos, coherentes con la fuente que el grafo
+  // eligio para esta carga (genero / artista / colaborativo).
+  function mensajeReco(tema) {
+    const titulo = elegir([
+      'Pensado para ti', 'Inspirado en tu colección', 'Porque tienes buen ojo',
+      'Tu próxima obra favorita', 'Hecho a tu gusto', 'Siguiendo tu instinto',
+      'Elegido para tu mirada', 'Para seguir coleccionando', 'Una obra te espera',
+      'Curaduría a tu medida', 'Lo que viene en tu colección', 'Solo para coleccionistas como tú',
+    ]);
+    let sub = 'Una selección a partir de lo que has adquirido';
+    if (tema && tema.tipo === 'genero') {
+      const g = tema.valor;
+      sub = elegir([
+        `Más obras de ${g} para tu colección`,
+        `Porque coleccionas ${g}`,
+        `Sigue explorando el mundo de la ${g}`,
+        `Tu pasión por la ${g}, en nuevas piezas`,
+        `Otras joyas de ${g} que podrían enamorarte`,
+        `La ${g} tiene mucho más que mostrarte`,
+      ]);
+    } else if (tema && tema.tipo === 'artista') {
+      const a = tema.valor;
+      sub = elegir([
+        `Más del trazo de ${a}`,
+        `Porque te cautivó ${a}`,
+        `Otras piezas de ${a}`,
+        `El universo de ${a}, para ti`,
+        `Sigue la obra de ${a}`,
+        `${a} tiene más que ofrecerte`,
+      ]);
+    } else if (tema && tema.tipo === 'colaborativo') {
+      sub = elegir([
+        'Coleccionistas con tu gusto también eligieron esto',
+        'Lo que aman quienes compran como tú',
+        'Descubrimientos de coleccionistas afines',
+        'Gustos parecidos al tuyo se llevaron estas obras',
+        'La sabiduría de coleccionistas como tú',
+        'Tendencias entre quienes comparten tu mirada',
+      ]);
+    }
+    return { titulo, sub };
+  }
+
+  async function cargarRecomendaciones() {
+    if (!isLoggedIn()) return;
+    const user = getUser();
+    const uid = user && (user.id || user.usuario_id);
+    if (!uid) return;
+    try {
+      // Estrategia variada: el grafo elige un tema coherente (género, artista o
+      // colaborativo) y lo cambia entre visitas, con obras barajadas.
+      const res = await fetch(`${API_BASE}/recomendaciones/${uid}?limite=12`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const recs = data.recomendaciones || [];
+      if (recs.length === 0) return;
+
+      const msg = mensajeReco(data.tema);
+      const tEl = document.getElementById('recoTitle');
+      const sEl = document.getElementById('recoSubtitle');
+      if (tEl) tEl.textContent = msg.titulo;
+      if (sEl) sEl.textContent = msg.sub;
+
+      // En colaborativo cada obra es de un género distinto: ahí el motivo por
+      // tarjeta aporta. En género/artista el tema ya lo dice el encabezado.
+      const mostrarMotivo = data.tema && data.tema.tipo === 'colaborativo';
+
+      // Enriquecer cada recomendación con el detalle del catálogo (fotos, etc.).
+      const obras = await Promise.all(recs.map(async (r) => {
+        let obra = null;
+        try {
+          const dRes = await fetch(`${API_BASE}/catalogo/${r.obra_id}`);
+          if (dRes.ok) {
+            const d = await dRes.json();
+            if (d && d.data) obra = d.data;
+          }
+        } catch (_) { /* usa los datos del grafo como respaldo */ }
+        if (!obra) {
+          obra = {
+            _id: r.obra_id, obra_id: r.obra_id, nombre: r.nombre,
+            genero: r.genero, artista_nombre: r.artista,
+            precio_venta: r.precio, estado: 'Disponible', fotos: [],
+          };
+        }
+        obra.motivo = mostrarMotivo ? r.motivo : null;
+        return obra;
+      }));
+
+      const track = document.getElementById('recoTrack');
+      track.innerHTML = '';
+      obras.forEach((o, i) => track.appendChild(construirObraCard(o, i)));
+      document.getElementById('recoSection').style.display = 'block';
+
+      // Flechas del carrusel
+      document.getElementById('recoNext').onclick = () => desplazarReco(1);
+      document.getElementById('recoPrev').onclick = () => desplazarReco(-1);
+      track.addEventListener('scroll', actualizarFlechasReco, { passive: true });
+      window.addEventListener('resize', actualizarFlechasReco);
+      requestAnimationFrame(actualizarFlechasReco);
+    } catch (e) {
+      console.error('Error recomendaciones:', e);
+    }
   }
 
   updateAuthButtons();
+  cargarRecomendaciones();
   cargarGeneros().then(() => cargarArtistas()).then(() => cargarObras(1));
 
   document.getElementById('applyFilters').addEventListener('click', () => cargarObras(1));

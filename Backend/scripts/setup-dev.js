@@ -1,4 +1,4 @@
-﻿// Script de setup para desarrollo
+// Script de setup para desarrollo
 // Crea: admin real, artistas con foto, obras con foto, épocas faltantes
 // Ejecutar: node scripts/setup-dev.js (desde Backend/)
 const path = require('path');

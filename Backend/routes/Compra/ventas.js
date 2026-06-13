@@ -46,6 +46,16 @@ router.put('/:id/concretar', verificarToken, verificarAdmin, ventaController.con
 router.put('/:id/cancelar', verificarToken, verificarAdmin, ventaController.cancelarVenta);
 
 /**
+ * GET /api/ventas/mis-compras
+ * List the authenticated member's own purchases.
+ * Must be declared before '/' to avoid being shadowed by the admin list route.
+ * @route GET /api/ventas/mis-compras
+ * @auth Requires JWT + member role
+ * @returns {Object} 200 - The member's purchases (reservations, sales, cancellations)
+ */
+router.get('/mis-compras', verificarToken, verificarMiembro, ventaController.getMisCompras);
+
+/**
  * GET /api/ventas
  * List all sales (admin only).
  * @route GET /api/ventas

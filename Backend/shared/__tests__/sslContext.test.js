@@ -1,4 +1,4 @@
-﻿// Tests unitarios SSL - Session Context Layer
+// Tests unitarios SSL - Session Context Layer
 // Ejecutar: node --test Backend/shared/__tests__/sslContext.test.js
 const { describe, it, before, after, afterEach } = require('node:test');
 const assert = require('node:assert');

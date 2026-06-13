@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Middleware de autenticación y autorización.
  * Módulo standalone - solo depende de jsonwebtoken (sin dependencia MySQL).
  * Misma interfaz que el auth original: verificarToken, verificarAdmin,

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Field mapper utility - transforms raw MongoDB artwork documents into the
  * frontend-friendly response format. Resolves artist names from both embedded
  * and populated artist data, and normalizes Decimal128 values to plain numbers.

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Middleware de autenticación y autorización.
  * Soporta JWT (Bearer token) e internal API key para comunicación service-to-service.
  * Provee verificación de token, roles (admin/miembro) y autenticación opcional.

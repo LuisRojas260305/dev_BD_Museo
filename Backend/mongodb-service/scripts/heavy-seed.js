@@ -1,4 +1,4 @@
-﻿// Heavy seed - carga masiva para benchmark real
+// Heavy seed - carga masiva para benchmark real
 // MongoDB: +5000 obras  |  MySQL: +3000 usuarios +15000 ventas  |  Cassandra: +100000 eventos +30000 visitas
 // Usa insertMany / batch SQL para mayor velocidad
 
