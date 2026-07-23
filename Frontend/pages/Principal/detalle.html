@@ -67,6 +67,21 @@
       border-top: 1px solid var(--border-light);
       border-bottom: 1px solid var(--border-light);
     }
+    .desc-generando { color: var(--text-light); font-style: italic; }
+    .btn-regen-desc {
+      align-self: flex-start;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--wine);
+      border-radius: 100px;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.72rem;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .btn-regen-desc:hover:not(:disabled) { background: var(--wine); color: #fff; }
+    .btn-regen-desc:disabled { opacity: 0.5; cursor: default; }
 
     .meta-grid {
       display: grid;
@@ -120,10 +135,6 @@
     .status-reservado  { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
     .status-reservado::before  { background: #f97316; }
 
-    .visits-count {
-      font-size: 0.8rem;
-      color: var(--text-light);
-    }
 
     .features-section {
       background: var(--warm-white);
@@ -443,6 +454,7 @@
       obra.ancho = typeof obra.ancho === 'object'
         ? (Number(obra.ancho._serialized) || 0) : (obra.ancho || 0);
       render(obra);
+      gestionarDescripcion(obra);
       cargarResenas(obra._id);
       registrarYMostrarVisitas(obra._id);
     } catch (error) {
@@ -454,6 +466,8 @@
     // MongoDB guarda el estado como string: 'Disponible', 'Reservada', 'Vendida'
     const estadoTexto = obra.estado || 'Desconocido';
     const user = getUser();
+    const esAdmin = !!(user && user.tipo === 'administrador');
+    const tieneDesc = esDescripcionReal(obra.descripcion);
 
     const puedeComprar = (estadoTexto === 'Disponible') && user &&
       (user.tipo === 'miembro' || user.tipo === 'administrador');
@@ -544,16 +558,82 @@
             ? `<a href="artista.html?id=${obra.artista_id}">${obra.artista_nombre}</a>`
             : '<span>Artista desconocido</span>'}</p>
           <span class="badge badge-muted" style="align-self:flex-start">${obra.genero_nombre || ''}</span>
-          ${obra.descripcion ? `<p class="detail-description">${obra.descripcion}</p>` : ''}
+          <p class="detail-description" id="detailDescripcion"${tieneDesc ? '' : ' style="display:none"'}>${tieneDesc ? obra.descripcion : ''}</p>
+          ${esAdmin ? `<button type="button" class="btn-regen-desc" id="btnRegenDesc" title="Regenerar descripción con IA">&#8635; Regenerar descripción</button>` : ''}
           ${metaHTML}
           <div class="detail-price">${Number(obra.precio_venta).toLocaleString()} $</div>
           <div class="status-badge ${estadoClase}">${estadoTexto}</div>
-          <div class="visits-count" id="visitasCount">Cargando visitas...</div>
           ${featuresHTML}
           ${botonCompra}
         </div>
       </div>
     `;
+  }
+
+  // -------------------------------------------------------------------------
+  // Descripción por IA (Groq). Se genera al abrir la obra si no tiene y tiene
+  // foto; se guarda para no repetir. Admin puede regenerarla con un botón.
+  // -------------------------------------------------------------------------
+  function tieneFotoReal(obra) {
+    const f = obra.fotos && obra.fotos.length > 0 ? obra.fotos[0] : '';
+    return !!f && !/placehold\.co|via\.placeholder|placeholder\.com/i.test(f);
+  }
+  // Mismo umbral que el backend: los stubs cortos del seed se tratan como ausentes.
+  function esDescripcionReal(desc) {
+    return !!desc && desc.trim().length >= 60;
+  }
+
+  async function gestionarDescripcion(obra) {
+    const p = document.getElementById('detailDescripcion');
+    const btn = document.getElementById('btnRegenDesc');
+    if (btn) btn.addEventListener('click', () => regenerarDescripcion(obra));
+
+    // Ya tiene una descripción real (pintada en render): nada que generar.
+    if (esDescripcionReal(obra.descripcion)) return;
+    // Solo se generan descripciones para obras con foto real.
+    if (!p || !tieneFotoReal(obra)) return;
+
+    p.style.display = 'block';
+    p.classList.add('desc-generando');
+    p.textContent = 'Generando descripción...';
+    try {
+      const r = await fetch(`${API_BASE}/catalogo/obras/${obra._id}/descripcion`, { method: 'POST' });
+      const d = await r.json();
+      if (d && d.descripcion) {
+        p.classList.remove('desc-generando');
+        p.textContent = d.descripcion;
+      } else {
+        p.style.display = 'none';
+      }
+    } catch (_) {
+      p.style.display = 'none';
+    }
+  }
+
+  async function regenerarDescripcion(obra) {
+    const p = document.getElementById('detailDescripcion');
+    const btn = document.getElementById('btnRegenDesc');
+    if (!p) return;
+    const previo = p.textContent;
+    p.style.display = 'block';
+    p.classList.add('desc-generando');
+    p.textContent = 'Regenerando...';
+    if (btn) btn.disabled = true;
+    try {
+      const token = localStorage.getItem('token');
+      const r = await fetch(`${API_BASE}/catalogo/obras/${obra._id}/descripcion/regenerar`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const d = await r.json();
+      p.classList.remove('desc-generando');
+      p.textContent = (d && d.descripcion) ? d.descripcion : previo;
+    } catch (_) {
+      p.classList.remove('desc-generando');
+      p.textContent = previo;
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
 
   updateAuthButtons();
@@ -627,11 +707,8 @@
 
   async function registrarYMostrarVisitas(obra_id) {
     try {
+      // Solo registra la visita del lado del servidor; ya no se muestra el contador.
       await fetch(`http://localhost:3000/api/visitas/${obra_id}`, { method: 'POST' });
-      const r = await fetch(`http://localhost:3000/api/visitas/${obra_id}`);
-      const d = await r.json();
-      const el = document.getElementById('visitasCount');
-      if (el) el.textContent = `${d.total} vista${d.total !== 1 ? 's' : ''}`;
     } catch {}
   }
 

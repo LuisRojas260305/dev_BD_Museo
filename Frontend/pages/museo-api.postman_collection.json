@@ -1,0 +1,234 @@
+{
+  "info": {
+    "name": "Museo de Arte Contemporáneo · API Políglota",
+    "description": "Colección de la plataforma políglota del Museo (Grupo 3, Bases de Datos II).\n\nMotores: MySQL (:3306), MongoDB (:27017 vía :3001), Cassandra (:9042 vía :3002), Neo4j (:7687 vía :3003).\nEl Backend gateway (:3000) es la entrada pública.\n\nUso: ejecuta primero 'Usuarios > Login' (guarda el token automáticamente en la variable {{token}}). El resto de peticiones autenticadas ya lo usan.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gateway", "value": "http://localhost:3000", "type": "string" },
+    { "key": "mongoSvc", "value": "http://localhost:3001", "type": "string" },
+    { "key": "cassandraSvc", "value": "http://localhost:3002", "type": "string" },
+    { "key": "neo4jSvc", "value": "http://localhost:3003", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "usuarioId", "value": "2", "type": "string" },
+    { "key": "obraId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Login (admin) · guarda token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json();",
+                  "const t = d.token || (d.data && d.data.token);",
+                  "if (t) { pm.collectionVariables.set('token', t); console.log('Token guardado.'); }",
+                  "pm.test('Login OK', () => pm.expect(t).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@museo.com\",\n  \"password\": \"admin123\"\n}" },
+            "url": { "raw": "{{gateway}}/api/usuarios/login", "host": ["{{gateway}}"], "path": ["api", "usuarios", "login"] }
+          }
+        },
+        {
+          "name": "Registro de miembro",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Nuevo\",\n  \"apellido\": \"Miembro\",\n  \"email\": \"nuevo@correo.com\",\n  \"password\": \"clave123\"\n}" },
+            "url": { "raw": "{{gateway}}/api/usuarios/registro", "host": ["{{gateway}}"], "path": ["api", "usuarios", "registro"] }
+          }
+        },
+        {
+          "name": "Mi perfil (JWT)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway}}/api/usuarios/perfil", "host": ["{{gateway}}"], "path": ["api", "usuarios", "perfil"] }
+          }
+        },
+        {
+          "name": "Listar usuarios (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway}}/api/usuarios", "host": ["{{gateway}}"], "path": ["api", "usuarios"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catálogo (MongoDB)",
+      "item": [
+        {
+          "name": "Listar obras (paginado)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway}}/api/catalogo?page=1&limit=12", "host": ["{{gateway}}"], "path": ["api", "catalogo"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "12" }] }
+          }
+        },
+        {
+          "name": "Buscar obras (full-text)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway}}/api/catalogo/search?q=retrato", "host": ["{{gateway}}"], "path": ["api", "catalogo", "search"], "query": [{ "key": "q", "value": "retrato" }] }
+          }
+        },
+        {
+          "name": "Detalle de una obra",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway}}/api/catalogo/{{obraId}}", "host": ["{{gateway}}"], "path": ["api", "catalogo", "{{obraId}}"] }
+          }
+        },
+        {
+          "name": "Listar artistas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway}}/api/catalogo/artistas", "host": ["{{gateway}}"], "path": ["api", "catalogo", "artistas"] }
+          }
+        },
+        {
+          "name": "Generar descripción con IA",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{gateway}}/api/catalogo/obras/{{obraId}}/descripcion", "host": ["{{gateway}}"], "path": ["api", "catalogo", "obras", "{{obraId}}", "descripcion"] }
+          }
+        },
+        {
+          "name": "Regenerar descripción (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway}}/api/catalogo/obras/{{obraId}}/descripcion/regenerar", "host": ["{{gateway}}"], "path": ["api", "catalogo", "obras", "{{obraId}}", "descripcion", "regenerar"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recomendaciones (Neo4j)",
+      "item": [
+        {
+          "name": "Recomendaciones del usuario",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway}}/api/recomendaciones/{{usuarioId}}?limite=12", "host": ["{{gateway}}"], "path": ["api", "recomendaciones", "{{usuarioId}}"], "query": [{ "key": "limite", "value": "12" }] }
+          }
+        },
+        {
+          "name": "Lenguaje natural → Cypher (+5%)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"pregunta\": \"¿Cuáles son las obras de Pintura más compradas?\"\n}" },
+            "url": { "raw": "{{gateway}}/api/recomendaciones/nl", "host": ["{{gateway}}"], "path": ["api", "recomendaciones", "nl"] }
+          }
+        },
+        {
+          "name": "Health + tamaño del grafo (directo :3003)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{neo4jSvc}}/api/recomendaciones/health", "host": ["{{neo4jSvc}}"], "path": ["api", "recomendaciones", "health"] }
+          }
+        },
+        {
+          "name": "Obras populares (directo :3003)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{neo4jSvc}}/api/recomendaciones/populares", "host": ["{{neo4jSvc}}"], "path": ["api", "recomendaciones", "populares"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ventas y facturación",
+      "item": [
+        {
+          "name": "Reservar obra (Miembro)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"obra_id\": \"{{obraId}}\"\n}" },
+            "url": { "raw": "{{gateway}}/api/ventas/reservar", "host": ["{{gateway}}"], "path": ["api", "ventas", "reservar"] }
+          }
+        },
+        {
+          "name": "Mis compras (Miembro)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway}}/api/ventas/mis-compras", "host": ["{{gateway}}"], "path": ["api", "ventas", "mis-compras"] }
+          }
+        },
+        {
+          "name": "Listar facturas (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway}}/api/ventas/facturas", "host": ["{{gateway}}"], "path": ["api", "ventas", "facturas"] }
+          }
+        },
+        {
+          "name": "Reporte de facturación (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{gateway}}/api/reportes/facturacion", "host": ["{{gateway}}"], "path": ["api", "reportes", "facturacion"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reseñas y Visitas (Cassandra)",
+      "item": [
+        {
+          "name": "Reseñas de una obra",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway}}/api/resenas/{{obraId}}", "host": ["{{gateway}}"], "path": ["api", "resenas", "{{obraId}}"] }
+          }
+        },
+        {
+          "name": "Publicar reseña (JWT)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"obra_id\": \"{{obraId}}\",\n  \"rating\": 5,\n  \"comentario\": \"Una obra impresionante.\"\n}" },
+            "url": { "raw": "{{gateway}}/api/resenas", "host": ["{{gateway}}"], "path": ["api", "resenas"] }
+          }
+        },
+        {
+          "name": "Registrar visita",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{gateway}}/api/visitas/{{obraId}}", "host": ["{{gateway}}"], "path": ["api", "visitas", "{{obraId}}"] }
+          }
+        },
+        {
+          "name": "Obras más visitadas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{gateway}}/api/visitas/top", "host": ["{{gateway}}"], "path": ["api", "visitas", "top"] }
+          }
+        },
+        {
+          "name": "Health auditoría (directo :3002)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{cassandraSvc}}/api/auditoria/health", "host": ["{{cassandraSvc}}"], "path": ["api", "auditoria", "health"] }
+          }
+        }
+      ]
+    }
+  ]
+}

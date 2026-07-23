@@ -13,6 +13,7 @@ const router = require('express').Router();
 const multer = require('multer');
 const catalogProxy = require('../services/catalogProxy');
 const multimediaHelper = require('../services/multimediaHelper');
+const descripcionIA = require('../services/descripcionIA');
 const sslMiddleware = require('../shared/sslMiddleware');
 const { opcionalAuth, verificarToken, verificarAdmin } = require('../shared/auth');
 const { addView } = require('../shared/sslContext');
@@ -390,6 +391,77 @@ router.delete('/obras/:id', verificarToken, verificarAdmin, async (req, res, nex
         }
         const obra = await catalogProxy.deleteObra(id);
         res.json(obra);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// ---------------------------------------------------------------------------
+// Descripciones por IA (Groq). Solo para obras con foto.
+// ---------------------------------------------------------------------------
+
+/** true si la obra tiene una foto real (no un placeholder externo). */
+function tieneFotoReal(obra) {
+    const f = obra && Array.isArray(obra.fotos) && obra.fotos.length > 0 ? obra.fotos[0] : '';
+    return !!f && !/placehold\.co|via\.placeholder|placeholder\.com/i.test(f);
+}
+
+// Longitud minima para considerar una descripcion "real". El seed masivo dejo
+// stubs muy cortos (ej. "Grabado de Andy Warhol. Cubismo, Retrato.") que se
+// tratan como ausentes para que la IA genere una descripcion de sala completa.
+const DESC_MIN = 60;
+function esDescripcionReal(desc) {
+    return !!desc && desc.trim().length >= DESC_MIN;
+}
+
+/**
+ * POST /api/catalogo/obras/:id/descripcion
+ * Genera (una sola vez) la descripción de una obra con IA y la guarda.
+ * Público y perezoso: se dispara al abrir la obra. Es idempotente, si la obra
+ * ya tiene descripción la devuelve tal cual; si no tiene foto, no genera nada.
+ * @returns {Object} 200 - { descripcion, generada }
+ */
+router.post('/obras/:id/descripcion', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const resp = await catalogProxy.getCatalogById(id);
+        const obra = (resp && resp.data) ? resp.data : resp;
+        if (!obra) return res.status(404).json({ success: false, error: 'Obra no encontrada' });
+
+        if (esDescripcionReal(obra.descripcion)) {
+            return res.json({ descripcion: obra.descripcion, generada: false });
+        }
+        if (!tieneFotoReal(obra)) {
+            return res.json({ descripcion: obra.descripcion || '', generada: false });
+        }
+
+        const descripcion = await descripcionIA.generarDescripcion(obra);
+        await catalogProxy.updateObra(id, { descripcion });
+        res.json({ descripcion, generada: true });
+    } catch (err) {
+        next(err);
+    }
+});
+
+/**
+ * POST /api/catalogo/obras/:id/descripcion/regenerar
+ * Fuerza una nueva descripción por IA (sobrescribe la existente). Solo admin.
+ * @auth Requires JWT + admin role
+ * @returns {Object} 200 - { descripcion, generada }
+ */
+router.post('/obras/:id/descripcion/regenerar', verificarToken, verificarAdmin, async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const resp = await catalogProxy.getCatalogById(id);
+        const obra = (resp && resp.data) ? resp.data : resp;
+        if (!obra) return res.status(404).json({ success: false, error: 'Obra no encontrada' });
+        if (!tieneFotoReal(obra)) {
+            return res.status(409).json({ success: false, error: 'La obra no tiene foto: no se genera descripción.' });
+        }
+
+        const descripcion = await descripcionIA.generarDescripcion(obra);
+        await catalogProxy.updateObra(id, { descripcion });
+        res.json({ descripcion, generada: true });
     } catch (err) {
         next(err);
     }
